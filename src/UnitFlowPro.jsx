@@ -3147,12 +3147,14 @@ const isSupabaseConfigured = () =>
 async function loadDB() {
   if (isSupabaseConfigured()) {
     try {
+      console.log("Loading from Supabase...");
       const [properties, units, team, turnovers] = await Promise.all([
         supabase.select("properties"),
         supabase.select("units"),
         supabase.select("team"),
         supabase.select("turnovers"),
       ]);
+      console.log("Supabase loaded:", { properties: properties?.length, units: units?.length, team: team?.length, turnovers: turnovers?.length });
       return { properties, units, team, turnovers, _version: DB_VERSION, _source: "supabase" };
     } catch (e) {
       console.warn("Supabase load failed, falling back to local:", e.message);
