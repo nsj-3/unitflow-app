@@ -1112,7 +1112,389 @@ function Team() {
   );
 }
 
-function genShareToken() {
+}
+
+// ─────────────────────────────────────────────
+// ONESIGNAL — web push notification setup
+// ─────────────────────────────────────────────
+
+const ONESIGNAL_APP_ID = "71c5efb6-f528-4f84-8846-34f67a314ea4";
+
+async function initOneSignal() {
+  try {
+    if (!window.OneSignal) return;
+    await window.OneSignal.init({
+      appId: ONESIGNAL_APP_ID,
+      allowLocalhostAsSecureOrigin: true,
+      notifyButton: { enable: false },
+    });
+  } catch (e) {
+    console.warn("OneSignal init failed:", e.message);
+  }
+}
+
+async function requestPushPermission() {
+  try {
+    if (!window.OneSignal) return false;
+    await window.OneSignal.Slidedown.promptPush();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────
+// AGENT PAGE — the AI coordinator control center
+// ─────────────────────────────────────────────
+
+const AGENT_LOG_KEY = "unitflow_agent_log";
+
+async function loadAgentLog() {
+  // Try Supabase first
+  if (isSupabaseConfigured()) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/agent_log?order=created_at.desc&limit=50`, {
+        headers: {
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+        }
+      });
+      if (r.ok) return r.json();
+    } catch {}
+  }
+  // Fallback to local storage
+  try {
+    const r = await window.storage.get(AGENT_LOG_KEY);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
+function AgentPage() {
+  const { db } = useApp();
+  const [log, setLog]             = useState([]);
+  const [loadingLog, setLoadingLog] = useState(true);
+  const [running, setRunning]     = useState(false);
+  const [lastRun, setLastRun]     = useState(null);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [settings, setSettings]   = useState({
+    morningBriefingEnabled: true,
+    briefingTime: "06:00",
+    smsAlerts: true,
+    supervisorPhone: "",
+    riskCheckInterval: 15,
+  });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [runResult, setRunResult]  = useState(null);
+
+  const activeTurnovers = (db.turnovers || []).filter(t => !t.is_ready);
+  const criticalCount   = activeTurnovers.filter(t => {
+    const days = Math.ceil((new Date(t.target_ready_date) - Date.now()) / 86400000);
+    return days < 0 || (t.stages || []).some(s => s.status === "in_progress" && (s.tasks || []).filter(tk => tk.completed_at).length === 0);
+  }).length;
+
+  useEffect(() => {
+    loadAgentLog().then(data => { setLog(data || []); setLoadingLog(false); });
+    // Check if push is already enabled
+    if (window.OneSignal) {
+      window.OneSignal.isPushNotificationsEnabled?.().then(enabled => setPushEnabled(enabled)).catch(() => {});
+    }
+    // Initialize OneSignal
+    initOneSignal();
+  }, []);
+
+  async function runAgent(type = "monitor") {
+    setRunning(true);
+    setRunResult(null);
+    try {
+      const url = type === "morning"
+        ? "/.netlify/functions/agent-observe?type=morning"
+        : "/.netlify/functions/agent-observe";
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const data = await r.json();
+      setRunResult(data);
+      setLastRun(new Date());
+      // Refresh log
+      const freshLog = await loadAgentLog();
+      setLog(freshLog || []);
+    } catch (e) {
+      setRunResult({ error: e.message });
+    }
+    setRunning(false);
+  }
+
+  async function enablePush() {
+    setPushLoading(true);
+    const success = await requestPushPermission();
+    setPushEnabled(success);
+    setPushLoading(false);
+  }
+
+  async function sendTestSMS() {
+    if (!settings.supervisorPhone) return;
+    try {
+      await fetch("/.netlify/functions/agent-sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: settings.supervisorPhone,
+          message: `UnitFlow AI Agent test message. You have ${activeTurnovers.length} active turnovers. Agent monitoring is active.`,
+        }),
+      });
+      alert("Test SMS sent!");
+    } catch (e) {
+      alert("SMS failed: " + e.message);
+    }
+  }
+
+  const typeColors = {
+    morning_briefing: { bg: "#fff7ed", border: "#fed7aa", color: "#c2570a", label: "Morning Briefing" },
+    critical_alert:   { bg: "#fef2f2", border: "#fecaca", color: "#dc2626", label: "Critical Alert" },
+    risk_alert:       { bg: "#fefce8", border: "#fde68a", color: "#a16207", label: "Risk Alert" },
+    action:           { bg: "#f0fdf4", border: "#bbf7d0", color: "#15803d", label: "Action Taken" },
+  };
+
+  return (
+    <div style={{ padding: "16px 16px 100px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>AI Operations</p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Agent</h1>
+          <button
+            onClick={() => setSettingsOpen(s => !s)}
+            style={{ width: 36, height: 36, background: "#f0ece6", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Agent status card */}
+      <div style={{ background: "linear-gradient(135deg, #fff7ed, #fef3e8)", border: "1px solid #fed7aa", borderRadius: 18, padding: 20, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px #e07d2a40" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "#1a1614" }}>Make Ready Agent</p>
+            <p style={{ fontSize: 11, color: "#a09890" }}>
+              {lastRun ? `Last run ${lastRun.toLocaleTimeString()}` : "Ready to run"}
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#059669", boxShadow: "0 0 8px #05966980" }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>Active</span>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
+          {[
+            { label: "Monitoring", value: activeTurnovers.length, color: "#e07d2a" },
+            { label: "Critical",   value: criticalCount,           color: criticalCount > 0 ? "#dc2626" : "#a09890" },
+            { label: "Log Entries", value: log.length,             color: "#6b6560" },
+          ].map(s => (
+            <div key={s.label} style={{ background: "rgba(255,255,255,0.7)", borderRadius: 10, padding: "10px 8px", textAlign: "center", border: "1px solid #fed7aa" }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: 9, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Action buttons */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <button
+            onClick={() => runAgent("monitor")}
+            disabled={running}
+            style={{
+              padding: "11px", borderRadius: 12, border: "none", cursor: running ? "default" : "pointer",
+              background: running ? "#f0ece6" : "linear-gradient(135deg,#e07d2a,#c45e0a)",
+              color: running ? "#a09890" : "white",
+              fontSize: 12, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              boxShadow: running ? "none" : "0 4px 12px #e07d2a40",
+            }}
+          >
+            {running ? (
+              <><div style={{ width: 14, height: 14, border: "2px solid #c8c0b8", borderTopColor: "#e07d2a", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} /> Running...</>
+            ) : (
+              <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run Now</>
+            )}
+          </button>
+          <button
+            onClick={() => runAgent("morning")}
+            disabled={running}
+            style={{
+              padding: "11px", borderRadius: 12,
+              border: "1px solid #fed7aa", cursor: running ? "default" : "pointer",
+              background: "rgba(255,255,255,0.7)", color: "#c2570a",
+              fontSize: 12, fontWeight: 700,
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+            Morning Briefing
+          </button>
+        </div>
+
+        {/* Run result */}
+        {runResult && (
+          <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} style={{ marginTop: 12, background: runResult.error ? "#fef2f2" : "#f0fdf4", border: `1px solid ${runResult.error ? "#fecaca" : "#86efac"}`, borderRadius: 10, padding: "10px 12px" }}>
+            {runResult.error ? (
+              <p style={{ fontSize: 12, color: "#dc2626" }}>Error: {runResult.error}</p>
+            ) : (
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 700, color: "#15803d", marginBottom: 4 }}>
+                  Checked {runResult.turnoversChecked} turnovers — {runResult.actions?.length || 0} action{runResult.actions?.length !== 1 ? "s" : ""} taken
+                </p>
+                {runResult.actions?.map((a, i) => (
+                  <p key={i} style={{ fontSize: 11, color: "#6b6560", marginTop: 3 }}>{a.type}: {a.message?.slice(0, 80)}...</p>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </div>
+
+      {/* Push notification setup */}
+      {!pushEnabled && (
+        <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 36, height: 36, background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e07d2a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>Enable Push Notifications</p>
+              <p style={{ fontSize: 11, color: "#a09890" }}>Get alerts when units are at risk</p>
+            </div>
+          </div>
+          <button
+            onClick={enablePush}
+            disabled={pushLoading}
+            style={{ width: "100%", padding: "11px", borderRadius: 11, border: "none", cursor: "pointer", background: "linear-gradient(135deg,#e07d2a,#c45e0a)", color: "white", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px #e07d2a40" }}
+          >
+            {pushLoading ? "Enabling..." : "Enable Notifications"}
+          </button>
+        </div>
+      )}
+
+      {pushEnabled && (
+        <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 12, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#059669", boxShadow: "0 0 8px #05966980" }} />
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#15803d" }}>Push notifications enabled</span>
+        </div>
+      )}
+
+      {/* Settings panel */}
+      <AnimatePresence>
+        {settingsOpen && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", marginBottom: 16 }}>
+            <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>Agent Settings</p>
+
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, display: "block", marginBottom: 6 }}>Supervisor Phone (for SMS alerts)</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    className="input-dark"
+                    placeholder="+1 512 555 0100"
+                    value={settings.supervisorPhone}
+                    onChange={e => setSettings(s => ({ ...s, supervisorPhone: e.target.value }))}
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    onClick={sendTestSMS}
+                    disabled={!settings.supervisorPhone}
+                    style={{ padding: "0 14px", borderRadius: 11, border: "1px solid #e8e4de", background: settings.supervisorPhone ? "#fff7ed" : "#f9f7f4", color: settings.supervisorPhone ? "#e07d2a" : "#a09890", fontSize: 12, fontWeight: 700, cursor: settings.supervisorPhone ? "pointer" : "default", whiteSpace: "nowrap" }}
+                  >
+                    Test SMS
+                  </button>
+                </div>
+                <p style={{ fontSize: 10, color: "#a09890", marginTop: 4 }}>Used for urgent alerts when a unit goes critical</p>
+              </div>
+
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, display: "block", marginBottom: 6 }}>Morning Briefing Time</label>
+                <input
+                  className="input-dark"
+                  type="time"
+                  value={settings.briefingTime}
+                  onChange={e => setSettings(s => ({ ...s, briefingTime: e.target.value }))}
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderTop: "1px solid #f0ece6" }}>
+                <div>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1614" }}>SMS Urgent Alerts</p>
+                  <p style={{ fontSize: 11, color: "#a09890" }}>Text when units go critical</p>
+                </div>
+                <button
+                  onClick={() => setSettings(s => ({ ...s, smsAlerts: !s.smsAlerts }))}
+                  style={{
+                    width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer",
+                    background: settings.smsAlerts ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#e8e4de",
+                    position: "relative", transition: "background 0.2s",
+                  }}
+                >
+                  <div style={{ position: "absolute", top: 2, left: settings.smsAlerts ? 22 : 2, width: 20, height: 20, borderRadius: "50%", background: "white", transition: "left 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,0.2)" }} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Agent activity log */}
+      <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>
+          Activity Log {log.length > 0 ? `(${log.length})` : ""}
+        </p>
+
+        {loadingLog ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 10 }} />)}
+          </div>
+        ) : log.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "32px 16px" }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d6d0c8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px" }}><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No activity yet</p>
+            <p style={{ fontSize: 11, color: "#a09890" }}>Tap "Run Now" to start the agent</p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {log.slice(0, 20).map((entry, i) => {
+              const tc = typeColors[entry.type] || typeColors.action;
+              return (
+                <div key={entry.id || i} style={{ background: tc.bg, border: `1px solid ${tc.border}`, borderRadius: 10, padding: "10px 12px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 4 }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: tc.color, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      {tc.label}
+                      {entry.unit_number && ` — Unit ${entry.unit_number}`}
+                    </span>
+                    <span style={{ fontSize: 9, color: "#a09890", whiteSpace: "nowrap", marginLeft: 8 }}>
+                      {entry.created_at ? timeAgo(entry.created_at) : ""}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12, color: "#3d3530", lineHeight: 1.5 }}>{entry.description}</p>
+                  {entry.action_taken && (
+                    <p style={{ fontSize: 10, color: tc.color, marginTop: 4, fontWeight: 600 }}>
+                      Action: {entry.action_taken}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+}
+
+
   const chars = "abcdefghjkmnpqrstuvwxyz23456789";
   return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }
@@ -3421,16 +3803,18 @@ export default function App() {
     );
   }
 
-  // Mobile field tech app — 3 tabs only
+  // Mobile field tech app — 4 tabs
   const PAGES = {
     Dashboard: <Dashboard />,
     Turnovers: <Turnovers />,
+    Agent:     <AgentPage />,
     Team:      <Team />,
   };
 
   const NAV = [
     { page: "Dashboard", label: "Overview",  icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
     { page: "Turnovers", label: "Make Ready", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, accent: true },
+    { page: "Agent",     label: "Agent",      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
     { page: "Team",      label: "Team",       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
   ];
 
