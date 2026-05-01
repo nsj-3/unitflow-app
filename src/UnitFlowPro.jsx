@@ -2880,7 +2880,7 @@ Tell them specifically: what stage they should be working on right now and why, 
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-opus-4-5",
       max_tokens: 300,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
@@ -2888,6 +2888,7 @@ Tell them specifically: what stage they should be working on right now and why, 
   });
 
   const data = await response.json();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
   return data.content?.[0]?.text || "";
 }
 
@@ -3043,8 +3044,8 @@ function AIBriefingCard({ turnovers, role, memberName }) {
       const text = await getAIBriefing(turnovers, role, memberName);
       setBriefing(text);
       setGenerated(true);
-    } catch {
-      setBriefing("Unable to generate briefing right now. Check your internet connection.");
+    } catch (e) {
+      setBriefing("Error: " + (e.message || "Unable to generate briefing. Check your Anthropic API key in Netlify environment variables."));
       setGenerated(true);
     }
     setLoading(false);
