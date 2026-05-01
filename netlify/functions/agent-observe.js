@@ -281,6 +281,19 @@ Sound urgent but calm. Be specific. End with one action to take right now.`
       });
     }
 
+    // Always log a scan summary so the activity log shows agent is working
+    const onTrackCount = activeTurnovers.filter(t => analyzeRisk(t).riskLevel === "on_track").length;
+    const atRiskCount  = actions.filter(a => a.type === "risk_alert").length;
+    const criticalCount = actions.filter(a => a.type === "critical_alert").length;
+
+    await logAction(
+      "action",
+      `Agent scanned ${activeTurnovers.length} active turnovers. ${onTrackCount} on track. ${atRiskCount} at risk. ${criticalCount} critical.`,
+      null, null, null,
+      `Checked ${activeTurnovers.length} turnovers at ${new Date().toLocaleTimeString()}`,
+      false
+    );
+
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*" },
