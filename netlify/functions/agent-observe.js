@@ -24,7 +24,7 @@ async function dbSelect(table) {
 }
 
 async function dbInsert(table, row) {
-  await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
     method: "POST",
     headers: {
       "apikey": SUPABASE_ANON,
@@ -34,6 +34,10 @@ async function dbInsert(table, row) {
     },
     body: JSON.stringify(row),
   });
+  if (!r.ok) {
+    const err = await r.text();
+    console.error(`dbInsert ${table} failed:`, err);
+  }
 }
 
 // Analyze a single turnover for risk
@@ -166,6 +170,17 @@ async function logAction(type, description, unitId, unitNumber, propertyName, ac
 exports.handler = async (event) => {
   const isMorningBriefing = event.queryStringParameters?.type === "morning";
   const actions = [];
+
+  // Test Supabase write on every run
+  await dbInsert("agent_log", {
+    id: `test-${Date.now()}`,
+    type: "action",
+    description: `Agent started at ${new Date().toISOString()}`,
+    action_taken: "Agent observation cycle started",
+    requires_confirmation: false,
+    confirmed: false,
+    created_at: new Date().toISOString(),
+  });
 
   try {
     // Load all active turnovers
