@@ -3090,8 +3090,16 @@ const supabase = {
   async select(table, filter = "") {
     const q = filter ? `?${filter}` : "";
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${q}`, { headers: this._h() });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`Supabase select ${table} failed:`, err);
+      throw new Error(err);
+    }
+    const data = await res.json();
+    // Handle both array response and {data: [...]} format
+    const result = Array.isArray(data) ? data : (data?.data || []);
+    console.log(`Supabase ${table}:`, result.length, "rows");
+    return result;
   },
 
   async upsert(table, row) {
