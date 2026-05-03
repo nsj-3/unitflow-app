@@ -1112,9 +1112,589 @@ function Team() {
   );
 }
 
+}
+
 // ─────────────────────────────────────────────
-// ONESIGNAL — web push notification setup
+// ROLE SYSTEM — maintenance vs leasing
 // ─────────────────────────────────────────────
+
+function getRoleData() {
+  try {
+    const stored = localStorage.getItem("unitflow_role");
+    return stored ? JSON.parse(stored) : null;
+  } catch { return null; }
+}
+
+function setRoleData(role, name) {
+  try {
+    localStorage.setItem("unitflow_role", JSON.stringify({ role, name, setAt: new Date().toISOString() }));
+  } catch {}
+}
+
+function clearRoleData() {
+  try { localStorage.removeItem("unitflow_role"); } catch {}
+}
+
+// ─────────────────────────────────────────────
+// ROLE SELECTION SCREEN
+// ─────────────────────────────────────────────
+
+function RoleSelectionScreen({ onSelect }) {
+  const [step, setStep] = useState("role"); // role | name
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [name, setName] = useState("");
+
+  function confirmRole() {
+    if (!name.trim()) return;
+    setRoleData(selectedRole, name.trim());
+    onSelect({ role: selectedRole, name: name.trim() });
+  }
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f7f5f2", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <style>{THEME.css}</style>
+
+      {/* Logo */}
+      <div style={{ width: 56, height: 56, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #e07d2a40", marginBottom: 24 }}>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {step === "role" && (
+          <motion.div key="role" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ width: "100%", maxWidth: 360 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", textAlign: "center", marginBottom: 8, letterSpacing: "-0.02em" }}>Welcome</h1>
+            <p style={{ fontSize: 14, color: "#6b6560", textAlign: "center", marginBottom: 32, lineHeight: 1.6 }}>Which team are you on? This sets up your experience.</p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <button
+                onClick={() => { setSelectedRole("maintenance"); setStep("name"); }}
+                style={{
+                  padding: "20px", borderRadius: 16, border: "2px solid #e8e4de",
+                  background: "#ffffff", cursor: "pointer", textAlign: "left",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "#e07d2a"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "#e8e4de"}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 13, background: "#fff7ed", border: "1px solid #fed7aa", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e07d2a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1614", marginBottom: 3 }}>Maintenance Team</p>
+                    <p style={{ fontSize: 12, color: "#a09890", lineHeight: 1.4 }}>Supervisors, technicians, porters</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => { setSelectedRole("leasing"); setStep("name"); }}
+                style={{
+                  padding: "20px", borderRadius: 16, border: "2px solid #e8e4de",
+                  background: "#ffffff", cursor: "pointer", textAlign: "left",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "#3b82f6"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "#e8e4de"}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 13, background: "#eff6ff", border: "1px solid #bfdbfe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1614", marginBottom: 3 }}>Leasing Team</p>
+                    <p style={{ fontSize: 12, color: "#a09890", lineHeight: 1.4 }}>Leasing agents, property managers</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {step === "name" && (
+          <motion.div key="name" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ width: "100%", maxWidth: 360 }}>
+            <button onClick={() => setStep("role")} style={{ background: "none", border: "none", cursor: "pointer", color: "#a09890", fontSize: 13, marginBottom: 24, display: "flex", alignItems: "center", gap: 6 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              Back
+            </button>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", marginBottom: 8, letterSpacing: "-0.02em" }}>What's your name?</h1>
+            <p style={{ fontSize: 14, color: "#6b6560", marginBottom: 28, lineHeight: 1.6 }}>
+              Your name will appear on messages and updates you post to unit threads so both teams know who said what.
+            </p>
+            <input
+              autoFocus
+              className="input-dark"
+              placeholder={selectedRole === "leasing" ? "e.g. Sarah from Leasing" : "e.g. Marcus Torres"}
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && confirmRole()}
+              style={{ width: "100%", marginBottom: 14, fontSize: 15 }}
+            />
+            <button
+              onClick={confirmRole}
+              disabled={!name.trim()}
+              style={{
+                width: "100%", padding: "14px", borderRadius: 13, border: "none",
+                background: name.trim() ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6",
+                color: name.trim() ? "white" : "#a09890",
+                fontSize: 14, fontWeight: 700, cursor: name.trim() ? "pointer" : "default",
+                boxShadow: name.trim() ? "0 4px 14px #e07d2a40" : "none",
+              }}
+            >
+              {selectedRole === "leasing" ? "Open Leasing View" : "Open Make Ready Board"}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// UNIT THREAD SYSTEM
+// ─────────────────────────────────────────────
+
+// Thread message storage key
+function threadKey(unitId) { return `thread_${unitId}`; }
+
+async function loadThreadMessages(unitId) {
+  if (isSupabaseConfigured()) {
+    try {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&order=created_at.asc`,
+        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
+      );
+      if (r.ok) return r.json();
+    } catch {}
+  }
+  try {
+    const r = await window.storage.get(threadKey(unitId), true);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
+async function postThreadMessage(unitId, unitNumber, propertyName, authorName, authorRole, text, photoBase64 = null) {
+  const msg = {
+    id: genId("msg"),
+    unit_id: unitId,
+    unit_number: unitNumber,
+    property_name: propertyName,
+    author_name: authorName,
+    author_role: authorRole, // maintenance | leasing | ai
+    text,
+    photo_base64: photoBase64 || null,
+    created_at: new Date().toISOString(),
+  };
+
+  if (isSupabaseConfigured()) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/unit_threads`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal",
+        },
+        body: JSON.stringify(msg),
+      });
+      return msg;
+    } catch {}
+  }
+  // Fallback to shared storage
+  try {
+    const existing = await loadThreadMessages(unitId);
+    await window.storage.set(threadKey(unitId), JSON.stringify([...existing, msg]), true);
+  } catch {}
+  return msg;
+}
+
+// Auto-post AI translation message when stage status changes
+async function postAIStageUpdate(unitId, unitNumber, propertyName, stageId, newStatus, targetDate, pct) {
+  const days = Math.ceil((new Date(targetDate) - Date.now()) / 86400000);
+  const stageLabels = { cleaning: "Cleaning", repairs: "Repairs", paint: "Paint", flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection" };
+  const stageLabel = stageLabels[stageId] || stageId;
+
+  let text = "";
+  if (newStatus === "done") {
+    text = `${stageLabel} is complete on Unit ${unitNumber}. Overall progress: ${pct}%. ${days > 0 ? `${days} days to target move-in.` : days === 0 ? "Target date is today." : `${Math.abs(days)} days past target — needs attention.`}`;
+  } else if (newStatus === "in_progress") {
+    text = `${stageLabel} has started on Unit ${unitNumber}. Overall progress: ${pct}%. Target move-in: ${targetDate}.`;
+  }
+
+  if (text) {
+    await postThreadMessage(unitId, unitNumber, propertyName, "AI Coordinator", "ai", text);
+  }
+}
+
+// ─────────────────────────────────────────────
+// UNIT THREAD COMPONENT — used by both roles
+// ─────────────────────────────────────────────
+
+function UnitThread({ to, authorName, authorRole, onClose }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [text, setText]         = useState("");
+  const [sending, setSending]   = useState(false);
+  const [photo, setPhoto]       = useState(null); // base64
+  const fileRef                 = useRef(null);
+  const bottomRef               = useRef(null);
+
+  useEffect(() => {
+    loadThreadMessages(to.unit_id).then(msgs => {
+      setMessages(msgs || []);
+      setLoading(false);
+    });
+    // Poll for new messages every 15 seconds
+    const interval = setInterval(async () => {
+      const fresh = await loadThreadMessages(to.unit_id);
+      setMessages(fresh || []);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [to.unit_id]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  function handlePhoto(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => setPhoto(e.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  async function sendMessage() {
+    if (!text.trim() && !photo) return;
+    setSending(true);
+    const msg = await postThreadMessage(to.unit_id, to.unit_number, to.property_name, authorName, authorRole, text.trim(), photo);
+    setMessages(prev => [...prev, msg]);
+    setText("");
+    setPhoto(null);
+    setSending(false);
+  }
+
+  const roleColors = {
+    maintenance: { bg: "#fff7ed", border: "#fed7aa", color: "#c2570a", dot: "#e07d2a" },
+    leasing:     { bg: "#eff6ff", border: "#bfdbfe", color: "#1d4ed8", dot: "#3b82f6" },
+    ai:          { bg: "#f0fdf4", border: "#86efac", color: "#15803d", dot: "#059669" },
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", zIndex: 200, maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column" }}>
+      {/* Header */}
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #e8e4de", padding: "14px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        <button onClick={onClose} style={{ width: 34, height: 34, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+          <Icon name="chevron_left" size={16} style={{ color: "#6b6560" }} />
+        </button>
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1614" }}>Unit {to.unit_number} — {to.property_name}</p>
+          <p style={{ fontSize: 11, color: "#a09890" }}>Team thread — maintenance & leasing</p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f7f5f2", display: "flex", flexDirection: "column", gap: 10 }}>
+        {loading ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)}
+          </div>
+        ) : messages.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "48px 24px" }}>
+            <div style={{ width: 48, height: 48, background: "#f0ece6", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a09890" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No messages yet</p>
+            <p style={{ fontSize: 12, color: "#a09890" }}>Be the first to post an update about this unit</p>
+          </div>
+        ) : (
+          messages.map(msg => {
+            const rc = roleColors[msg.author_role] || roleColors.maintenance;
+            const isMe = msg.author_name === authorName;
+            return (
+              <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: rc.dot }} />
+                  <span style={{ fontSize: 10, fontWeight: 700, color: rc.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    {msg.author_name} {msg.author_role === "ai" ? "" : `· ${msg.author_role}`}
+                  </span>
+                  <span style={{ fontSize: 10, color: "#a09890" }}>{timeAgo(msg.created_at)}</span>
+                </div>
+                <div style={{
+                  maxWidth: "85%", background: isMe ? "#fff7ed" : "#ffffff",
+                  border: `1px solid ${isMe ? "#fed7aa" : "#e8e4de"}`,
+                  borderRadius: isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+                  padding: "10px 14px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                }}>
+                  {msg.photo_base64 && (
+                    <img src={msg.photo_base64} alt="unit photo" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />
+                  )}
+                  {msg.text && (
+                    <p style={{ fontSize: 13, color: "#1a1614", lineHeight: 1.5 }}>{msg.text}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Photo preview */}
+      {photo && (
+        <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+          <img src={photo} alt="preview" style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover" }} />
+          <p style={{ fontSize: 12, color: "#6b6560", flex: 1 }}>Photo attached</p>
+          <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626" }}>
+            <Icon name="x" size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Input bar */}
+      <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "12px 16px", display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
+        <button
+          onClick={() => fileRef.current?.click()}
+          style={{ width: 38, height: 38, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhoto(e.target.files[0])} />
+        <textarea
+          placeholder="Post an update about this unit..."
+          value={text}
+          onChange={e => setText(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+          rows={1}
+          style={{
+            flex: 1, resize: "none", background: "#f9f7f4", border: "1px solid #e8e4de",
+            borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1a1614",
+            fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none",
+          }}
+        />
+        <button
+          onClick={sendMessage}
+          disabled={sending || (!text.trim() && !photo)}
+          style={{
+            width: 38, height: 38, borderRadius: 10, border: "none",
+            background: (text.trim() || photo) ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: (text.trim() || photo) ? "pointer" : "default", flexShrink: 0,
+          }}
+        >
+          <Icon name="send" size={16} style={{ color: (text.trim() || photo) ? "white" : "#a09890" }} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// LEASING VIEW — dedicated experience for leasing team
+// ─────────────────────────────────────────────
+
+function LeasingView({ userName, onSwitchRole }) {
+  const { db } = useApp();
+  const [selectedThread, setSelectedThread] = useState(null);
+  const [filterStatus, setFilterStatus]     = useState("all");
+
+  const turnovers = (db.turnovers || []).map(migrateTurnover);
+  const withRisk  = analyzeRisk(turnovers);
+
+  const statusOrder = { critical: 0, at_risk: 1, on_track: 2 };
+  const sorted = [...withRisk]
+    .filter(t => !t.is_ready || filterStatus === "all")
+    .filter(t => {
+      if (filterStatus === "ready") return t.is_ready;
+      if (filterStatus === "at_risk") return t.riskLevel === "at_risk" || t.riskLevel === "critical";
+      if (filterStatus === "on_track") return t.riskLevel === "on_track" && !t.is_ready;
+      return true;
+    })
+    .sort((a, b) => (statusOrder[a.riskLevel] ?? 2) - (statusOrder[b.riskLevel] ?? 2));
+
+  const total    = withRisk.length;
+  const ready    = withRisk.filter(t => t.is_ready).length;
+  const atRisk   = withRisk.filter(t => t.riskLevel === "at_risk" || t.riskLevel === "critical").length;
+  const onTrack  = withRisk.filter(t => t.riskLevel === "on_track" && !t.is_ready).length;
+
+  const statusConfig = {
+    on_track: { label: "On Track",  color: "#15803d", bg: "#f0fdf4", border: "#86efac", dot: "#059669" },
+    at_risk:  { label: "At Risk",   color: "#c2570a", bg: "#fff7ed", border: "#fed7aa", dot: "#e07d2a" },
+    critical: { label: "Critical",  color: "#dc2626", bg: "#fef2f2", border: "#fecaca", dot: "#dc2626" },
+    ready:    { label: "Ready",     color: "#15803d", bg: "#f0fdf4", border: "#86efac", dot: "#059669" },
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f7f5f2", maxWidth: 480, margin: "0 auto", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <style>{THEME.css}</style>
+
+      {/* Header */}
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #e8e4de", padding: "16px 16px 14px", position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+          <div>
+            <p style={{ fontSize: 11, color: "#3b82f6", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>Leasing View</p>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Unit Status</h1>
+          </div>
+          <button
+            onClick={onSwitchRole}
+            style={{ fontSize: 11, color: "#a09890", background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontWeight: 600, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            Switch role
+          </button>
+        </div>
+
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 14 }}>
+          {[
+            { label: "Total",    value: total,   color: "#6b6560", bg: "#f9f7f4" },
+            { label: "On Track", value: onTrack, color: "#15803d", bg: "#f0fdf4" },
+            { label: "At Risk",  value: atRisk,  color: atRisk > 0 ? "#c2570a" : "#a09890", bg: atRisk > 0 ? "#fff7ed" : "#f9f7f4" },
+            { label: "Ready",    value: ready,   color: "#1d4ed8", bg: "#eff6ff" },
+          ].map(s => (
+            <div key={s.label} style={{ background: s.bg, borderRadius: 12, padding: "10px 6px", textAlign: "center" }}>
+              <div style={{ fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 9, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Filters */}
+        <div style={{ display: "flex", gap: 6, overflowX: "auto", scrollbarWidth: "none" }}>
+          {[["all","All"], ["at_risk","Needs Attention"], ["on_track","On Track"], ["ready","Ready"]].map(([v, l]) => (
+            <button
+              key={v}
+              onClick={() => setFilterStatus(v)}
+              style={{
+                padding: "5px 12px", borderRadius: 100, fontSize: 11, fontWeight: 600,
+                border: "none", cursor: "pointer", whiteSpace: "nowrap",
+                background: filterStatus === v ? "#3b82f6" : "#f9f7f4",
+                color: filterStatus === v ? "white" : "#6b6560",
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+              }}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Unit list */}
+      <div style={{ padding: "16px 16px 100px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {sorted.length === 0 && (
+          <div style={{ textAlign: "center", padding: "48px 24px", color: "#a09890" }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No units match</p>
+          </div>
+        )}
+
+        {sorted.map(to => {
+          const days  = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+          const pct   = overallPct(to);
+          const sc    = to.is_ready ? statusConfig.ready : (statusConfig[to.riskLevel] || statusConfig.on_track);
+          const doneStages = (to.stages || []).filter(s => s.status === "done").length;
+
+          return (
+            <motion.div
+              key={to.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                background: "#ffffff", border: `1px solid ${sc.border}`,
+                borderRadius: 18, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+              }}
+            >
+              {/* Top row */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: sc.bg, border: `1px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: sc.color }}>{to.unit_number}</span>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>{to.property_name}</p>
+                    <p style={{ fontSize: 11, color: "#a09890", marginTop: 1 }}>
+                      {to.assigned_name ? `Lead: ${to.assigned_name}` : "Unassigned"}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 8, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
+                    {sc.label}
+                  </span>
+                  <p style={{ fontSize: 10, color: days < 0 ? "#dc2626" : days <= 3 ? "#e07d2a" : "#a09890", marginTop: 4, fontWeight: 600 }}>
+                    {to.is_ready ? "Move-in ready" : days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? "Due today" : `${days}d to move-in`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                  <span style={{ fontSize: 11, color: "#a09890" }}>{doneStages} of 6 stages complete</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: pct === 100 ? "#059669" : sc.color }}>{pct}%</span>
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: "#f0ece6", overflow: "hidden" }}>
+                  <motion.div
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 0.6 }}
+                    style={{ height: "100%", borderRadius: 3, background: to.is_ready ? "#059669" : pct === 100 ? "#059669" : sc.dot }}
+                  />
+                </div>
+              </div>
+
+              {/* Risk reason */}
+              {to.riskReason && !to.is_ready && (
+                <div style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, padding: "7px 10px", marginBottom: 10, display: "flex", gap: 7 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: sc.dot, flexShrink: 0, marginTop: 3 }} />
+                  <p style={{ fontSize: 11, color: sc.color, fontWeight: 600, lineHeight: 1.4 }}>{to.riskReason}</p>
+                </div>
+              )}
+
+              {/* Lease status + Thread button */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{
+                  fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 8,
+                  background: to.lease_status === "leased" ? "#f0fdf4" : "#fefce8",
+                  color: to.lease_status === "leased" ? "#15803d" : "#a16207",
+                  border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#fde68a"}`,
+                }}>
+                  {to.lease_status === "leased" ? "Leased" : "Unleased"}
+                </span>
+
+                <button
+                  onClick={() => setSelectedThread(to)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "7px 12px", borderRadius: 10,
+                    background: "#eff6ff", border: "1px solid #bfdbfe",
+                    color: "#1d4ed8", fontSize: 11, fontWeight: 700,
+                    cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif",
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  Team Thread
+                </button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Unit thread overlay */}
+      <AnimatePresence>
+        {selectedThread && (
+          <UnitThread
+            to={selectedThread}
+            authorName={userName}
+            authorRole="leasing"
+            onClose={() => setSelectedThread(null)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+
 
 const ONESIGNAL_APP_ID = "71c5efb6-f528-4f84-8846-34f67a314ea4";
 
@@ -3710,7 +4290,8 @@ export default function App() {
   const [db, setDB]           = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage]       = useState("Dashboard");
-  const [syncStatus, setSyncStatus] = useState("idle"); // idle | syncing | synced | error
+  const [syncStatus, setSyncStatus] = useState("idle");
+  const [roleData, setRoleData]     = useState(() => getRoleData());
 
   // Hash routing for shared links
   const [shareToken, setShareToken] = useState(() => {
@@ -3745,22 +4326,18 @@ export default function App() {
 
   const { notifications, addNotification, dismissNotification } = useNotifications();
 
-  // Risk monitor — checks turnovers every 60 seconds and fires notifications
+  // Risk monitor
   useEffect(() => {
     if (!db) return;
     function checkRisks() {
       const turnovers = (db.turnovers || []).map(migrateTurnover);
       const withRisk  = analyzeRisk(turnovers);
       withRisk.forEach(to => {
-        if (to.riskLevel === "critical") {
-          addNotification(to.riskReason, "critical", to.unit_number);
-        } else if (to.riskLevel === "at_risk") {
-          addNotification(to.riskReason, "at_risk", to.unit_number);
-        }
+        if (to.riskLevel === "critical") addNotification(to.riskReason, "critical", to.unit_number);
+        else if (to.riskLevel === "at_risk") addNotification(to.riskReason, "at_risk", to.unit_number);
       });
     }
-    // Run once on load then every 60s
-    const timer = setTimeout(checkRisks, 3000);
+    const timer    = setTimeout(checkRisks, 3000);
     const interval = setInterval(checkRisks, 60000);
     return () => { clearTimeout(timer); clearInterval(interval); };
   }, [db?.turnovers?.length]);
@@ -3801,7 +4378,16 @@ export default function App() {
     </>
   );
 
-  // Desktop PM Hub
+  // Role selection — show once if no role set
+  if (!roleData && !isDesktop) {
+    return (
+      <AppCtx.Provider value={{ db, updateDB, navigate }}>
+        <RoleSelectionScreen onSelect={data => setRoleData(data)} />
+      </AppCtx.Provider>
+    );
+  }
+
+  // Desktop PM Hub — always maintenance experience
   if (isDesktop) {
     return (
       <AppCtx.Provider value={{ db, updateDB, navigate }}>
@@ -3811,7 +4397,19 @@ export default function App() {
     );
   }
 
-  // Mobile field tech app — 4 tabs
+  // Leasing experience
+  if (roleData?.role === "leasing") {
+    return (
+      <AppCtx.Provider value={{ db, updateDB, navigate }}>
+        <LeasingView
+          userName={roleData.name}
+          onSwitchRole={() => { clearRoleData(); setRoleData(null); }}
+        />
+      </AppCtx.Provider>
+    );
+  }
+
+  // Maintenance experience — 4 tabs
   const PAGES = {
     Dashboard: <Dashboard />,
     Turnovers: <Turnovers />,
@@ -3863,7 +4461,7 @@ export default function App() {
           </AnimatePresence>
         </div>
 
-        {/* Bottom navigation — 3 tabs */}
+        {/* Bottom navigation */}
         <nav style={{
           position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
           width: "100%", maxWidth: 480, zIndex: 60,
@@ -3878,19 +4476,9 @@ export default function App() {
                   <button
                     key={item.page}
                     onClick={() => setPage(item.page)}
-                    style={{
-                      display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                      background: "none", border: "none", cursor: "pointer", padding: "4px 16px",
-                      position: "relative",
-                    }}
+                    style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 16px", position: "relative" }}
                   >
-                    <div style={{
-                      width: 46, height: 46, borderRadius: 15, marginTop: -20,
-                      background: "linear-gradient(135deg,#e07d2a,#c45e0a)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 4px 16px #e07d2a50",
-                      color: "white",
-                    }}>
+                    <div style={{ width: 46, height: 46, borderRadius: 15, marginTop: -20, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px #e07d2a50", color: "white" }}>
                       {item.icon}
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 700, color: isActive ? "#e07d2a" : "#a09890" }}>{item.label}</span>
@@ -3902,12 +4490,7 @@ export default function App() {
                 <button
                   key={item.page}
                   onClick={() => setPage(item.page)}
-                  style={{
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                    background: "none", border: "none", cursor: "pointer", padding: "4px 16px",
-                    color: isActive ? "#e07d2a" : "#a09890", position: "relative",
-                    transition: "color 0.2s",
-                  }}
+                  style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 16px", color: isActive ? "#e07d2a" : "#a09890", position: "relative", transition: "color 0.2s" }}
                 >
                   {item.icon}
                   <span style={{ fontSize: 10, fontWeight: 700 }}>{item.label}</span>
