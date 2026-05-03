@@ -662,6 +662,12 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
   const [openStageId, setOpenStageId] = useState(null);
   const [assigningTask, setAssigningTask] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showThread, setShowThread]       = useState(false);
+
+  // Get role from localStorage for thread authoring
+  const roleData = getRoleData();
+  const authorName = roleData?.name || "Maintenance Team";
+  const authorRole = roleData?.role || "maintenance";
 
   const pct = overallPct(to);
   const daysLeft = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
@@ -727,6 +733,21 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
 
         {/* Share link */}
         <ShareButton to={to} db={db} updateDB={updateDB} />
+
+        {/* Team Thread button */}
+        <button
+          onClick={() => setShowThread(true)}
+          style={{
+            width: "100%", padding: "11px", borderRadius: 12, marginTop: 8,
+            background: "#eff6ff", border: "1px solid #bfdbfe",
+            color: "#1d4ed8", fontSize: 13, fontWeight: 700,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Team Thread
+        </button>
 
         {/* Move-In Ready toggle */}
         {to.is_ready ? (
@@ -922,6 +943,18 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
           );
         })}
       </div>
+
+      {/* Unit thread overlay */}
+      <AnimatePresence>
+        {showThread && (
+          <UnitThread
+            to={to}
+            authorName={authorName}
+            authorRole={authorRole}
+            onClose={() => setShowThread(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
