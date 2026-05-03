@@ -1112,7 +1112,6 @@ function Team() {
   );
 }
 
-}
 
 // ─────────────────────────────────────────────
 // ROLE SYSTEM — maintenance vs leasing
