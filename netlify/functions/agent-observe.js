@@ -171,6 +171,25 @@ exports.handler = async (event) => {
   const isMorningBriefing = event.queryStringParameters?.type === "morning";
   const actions = [];
 
+  // Handle thread notification requests from the app
+  if (event.body) {
+    try {
+      const body = JSON.parse(event.body);
+      if (body.type === "thread_notification") {
+        await sendPush(body.title, body.message, {
+          type: "thread_notification",
+          unit_id: body.unitId,
+          unit_number: body.unitNumber,
+        });
+        return {
+          statusCode: 200,
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ success: true, type: "thread_notification" }),
+        };
+      }
+    } catch {}
+  }
+
   // Test Supabase write on every run
   await dbInsert("agent_log", {
     id: `test-${Date.now()}`,
