@@ -1312,7 +1312,7 @@ async function postThreadMessage(unitId, unitNumber, propertyName, authorName, a
     unit_number: unitNumber,
     property_name: propertyName,
     author_name: authorName,
-    author_role: authorRole, // maintenance | leasing | ai
+    author_role: authorRole,
     text,
     photo_base64: photoBase64 || null,
     created_at: new Date().toISOString(),
@@ -1330,14 +1330,33 @@ async function postThreadMessage(unitId, unitNumber, propertyName, authorName, a
         },
         body: JSON.stringify(msg),
       });
-      return msg;
     } catch {}
   }
+
   // Fallback to shared storage
   try {
     const existing = await loadThreadMessages(unitId);
     await window.storage.set(threadKey(unitId), JSON.stringify([...existing, msg]), true);
   } catch {}
+
+  // Send push notification to the other team
+  try {
+    const otherTeam = authorRole === "leasing" ? "Maintenance" : "Leasing";
+    const preview   = text ? (text.length > 60 ? text.slice(0, 60) + "..." : text) : "Sent a photo";
+    await fetch("/.netlify/functions/agent-observe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "thread_notification",
+        title: `${otherTeam} — Unit ${unitNumber}`,
+        message: `${authorName}: ${preview}`,
+        unitId,
+        unitNumber,
+        propertyName,
+      }),
+    });
+  } catch {}
+
   return msg;
 }
 
