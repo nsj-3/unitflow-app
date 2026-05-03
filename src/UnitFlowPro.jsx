@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 // CONSTANTS & HELPERS
 // ─────────────────────────────────────────────
 
-const DB_KEY     = "unitflow_pro_db";
+const DB_KEY     = "mainlync_pro_db";
 const DB_VERSION = 5;
 const AppCtx     = createContext(null);
 const useApp     = () => useContext(AppCtx);
@@ -1152,19 +1152,19 @@ function Team() {
 
 function getRoleData() {
   try {
-    const stored = localStorage.getItem("unitflow_role");
+    const stored = localStorage.getItem("mainlync_role");
     return stored ? JSON.parse(stored) : null;
   } catch { return null; }
 }
 
 function setRoleData(role, name) {
   try {
-    localStorage.setItem("unitflow_role", JSON.stringify({ role, name, setAt: new Date().toISOString() }));
+    localStorage.setItem("mainlync_role", JSON.stringify({ role, name, setAt: new Date().toISOString() }));
   } catch {}
 }
 
 function clearRoleData() {
-  try { localStorage.removeItem("unitflow_role"); } catch {}
+  try { localStorage.removeItem("mainlync_role"); } catch {}
 }
 
 // ─────────────────────────────────────────────
@@ -1776,7 +1776,7 @@ async function requestPushPermission() {
 // AGENT PAGE — the AI coordinator control center
 // ─────────────────────────────────────────────
 
-const AGENT_LOG_KEY = "unitflow_agent_log";
+const AGENT_LOG_KEY = "mainlync_agent_log";
 
 async function loadAgentLog() {
   // Try Supabase first
@@ -1867,7 +1867,7 @@ function AgentPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           to: settings.supervisorPhone,
-          message: `UnitFlow AI Agent test message. You have ${activeTurnovers.length} active turnovers. Agent monitoring is active.`,
+          message: `Mainlync Agent test message. You have ${activeTurnovers.length} active turnovers. Agent monitoring is active.`,
         }),
       });
       alert("Test SMS sent!");
@@ -2443,7 +2443,7 @@ function SharedUnitView({ token }) {
             <Icon name="wrench" size={16} style={{ color: "white" }} />
           </div>
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, color: "#e07d2a", letterSpacing: "0.06em", textTransform: "uppercase" }}>UnitFlow</p>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#e07d2a", letterSpacing: "0.06em", textTransform: "uppercase" }}>Mainlync</p>
             <p style={{ fontSize: 10, color: "#a09890" }}>Make-Ready Board</p>
           </div>
         </div>
@@ -2727,7 +2727,7 @@ function SharedUnitView({ token }) {
               <Icon name="wrench" size={10} style={{ color: "white" }} />
             </div>
             <span style={{ fontSize: 11, color: "#a09890", fontWeight: 600 }}>Powered by </span>
-            <span style={{ fontSize: 11, fontWeight: 800, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>UnitFlow Pro</span>
+            <span style={{ fontSize: 11, fontWeight: 800, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Mainlync Pro</span>
           </div>
           <p style={{ fontSize: 10, color: "#c8c0b8", marginTop: 8 }}>Make-ready coordination for property teams</p>
         </div>
@@ -2786,7 +2786,7 @@ function SharedUnitView({ token }) {
 // 
 
 // Shared sync key — written by desktop, read by mobile (and vice-versa)
-const SYNC_KEY   = "unitflow_live_board";
+const SYNC_KEY   = "mainlync_live_board";
 const SYNC_INTERVAL = 20000; // 20-second poll
 
 async function writeSyncBoard(db) {
@@ -2810,7 +2810,7 @@ async function readSyncBoard() {
 // Append an activity entry to the shared log
 async function logActivity(entry) {
   try {
-    const key = "unitflow_activity_log";
+    const key = "mainlync_activity_log";
     const existing = await window.storage.get(key, true);
     const log = existing ? JSON.parse(existing.value) : [];
     log.unshift({ ...entry, id: genId("act"), ts: new Date().toISOString() });
@@ -2820,7 +2820,7 @@ async function logActivity(entry) {
 
 async function readActivityLog() {
   try {
-    const r = await window.storage.get("unitflow_activity_log", true);
+    const r = await window.storage.get("mainlync_activity_log", true);
     return r ? JSON.parse(r.value) : [];
   } catch { return []; }
 }
@@ -3002,7 +3002,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
             <Icon name="wrench" size={16} style={{ color: "white" }} />
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 800, color: "#1a1614", lineHeight: 1 }}>UnitFlow</p>
+            <p style={{ fontSize: 13, fontWeight: 800, color: "#1a1614", lineHeight: 1 }}>Mainlync</p>
             <p style={{ fontSize: 9, color: "#e07d2a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>PM Hub</p>
           </div>
         </div>
