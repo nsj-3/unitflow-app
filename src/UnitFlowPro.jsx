@@ -295,7 +295,7 @@ async function relayStageComplete(to, stageId, db) {
         max_tokens: 120,
         messages: [{
           role: "user",
-          content: `You are Relay, Mainlync's AI coordinator for property management.
+          content: `You are Relay, Mainlync's agentic AI for property management.
 ${stageLabel} just completed on Unit ${to.unit_number} at ${to.property_name} by ${assignedName}.
 Overall progress: ${pct}%. Days to target move-in: ${days > 0 ? days : "overdue by " + Math.abs(days)}.
 ${nextLabel ? `Next stage recommended: ${nextLabel}.` : "All stages complete — ready for move-in review."}
@@ -335,7 +335,7 @@ async function relayStallAlert(to, stalledStageId) {
         max_tokens: 100,
         messages: [{
           role: "user",
-          content: `You are Relay, Mainlync's AI coordinator.
+          content: `You are Relay, Mainlync's agentic AI.
 ${stageLabel} on Unit ${to.unit_number} at ${to.property_name} has had no activity for 24+ hours.
 Assigned to: ${assignedName}. Days to target: ${days > 0 ? days : "overdue by " + Math.abs(days)}.
 Write one short message (2 sentences) for the unit thread nudging the assigned person to update the status.
@@ -374,7 +374,7 @@ async function relayOwnerReport(to) {
         max_tokens: 200,
         messages: [{
           role: "user",
-          content: `You are Relay, Mainlync's AI coordinator.
+          content: `You are Relay, Mainlync's agentic AI.
 Unit ${to.unit_number} at ${to.property_name} has been marked Move-In Ready.
 Turnover started: ${createdDate}. Ready date: ${readyDate}.
 Completed work: ${completedList}.
@@ -1626,7 +1626,7 @@ async function postAIStageUpdate(unitId, unitNumber, propertyName, stageId, newS
   }
 
   if (text) {
-    await postThreadMessage(unitId, unitNumber, propertyName, "AI Coordinator", "ai", text);
+    await postThreadMessage(unitId, unitNumber, propertyName, "Relay", "ai", text);
   }
 }
 
@@ -2057,7 +2057,7 @@ function LeasingView({ userName, onSwitchRole }) {
 
 
 // ─────────────────────────────────────────────
-// AGENT PAGE — the AI coordinator control center
+// AGENT PAGE — Relay control center
 // ─────────────────────────────────────────────
 
 const AGENT_LOG_KEY = "mainlync_agent_log";
@@ -2180,7 +2180,7 @@ function AgentPage() {
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 15, fontWeight: 800, color: "#1a1614" }}>Make Ready Agent</p>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "#1a1614" }}>Relay</p>
             <p style={{ fontSize: 11, color: "#a09890" }}>
               {lastRun ? `Last run ${lastRun.toLocaleTimeString()}` : "Ready to run"}
             </p>
@@ -4124,7 +4124,7 @@ async function getAIBriefing(turnovers, role, memberName) {
     };
   });
 
-  const systemPrompt = `You are an AI coordinator for a property management make-ready system. 
+  const systemPrompt = `You are Relay, Mainlync's agentic AI. 
 You generate short, direct, human-sounding briefings for property management team members.
 Never use bullet points with dashes. Use numbered lists when listing multiple items.
 Keep responses under 120 words. Sound like a helpful coworker, not a robot.
@@ -4273,9 +4273,9 @@ function AIBriefingCard({ turnovers, role, memberName }) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M20 2v4m0 0h-4m4 0l-5 5"/></svg>
         </div>
         <div style={{ flex: 1, textAlign: "left" }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>AI Coordinator</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>Relay</p>
           <p style={{ fontSize: 11, color: "#a09890" }}>
-            {generated ? "Tap to expand your briefing" : "Tap for your personalized briefing"}
+            {generated ? "Tap to expand your briefing" : "Tap for your Relay briefing"}
           </p>
         </div>
         {loading ? (
@@ -4346,7 +4346,7 @@ function RiskBadge({ riskLevel, riskReason }) {
 }
 
 // ─────────────────────────────────────────────
-// UPDATED DASHBOARD — with AI coordinator
+// UPDATED DASHBOARD — with Relay
 // ─────────────────────────────────────────────
 
 function Dashboard() {
@@ -4379,7 +4379,7 @@ function Dashboard() {
         <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Overview</h1>
       </div>
 
-      {/* AI Coordinator briefing card */}
+      {/* Relay briefing card */}
       {total > 0 && (
         <AIBriefingCard
           turnovers={rawTurnovers}
