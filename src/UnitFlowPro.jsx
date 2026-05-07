@@ -1485,6 +1485,36 @@ async function loadThreadMessages(unitId) {
   } catch { return []; }
 }
 
+// Read receipt storage key
+function readKey(unitId) { return `reads_${unitId}`; }
+
+// Record that someone opened the thread
+async function recordThreadRead(unitId, readerName, readerRole) {
+  try {
+    const key = readKey(unitId);
+    const existing = await window.storage.get(key, true).catch(() => null);
+    const reads = existing ? JSON.parse(existing.value) : [];
+
+    // Update or add this reader
+    const filtered = reads.filter(r => r.name !== readerName);
+    const updated  = [...filtered, {
+      name: readerName,
+      role: readerRole,
+      seen_at: new Date().toISOString(),
+    }];
+
+    await window.storage.set(key, JSON.stringify(updated), true);
+  } catch {}
+}
+
+// Load who has seen the thread
+async function loadThreadReads(unitId) {
+  try {
+    const r = await window.storage.get(readKey(unitId), true);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
 async function postThreadMessage(unitId, unitNumber, propertyName, authorName, authorRole, text, photoBase64 = null) {
   const msg = {
     id: genId("msg"),
@@ -1569,6 +1599,7 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
   const [text, setText]               = useState("");
   const [sending, setSending]         = useState(false);
   const [photo, setPhoto]             = useState(null);
+  const [reads, setReads]             = useState([]);
   const fileRef                       = useRef(null);
   const bottomRef                     = useRef(null);
   const relayBottomRef                = useRef(null);
@@ -1578,14 +1609,27 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
   const relayMessages = allMessages.filter(m => m.author_role === "ai");
   const unreadRelay   = relayMessages.filter(m => new Date(m.created_at) > new Date(lastRelayView - 1000)).length;
 
+  // Readers from the other team
+  const otherReads = reads.filter(r => r.name !== authorName);
+  const maintenanceReads = otherReads.filter(r => r.role === "maintenance");
+  const leasingReads     = otherReads.filter(r => r.role === "leasing");
+
   useEffect(() => {
+    // Record that this person opened the thread
+    recordThreadRead(to.unit_id, authorName, authorRole);
+
+    // Load messages and reads
     loadThreadMessages(to.unit_id).then(msgs => {
       setAllMessages(msgs || []);
       setLoading(false);
     });
+    loadThreadReads(to.unit_id).then(r => setReads(r || []));
+
     const interval = setInterval(async () => {
       const fresh = await loadThreadMessages(to.unit_id);
       setAllMessages(fresh || []);
+      const freshReads = await loadThreadReads(to.unit_id);
+      setReads(freshReads || []);
     }, 15000);
     return () => clearInterval(interval);
   }, [to.unit_id]);
@@ -1629,7 +1673,11 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
           </button>
           <div style={{ flex: 1 }}>
             <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1614" }}>Unit {to.unit_number} — {to.property_name}</p>
-            <p style={{ fontSize: 11, color: "#a09890" }}>Maintenance & Leasing</p>
+            <p style={{ fontSize: 11, color: "#a09890" }}>
+              {reads.length > 0
+                ? `Active: ${reads.map(r => r.name.split(" ")[0]).join(", ")}`
+                : "Maintenance & Leasing"}
+            </p>
           </div>
         </div>
         {/* Tabs */}
@@ -1678,6 +1726,17 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
               );
             })}
             <div ref={bottomRef} />
+
+            {/* Seen by indicator — shows when the other team has read the thread */}
+            {otherReads.length > 0 && humanMessages.length > 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end", padding: "4px 0" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style={{ fontSize: 10, color: "#059669", fontWeight: 600 }}>
+                  Seen by {otherReads.map(r => r.name.split(" ")[0]).join(", ")}
+                  {" · "}{timeAgo(otherReads.sort((a,b) => new Date(b.seen_at) - new Date(a.seen_at))[0].seen_at)}
+                </span>
+              </div>
+            )}
           </div>
 
           {photo && (
