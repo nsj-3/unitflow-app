@@ -731,57 +731,45 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
   //  Render 
   return (
     <>
-      {/*  Header stats  */}
-      <div style={{ padding: "0 16px 14px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 14 }}>
+      {/* Summary strip — ByeWind style */}
+      <div style={{ padding: "12px 16px 0" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 12 }}>
           {[
-            { label: "Total",   value: total,   color: "#f0a05a" },
-            { label: "Active",  value: active,  color: "#7fa8ff" },
+            { label: "Total",   value: total,   color: "#000" },
+            { label: "Active",  value: active,  color: "#000" },
             { label: "Ready",   value: ready,   color: "#16a34a" },
             { label: "Overdue", value: overdue, color: overdue > 0 ? "#dc2626" : "#8e8e93" },
           ].map(s => (
-            <div key={s.label} style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 9, color: "#8e8e93", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
+            <div key={s.label} style={{ background: "#fff", borderRadius: 12, padding: "10px 6px", textAlign: "center", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 9, color: "#8e8e93", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 3 }}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Filter row */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {[["all","All"], ["active","Active"], ["ready","Ready"]].map(([v, l]) => (
-            <button key={v} onClick={() => setFilterStatus(v)} style={{
-              padding: "5px 13px", borderRadius: 100, fontSize: 11, fontWeight: 600,
-              border: "none", cursor: "pointer",
-              background: filterStatus === v ? "#000000" : "#ffffff",
-              color: filterStatus === v ? "white" : "#8e8e93",
-              boxShadow: filterStatus === v ? "0 2px 10px #e07d2a40" : "none",
-            }}>{l}</button>
+        {/* Filters */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+          {[["all","All"],["active","Active"],["ready","Ready"]].map(([v,l]) => (
+            <button key={v} onClick={() => setFilterStatus(v)} style={{ padding: "5px 12px", borderRadius: 100, fontSize: 12, fontWeight: 500, border: "0.5px solid #e5e5ea", cursor: "pointer", fontFamily: "'Inter',sans-serif", background: filterStatus === v ? "#000" : "#fff", color: filterStatus === v ? "#fff" : "#8e8e93" }}>{l}</button>
           ))}
-          <div style={{ width: 1, background: "#e5e5ea", margin: "0 2px" }} />
-          {[["all","All"], ["leased","Leased"], ["unleased","Unleased"]].map(([v, l]) => (
-            <button key={v} onClick={() => setFilterLease(v)} style={{
-              padding: "5px 13px", borderRadius: 100, fontSize: 11, fontWeight: 600,
-              border: "none", cursor: "pointer",
-              background: filterLease === v ? "#c6c6c8" : "#ffffff",
-              color: filterLease === v ? "#000000" : "#8e8e93",
-            }}>{l}</button>
+          <div style={{ width: "0.5px", background: "#e5e5ea", margin: "0 2px" }} />
+          {[["all","All"],["leased","Leased"],["unleased","Unleased"]].map(([v,l]) => (
+            <button key={v} onClick={() => setFilterLease(v)} style={{ padding: "5px 12px", borderRadius: 100, fontSize: 12, fontWeight: 500, border: "0.5px solid #e5e5ea", cursor: "pointer", fontFamily: "'Inter',sans-serif", background: filterLease === v ? "#e5e5ea" : "#fff", color: filterLease === v ? "#000" : "#8e8e93" }}>{l}</button>
           ))}
         </div>
       </div>
 
-      {/*  Unit cards  */}
-      <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+      {/* Unit cards grid */}
+      <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
         {displayed.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 24px", color: "#8e8e93" }}>
-            <div style={{ fontSize: 32, marginBottom: 10 }}></div>
-            <p style={{ fontSize: 14 }}>No units match this filter</p>
+          <div style={{ textAlign: "center", padding: "40px 24px" }}>
+            <p style={{ fontSize: 14, color: "#8e8e93" }}>No units match this filter</p>
           </div>
         )}
         {displayed.map(to => <UnitCard key={to.id} to={to} onOpen={() => setSelectedId(to.id)} />)}
       </div>
 
-      {/*  Detail drawer  */}
+      {/* Detail drawer */}
       <AnimatePresence>
         {selectedTO && (
           <motion.div
@@ -789,7 +777,7 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedId(null)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)", zIndex: 80, maxWidth: 480, margin: "0 auto" }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 80, maxWidth: 480, margin: "0 auto" }}
           >
             <motion.div
               initial={{ y: "100%" }}
@@ -799,15 +787,15 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
               onClick={e => e.stopPropagation()}
               style={{
                 position: "absolute", bottom: 0, left: 0, right: 0,
-                background: "#fafaf8",
-                borderRadius: "22px 22px 0 0",
-                border: "1px solid #d6d0c8", borderBottom: "none",
+                background: "#ffffff",
+                borderRadius: "20px 20px 0 0",
+                borderTop: "0.5px solid #e5e5ea",
                 maxHeight: "92vh",
                 display: "flex", flexDirection: "column",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "center", paddingTop: 10 }}>
-                <div style={{ width: 36, height: 4, background: "#c6c6c8", borderRadius: 2 }} />
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 10, paddingBottom: 4 }}>
+                <div style={{ width: 36, height: 4, background: "#d1d1d6", borderRadius: 2 }} />
               </div>
               <UnitDrawer
                 to={selectedTO}
@@ -835,109 +823,81 @@ function UnitCard({ to, onOpen }) {
   const daysLeft = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
   const isOverdue = daysLeft < 0 && !to.is_ready;
 
-  const stageStatuses = (to.stages || []).map(s => {
-    const def = MR_STAGES.find(m => m.id === s.id);
-    return { ...s, def };
-  });
+  const stages = (to.stages || []).map(s => ({
+    ...s, def: MR_STAGES.find(m => m.id === s.id),
+  }));
 
-  const doneCount = stageStatuses.filter(s => s.status === "done").length;
-  const inProgCount = stageStatuses.filter(s => s.status === "in_progress").length;
+  const doneCount = stages.filter(s => s.status === "done").length;
+  const inProgCount = stages.filter(s => s.status === "in_progress").length;
+
+  const statusColor = to.is_ready ? "#16a34a"
+    : isOverdue ? "#dc2626"
+    : daysLeft <= 3 ? "#e07d2a"
+    : "#8e8e93";
+
+  const statusLabel = to.is_ready ? "Ready"
+    : isOverdue ? `${Math.abs(daysLeft)}d overdue`
+    : daysLeft === 0 ? "Due today"
+    : `${daysLeft}d left`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onOpen}
       style={{
-        background: to.is_ready ? "#f0fdf4" : "#ffffff",
-        border: `1px solid ${to.is_ready ? "#86efac" : "#e5e5ea"}`,
-        borderRadius: 18, padding: 16, cursor: "pointer",
+        background: "#ffffff",
+        borderRadius: 14,
+        padding: "14px 16px",
+        cursor: "pointer",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+        borderLeft: `3px solid ${statusColor}`,
       }}
     >
-      {/* Top row */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 42, height: 42, borderRadius: 13,
-            background: to.is_ready ? "#dcfce7" : "#f2f2f7",
-            border: `1px solid ${to.is_ready ? "#4ade80" : "#c6c6c8"}`,
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: to.is_ready ? "#16a34a" : "#000000" }}>
-              {to.unit_number}
-            </span>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#000" }}>{to.unit_number}</span>
           </div>
           <div>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#000000" }}>{to.property_name}</h3>
-            <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>
-              {to.assigned_name ? ` ${to.assigned_name}` : "Unassigned"}
-            </p>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#000", lineHeight: 1.2 }}>{to.property_name}</p>
+            <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>{to.assigned_name || "Unassigned"}</p>
           </div>
         </div>
-        <div style={{ textAlign: "right" }}>
-          {to.is_ready ? (
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a", background: "#dcfce7", border: "1px solid #05966935", borderRadius: 8, padding: "3px 8px" }}> Ready</span>
-          ) : (
-            <span style={{ fontSize: 10, fontWeight: 600, color: isOverdue ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#8e8e93" }}>
-              {isOverdue ? ` ${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? "Due today" : `${daysLeft}d left`}
-            </span>
-          )}
+        <div style={{ display: "flex", flex: "column", alignItems: "flex-end", gap: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: statusColor, whiteSpace: "nowrap" }}>{statusLabel}</span>
+          <span style={{ fontSize: 10, color: "#8e8e93", marginTop: 2 }}>
+            {to.lease_status === "leased" ? "Leased" : "Unleased"}
+          </span>
         </div>
       </div>
 
-      {/* Stage grid — 6 pills showing each stage's status */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 5, marginBottom: 12 }}>
-        {stageStatuses.map(s => {
+      {/* Stage dots — ByeWind style horizontal indicators */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+        {stages.map(s => {
           const isDone = s.status === "done";
           const isIP   = s.status === "in_progress";
-          const taskDone = s.tasks.filter(t => t.completed).length;
-          const taskTotal = s.tasks.length;
+          const bg = isDone ? "#16a34a" : isIP ? "#e07d2a" : "#e5e5ea";
           return (
-            <div key={s.id} style={{
-              padding: "6px 8px", borderRadius: 10,
-              background: isDone ? s.def.bg : isIP ? s.def.bg : "#f2f2f7",
-              border: `1px solid ${isDone ? s.def.accent : isIP ? s.def.accent : "#f2f2f7"}`,
-              display: "flex", alignItems: "center", gap: 5,
-            }}>
-              <div style={{
-                width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-                background: isDone ? s.def.dot : isIP ? s.def.dot : "#c6c6c8",
-                opacity: isDone ? 1 : isIP ? 0.8 : 0.4,
-              }} />
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: isDone ? s.def.color : isIP ? s.def.color : "#b8b0a8", textTransform: "uppercase", letterSpacing: "0.03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {s.def.short}
-                </div>
-                {taskTotal > 0 && (
-                  <div style={{ fontSize: 8, color: isDone ? "#16a34a" : isIP ? s.def.color : "#c6c6c8", fontWeight: 600 }}>
-                    {taskDone}/{taskTotal}
-                  </div>
-                )}
-              </div>
-            </div>
+            <div key={s.id} style={{ flex: 1, height: 4, borderRadius: 2, background: bg, transition: "background 0.3s" }} title={s.def?.label} />
           );
         })}
       </div>
 
-      {/* Overall progress bar */}
-      <div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-          <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 600 }}>
-            {doneCount}/{MR_STAGES.length} stages done{inProgCount > 0 ? ` · ${inProgCount} in progress` : ""}
-          </span>
-          <span style={{ fontSize: 10, fontWeight: 800, color: pct === 100 ? "#16a34a" : "#e07d2a" }}>{pct}%</span>
-        </div>
-        <div style={{ height: 4, borderRadius: 2, background: "#f2f2f7", overflow: "hidden" }}>
-          <motion.div
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            style={{ height: "100%", borderRadius: 2, background: pct === 100 ? "#16a34a" : "linear-gradient(90deg, #e07d2a, #c45e0a)" }}
-          />
-        </div>
+      {/* Stats row */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 11, color: "#8e8e93" }}>
+          {doneCount}/{MR_STAGES.length} stages
+          {inProgCount > 0 ? ` · ${inProgCount} active` : ""}
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? "#16a34a" : "#000" }}>{pct}%</span>
       </div>
     </motion.div>
   );
 }
+
 
 //  Detail drawer 
 function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssignTask, onMarkReady, onUnmarkReady, onDelete, onClose }) {
@@ -1259,19 +1219,21 @@ function Turnovers() {
   }
 
   return (
-    <div style={{ paddingBottom: 100 }}>
-      {/* Page header */}
-      <div style={{ padding: "16px 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <div>
-          <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>Make Ready</p>
-          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Turnover Board</h1>
+    <div style={{ paddingBottom: 100, background: "#f2f2f7", minHeight: "100vh" }}>
+      {/* Page header — ByeWind style */}
+      <div style={{ padding: "16px 16px 12px", background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", position: "sticky", top: 0, zIndex: 40 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <p style={{ fontSize: 11, color: "#8e8e93", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: 2 }}>Make Ready</p>
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "#000", letterSpacing: "-0.02em" }}>Turnover Board</h1>
+          </div>
+          <button
+            onClick={() => setShowCreate(true)}
+            style={{ width: 36, height: 36, background: "#000", border: "none", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <Icon name="plus" size={16} style={{ color: "white" }} />
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          style={{ width: 40, height: 40, background: "#000000", border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 14px #e07d2a40" }}
-        >
-          <Icon name="plus" size={18} style={{ color: "white" }} />
-        </button>
       </div>
 
       <MakeReadyBoard turnovers={db.turnovers} db={db} updateDB={updateDB} />
@@ -4433,7 +4395,7 @@ export default function App() {
                   onClick={() => setPage(item.page)}
                   style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 12px", color: isActive ? activeColor : inactiveColor, transition: "color 0.15s" }}
                 >
-                  {React.cloneElement(item.icon, { stroke: isActive ? activeColor : inactiveColor })}
+                  <span style={{ color: isActive ? activeColor : inactiveColor }}>{item.icon}</span>
                   <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.01em", fontFamily: "'Inter', sans-serif" }}>{item.label}</span>
                 </button>
               );
