@@ -4600,19 +4600,27 @@ export default function App() {
     return () => { clearTimeout(timer); clearInterval(interval); };
   }, [db?.turnovers?.length]);
 
-  // Risk monitor
+  // Risk monitor — fires once per unit per session, checks every 10 minutes
+  const notifiedRef = useRef(new Set());
   useEffect(() => {
     if (!db) return;
     function checkRisks() {
       const turnovers = (db.turnovers || []).map(migrateTurnover);
       const withRisk  = analyzeRisk(turnovers);
       withRisk.forEach(to => {
-        if (to.riskLevel === "critical") addNotification(to.riskReason, "critical", to.unit_number);
-        else if (to.riskLevel === "at_risk") addNotification(to.riskReason, "at_risk", to.unit_number);
+        const key = `${to.id}_${to.riskLevel}`;
+        if (notifiedRef.current.has(key)) return;
+        if (to.riskLevel === "critical") {
+          addNotification(to.riskReason, "critical", to.unit_number);
+          notifiedRef.current.add(key);
+        } else if (to.riskLevel === "at_risk") {
+          addNotification(to.riskReason, "at_risk", to.unit_number);
+          notifiedRef.current.add(key);
+        }
       });
     }
-    const timer    = setTimeout(checkRisks, 3000);
-    const interval = setInterval(checkRisks, 60000);
+    const timer    = setTimeout(checkRisks, 5000);
+    const interval = setInterval(checkRisks, 10 * 60 * 1000);
     return () => { clearTimeout(timer); clearInterval(interval); };
   }, [db?.turnovers?.length]);
 
