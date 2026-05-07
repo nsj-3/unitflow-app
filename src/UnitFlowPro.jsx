@@ -259,8 +259,178 @@ const SEED_DATA = {
   ],
 };
 // ─────────────────────────────────────────────
-// MAKE READY — STAGE DEFINITIONS & HELPERS
+// RELAY — Mainlync's Agentic AI
+// Level 2: Proactive coordinator that acts
+// automatically when things change
 // ─────────────────────────────────────────────
+
+const RELAY_VERSION = "1.0";
+
+// Relay generates and posts a stage completion message to the unit thread
+async function relayStageComplete(to, stageId, db) {
+  const stageLabels = {
+    cleaning: "Cleaning", repairs: "Repairs", paint: "Paint",
+    flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection"
+  };
+  const stageLabel = stageLabels[stageId] || stageId;
+  const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+  const pct  = overallPct({ ...to, stages: to.stages.map(s => s.id === stageId ? { ...s, status: "done" } : s) });
+  const assignedName = to.stages?.find(s => s.id === stageId)?.assigned_name || to.assigned_name || "the team";
+
+  // Find next idle stage
+  const stageOrder = ["cleaning", "repairs", "paint", "flooring", "final_clean", "inspection"];
+  const nextStage = stageOrder.find(sid => {
+    const s = to.stages?.find(st => st.id === sid);
+    return s && s.status === "idle" && sid !== stageId;
+  });
+  const nextLabel = nextStage ? stageLabels[nextStage] : null;
+
+  // Generate AI message
+  try {
+    const response = await fetch("/.netlify/functions/ai-briefing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-opus-4-5",
+        max_tokens: 120,
+        messages: [{
+          role: "user",
+          content: `You are Relay, Mainlync's AI coordinator for property management.
+${stageLabel} just completed on Unit ${to.unit_number} at ${to.property_name} by ${assignedName}.
+Overall progress: ${pct}%. Days to target move-in: ${days > 0 ? days : "overdue by " + Math.abs(days)}.
+${nextLabel ? `Next stage recommended: ${nextLabel}.` : "All stages complete — ready for move-in review."}
+Write one short update (2 sentences max) for the unit thread that both maintenance and leasing can see.
+Sound like a helpful coordinator. Be specific. Use the unit number and stage name.`
+        }],
+      }),
+    });
+    const data = await response.json();
+    const message = data.content?.[0]?.text || `${stageLabel} complete on Unit ${to.unit_number}. Progress: ${pct}%.`;
+    await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
+  } catch {
+    // Silent fallback — post basic update
+    await postThreadMessage(
+      to.unit_id, to.unit_number, to.property_name, "Relay", "ai",
+      `${stageLabel} is complete on Unit ${to.unit_number} at ${to.property_name}. Overall progress: ${pct}%.${nextLabel ? ` ${nextLabel} is up next.` : " Unit is ready for final review."}`
+    );
+  }
+}
+
+// Relay posts a stall alert to the unit thread
+async function relayStallAlert(to, stalledStageId) {
+  const stageLabels = {
+    cleaning: "Cleaning", repairs: "Repairs", paint: "Paint",
+    flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection"
+  };
+  const stageLabel = stageLabels[stalledStageId] || stalledStageId;
+  const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+  const assignedName = to.stages?.find(s => s.id === stalledStageId)?.assigned_name || to.assigned_name || "the assigned tech";
+
+  try {
+    const response = await fetch("/.netlify/functions/ai-briefing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-opus-4-5",
+        max_tokens: 100,
+        messages: [{
+          role: "user",
+          content: `You are Relay, Mainlync's AI coordinator.
+${stageLabel} on Unit ${to.unit_number} at ${to.property_name} has had no activity for 24+ hours.
+Assigned to: ${assignedName}. Days to target: ${days > 0 ? days : "overdue by " + Math.abs(days)}.
+Write one short message (2 sentences) for the unit thread nudging the assigned person to update the status.
+Be direct but not aggressive. Use their name. Sound human.`
+        }],
+      }),
+    });
+    const data = await response.json();
+    const message = data.content?.[0]?.text || `${stageLabel} on Unit ${to.unit_number} hasn't had any activity in 24+ hours. ${assignedName} — can you post a quick update on where things stand?`;
+    await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
+  } catch {
+    await postThreadMessage(
+      to.unit_id, to.unit_number, to.property_name, "Relay", "ai",
+      `${stageLabel} on Unit ${to.unit_number} hasn't had any activity in 24+ hours. ${assignedName} — can you post a quick update on where things stand?`
+    );
+  }
+}
+
+// Relay drafts an owner report when a unit goes move-in ready
+async function relayOwnerReport(to) {
+  const completedStages = to.stages?.filter(s => s.status === "done").map(s => s.id) || [];
+  const stageLabels = {
+    cleaning: "Cleaning", repairs: "Repairs", paint: "Paint",
+    flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection"
+  };
+  const completedList = completedStages.map(s => stageLabels[s] || s).join(", ");
+  const createdDate = new Date(to.created_date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const readyDate   = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+  try {
+    const response = await fetch("/.netlify/functions/ai-briefing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-opus-4-5",
+        max_tokens: 200,
+        messages: [{
+          role: "user",
+          content: `You are Relay, Mainlync's AI coordinator.
+Unit ${to.unit_number} at ${to.property_name} has been marked Move-In Ready.
+Turnover started: ${createdDate}. Ready date: ${readyDate}.
+Completed work: ${completedList}.
+Lease status: ${to.lease_status === "leased" ? "Unit is leased — resident move-in pending" : "Unit is unleased — available for leasing"}.
+Write a professional owner report (3-4 sentences) the property manager can send directly to the property owner.
+Summarize the work completed, confirm the unit is ready, and note the lease status. Professional tone.`
+        }],
+      }),
+    });
+    const data = await response.json();
+    const report = data.content?.[0]?.text || `Unit ${to.unit_number} at ${to.property_name} has completed its make-ready process and is cleared for move-in as of ${readyDate}. All required stages were completed including ${completedList}. The unit is ${to.lease_status === "leased" ? "currently leased and awaiting resident move-in" : "available and ready for leasing"}.`;
+
+    await postThreadMessage(
+      to.unit_id, to.unit_number, to.property_name, "Relay", "ai",
+      `Unit ${to.unit_number} is Move-In Ready. Here is your owner report draft:\n\n${report}\n\n— Tap to copy and send to your owner.`
+    );
+  } catch {
+    await postThreadMessage(
+      to.unit_id, to.unit_number, to.property_name, "Relay", "ai",
+      `Unit ${to.unit_number} at ${to.property_name} is Move-In Ready as of ${readyDate}. All make-ready stages have been completed. ${to.lease_status === "leased" ? "Unit is leased — resident move-in is pending." : "Unit is available for leasing."}`
+    );
+  }
+}
+
+// Relay stall checker — runs periodically to detect stalled stages
+function checkForStalls(turnovers, lastStallCheck) {
+  const stalled = [];
+  const now = Date.now();
+
+  turnovers.forEach(to => {
+    if (to.is_ready) return;
+    (to.stages || []).forEach(stage => {
+      if (stage.status !== "in_progress") return;
+      const tasks = stage.tasks || [];
+      const lastActivity = tasks
+        .filter(t => t.completed_at)
+        .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))[0];
+
+      const lastTime = lastActivity
+        ? new Date(lastActivity.completed_at).getTime()
+        : new Date(to.created_date).getTime();
+
+      const hoursSince = (now - lastTime) / 3600000;
+      const stallKey   = `${to.id}_${stage.id}`;
+
+      // Only alert if stalled 24+ hours and not already alerted this session
+      if (hoursSince >= 24 && !lastStallCheck[stallKey]) {
+        stalled.push({ to, stageId: stage.id, stallKey });
+      }
+    });
+  });
+
+  return stalled;
+}
+
+
 
 const MR_STAGES = [
   { id: "cleaning",    label: "Cleaning",    short: "Clean",   color: "#c2570a", bg: "#fff7ed", accent: "#fed7aa", dot: "#e07d2a" },
@@ -384,6 +554,12 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
       };
     });
     await updateDB({ ...db, turnovers: updated });
+
+    // Relay: auto-post to unit thread when stage completes
+    if (newStatus === "done") {
+      const to = updated.find(t => t.id === toId);
+      if (to) relayStageComplete(to, stageId, db).catch(() => {});
+    }
   }
 
   async function toggleTask(toId, stageId, taskId) {
@@ -431,6 +607,10 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
       : t
     );
     await updateDB({ ...db, turnovers: updated });
+
+    // Relay: auto-draft owner report when unit goes ready
+    const to = updated.find(t => t.id === toId);
+    if (to) relayOwnerReport(to).catch(() => {});
   }
 
   async function unmarkReady(toId) {
@@ -1889,7 +2069,10 @@ function AgentPage() {
       <div style={{ marginBottom: 20 }}>
         <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>AI Operations</p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Agent</h1>
+          <div>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Relay</h1>
+            <p style={{ fontSize: 11, color: "#a09890", marginTop: 2 }}>Mainlync's Agentic AI — v{RELAY_VERSION}</p>
+          </div>
           <button
             onClick={() => setSettingsOpen(s => !s)}
             style={{ width: 36, height: 36, background: "#f0ece6", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
@@ -4374,6 +4557,24 @@ export default function App() {
 
   const { notifications, addNotification, dismissNotification } = useNotifications();
 
+  // Relay stall checker — runs every 30 minutes
+  const stallCheckRef = useRef({});
+  useEffect(() => {
+    if (!db) return;
+    async function runStallCheck() {
+      const turnovers = (db.turnovers || []).map(migrateTurnover);
+      const stalled   = checkForStalls(turnovers, stallCheckRef.current);
+      for (const { to, stageId, stallKey } of stalled) {
+        stallCheckRef.current[stallKey] = Date.now();
+        await relayStallAlert(to, stageId).catch(() => {});
+        addNotification(`${stageId} on Unit ${to.unit_number} stalled 24h+ — Relay posted to thread`, "at_risk", to.unit_number);
+      }
+    }
+    const timer    = setTimeout(runStallCheck, 5000);
+    const interval = setInterval(runStallCheck, 30 * 60 * 1000);
+    return () => { clearTimeout(timer); clearInterval(interval); };
+  }, [db?.turnovers?.length]);
+
   // Risk monitor
   useEffect(() => {
     if (!db) return;
@@ -4468,7 +4669,7 @@ export default function App() {
   const NAV = [
     { page: "Dashboard", label: "Overview",  icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
     { page: "Turnovers", label: "Make Ready", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, accent: true },
-    { page: "Agent",     label: "Agent",      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
+    { page: "Agent",     label: "Relay",      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
     { page: "Team",      label: "Team",       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
   ];
 
