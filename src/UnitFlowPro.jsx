@@ -388,6 +388,22 @@ const SEED_DATA = {
 
 const RELAY_VERSION = "1.0";
 
+// ── Agent log loader ──────────────────────────
+async function loadAgentLog() {
+  if (isSupabaseConfigured()) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/agent_log?order=created_at.desc&limit=50`, {
+        headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+      });
+      if (r.ok) return r.json();
+    } catch {}
+  }
+  try {
+    const r = await window.storage.get("unitflow_agent_log");
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
 // Relay generates and posts a stage completion message to the unit thread
 async function relayStageComplete(to, stageId, db) {
   const stageLabels = {
@@ -924,7 +940,7 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
       {/*  Drawer header  */}
-      <div style={{ padding: "12px 16px 14px", borderBottom: "1px solid #f0ece6", flexShrink: 0 }}>
+      <div style={{ padding: "12px 16px 14px", borderBottom: "1px solid #e5e5ea", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 44, height: 44, borderRadius: 13, background: "#f2f2f7", border: "1px solid #d6d0c8", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1086,7 +1102,7 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
                     exit={{ height: 0, opacity: 0 }}
                     style={{
                       overflow: "hidden",
-                      background: "#f4f1ed",
+                      background: "#f2f2f7",
                       border: `1px solid ${statusStyle.border}`,
                       borderTop: "none",
                       borderRadius: "0 0 12px 12px",
@@ -1277,7 +1293,7 @@ function Turnovers() {
                     ))}
                   </div>
                 </div>
-                <div style={{ background: "#f2f2f7", border: "1px solid #f0ece6", borderRadius: 12, padding: "12px 14px" }}>
+                <div style={{ background: "#f2f2f7", border: "1px solid #e5e5ea", borderRadius: 12, padding: "12px 14px" }}>
                   <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, marginBottom: 8 }}>Stages (work in any order):</p>
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     {MR_STAGES.map(s => (
@@ -1995,7 +2011,7 @@ function AgentPage() {
                 />
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderTop: "1px solid #f0ece6" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderTop: "1px solid #e5e5ea" }}>
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 600, color: "#000000" }}>SMS Urgent Alerts</p>
                   <p style={{ fontSize: 11, color: "#8e8e93" }}>Text when units go critical</p>
@@ -2580,7 +2596,7 @@ function SharedUnitView({ token }) {
                       exit={{ height: 0, opacity: 0 }}
                       style={{
                         overflow: "hidden",
-                        background: "#f4f1ed",
+                        background: "#f2f2f7",
                         border: `1px solid ${statusStyle.border}`,
                         borderTop: "none",
                         borderRadius: "0 0 12px 12px",
@@ -2602,7 +2618,7 @@ function SharedUnitView({ token }) {
                       {tasks.map((tk, ti) => (
                         <motion.div
                           key={tk.id}
-                          animate={justChecked === tk.id ? { backgroundColor: ["#f4f1ed", `${def.dot}15`, "#f4f1ed"] } : {}}
+                          animate={justChecked === tk.id ? { backgroundColor: ["#f2f2f7", `${def.dot}15`, "#f2f2f7"] } : {}}
                           transition={{ duration: 0.5 }}
                           style={{ padding: "12px 14px", borderBottom: ti < tasks.length - 1 ? "1px solid #ede9e3" : "none" }}
                         >
@@ -2925,114 +2941,84 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
 
   //  Render 
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f0ec", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column" }}>
       <style>{THEME.css}</style>
       <style>{`
-        .desk-card:hover { border-color: #e07d2a50 !important; background: #f4f1ed !important; }
-        .desk-btn:hover  { opacity: 0.85; }
-        .stage-col::-webkit-scrollbar { width: 4px; }
+        .desk-card { transition: box-shadow 0.15s; }
+        .desk-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+        .desk-btn:hover { opacity: 0.85; }
+        .stage-col::-webkit-scrollbar { width: 3px; }
         .stage-col::-webkit-scrollbar-track { background: transparent; }
-        .stage-col::-webkit-scrollbar-thumb { background: #d6d0c8; border-radius: 2px; }
+        .stage-col::-webkit-scrollbar-thumb { background: #c6c6c8; border-radius: 2px; }
         @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
       `}</style>
 
-      {/*  Top bar  */}
-      <div style={{ height: 58, background: "#f4f1ed", borderBottom: "1px solid #f0ece6", display: "flex", alignItems: "center", padding: "0 24px", gap: 20, flexShrink: 0, position: "sticky", top: 0, zIndex: 100 }}>
+      {/* Top bar — ByeWind style */}
+      <div style={{ height: 56, background: "#ffffff", borderBottom: "0.5px solid #e5e5ea", display: "flex", alignItems: "center", padding: "0 24px", gap: 16, flexShrink: 0, position: "sticky", top: 0, zIndex: 100 }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 8 }}>
-          <div style={{ width: 32, height: 32, background: "#000000", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Icon name="wrench" size={16} style={{ color: "white" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 8 }}>
+          <div style={{ width: 28, height: 28, background: "#000", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 800, color: "#000000", lineHeight: 1 }}>Mainlync</p>
-            <p style={{ fontSize: 9, color: "#e07d2a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>PM Hub</p>
-          </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: "#000", letterSpacing: "-0.01em" }}>Mainlync</span>
+          <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 500, background: "#f2f2f7", borderRadius: 6, padding: "2px 7px" }}>PM Hub</span>
         </div>
 
         {/* Tab switcher */}
-        <div style={{ display: "flex", gap: 2, background: "#ffffff", borderRadius: 10, padding: 3 }}>
-          {[["board","grid","Make Ready Board"], ["analytics","chart","Analytics"]].map(([t, icon, label]) => (
-            <button key={t} onClick={() => setActiveTab(t)} style={{
-              padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
-              background: activeTab === t ? "#000000" : "transparent",
-              color: activeTab === t ? "white" : "#8e8e93",
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
-              <Icon name={icon} size={13} /> {label}
+        <div style={{ display: "flex", gap: 1, background: "#f2f2f7", borderRadius: 8, padding: "3px" }}>
+          {[["board","Make Ready Board"],["analytics","Analytics"]].map(([t,label]) => (
+            <button key={t} onClick={() => setActiveTab(t)} style={{ padding: "5px 12px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 500, background: activeTab === t ? "#ffffff" : "transparent", color: activeTab === t ? "#000" : "#8e8e93", fontFamily: "'Inter',sans-serif", boxShadow: activeTab === t ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>
+              {label}
             </button>
           ))}
         </div>
 
         {/* Property filter */}
-        <select
-          value={filterProperty}
-          onChange={e => setFilterProperty(e.target.value)}
-          style={{ padding: "6px 12px", background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 8, color: "#000000", fontSize: 12, cursor: "pointer", outline: "none" }}
-        >
+        <select value={filterProperty} onChange={e => setFilterProperty(e.target.value)}
+          style={{ padding: "6px 10px", background: "#f2f2f7", border: "none", borderRadius: 8, color: "#000", fontSize: 12, cursor: "pointer", outline: "none", fontFamily: "'Inter',sans-serif" }}>
           <option value="all">All Properties</option>
           {db.properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
 
-        {/* Spacer */}
         <div style={{ flex: 1 }} />
 
         {/* Sync indicator */}
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{
-            width: 7, height: 7, borderRadius: "50%",
-            background: syncPulse ? "#16a34a" : "#c6c6c8",
-            boxShadow: syncPulse ? "0 0 8px #059669" : "none",
-            animation: syncPulse ? "pulse-dot 0.6s ease" : "none",
-            transition: "background 0.3s",
-          }} />
-          <span style={{ fontSize: 11, color: "#8e8e93" }}>
-            {lastSync ? `Synced ${timeAgo(lastSync)}` : "Syncing…"}
-          </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: syncPulse ? "#16a34a" : "#c6c6c8", transition: "background 0.3s" }} />
+          <span style={{ fontSize: 11, color: "#8e8e93" }}>{lastSync ? `Synced ${timeAgo(lastSync)}` : "Syncing…"}</span>
         </div>
 
-        {/* New turnover button */}
-        <button
-          onClick={() => setShowNewTurnover(true)}
-          className="desk-btn"
-          style={{
-            padding: "8px 16px", background: "#000000", border: "none", borderRadius: 10,
-            color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer",
-            display: "flex", alignItems: "center", gap: 7, boxShadow: "0 2px 12px #e07d2a40",
-          }}
-        >
-          <Icon name="plus" size={14} /> New Turnover
+        {/* New turnover */}
+        <button onClick={() => setShowNewTurnover(true)} className="desk-btn"
+          style={{ padding: "7px 14px", background: "#000", border: "none", borderRadius: 8, color: "white", fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Inter',sans-serif" }}>
+          <Icon name="plus" size={13} /> New Turnover
         </button>
       </div>
 
-      {/*  Stats strip  */}
-      <div style={{ background: "#f4f1ed", borderBottom: "1px solid #f0ece6", padding: "10px 24px", display: "flex", gap: 24, flexShrink: 0 }}>
+      {/* Stats strip — ByeWind dashboard cards */}
+      <div style={{ background: "#ffffff", borderBottom: "0.5px solid #e5e5ea", padding: "12px 24px", display: "flex", gap: 12, flexShrink: 0 }}>
         {[
-          { label: "Total Active",  value: stats.total,   color: "#f0a05a" },
-          { label: "In Progress",   value: stats.active,  color: "#7fa8ff" },
+          { label: "Total Active",  value: stats.total,   color: "#000" },
+          { label: "In Progress",   value: stats.active,  color: "#000" },
           { label: "Move-In Ready", value: stats.ready,   color: "#16a34a" },
           { label: "Overdue",       value: stats.overdue, color: stats.overdue > 0 ? "#dc2626" : "#8e8e93" },
-          { label: "Avg Days Open", value: stats.avgDays, color: "#ffad5c" },
-        ].map(s => (
-          <div key={s.label} style={{ display: "flex", align: "center", gap: 10 }}>
-            <span style={{ fontSize: 22, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</span>
-            <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "center", lineHeight: 1.3 }}>{s.label}</span>
-            <div style={{ width: 1, background: "#f2f2f7", margin: "0 4px", alignSelf: "stretch" }} />
+          { label: "Avg Days Open", value: stats.avgDays, color: "#000" },
+        ].map((s, i) => (
+          <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 12, borderRight: i < 4 ? "0.5px solid #e5e5ea" : "none" }}>
+            <span style={{ fontSize: 24, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</span>
+            <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", lineHeight: 1.3, maxWidth: 64 }}>{s.label}</span>
           </div>
         ))}
       </div>
 
-      {/*  Main content  */}
+      {/* Main content */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
 
         {activeTab === "board" && (
           <>
-            {/*  Kanban board  */}
-            <div style={{ flex: 1, overflowX: "auto", overflowY: "hidden", display: "flex", padding: "20px 0 20px 20px", gap: 14 }}>
+            {/* Kanban board */}
+            <div style={{ flex: 1, overflowX: "auto", overflowY: "hidden", display: "flex", padding: "16px 0 16px 16px", gap: 12 }}>
               {MR_STAGES.map(def => {
-                const stageUnits = filtered.filter(u => !u.is_ready && u.stages?.some(s => s.id === def.id && s.status === "in_progress"));
-                const idleUnits  = filtered.filter(u => !u.is_ready && u.stages?.some(s => s.id === def.id && s.status === "idle") && !u.stages?.some(s => s.id === def.id && s.status === "in_progress"));
-
-                // Show units that have this stage in progress OR not started
                 const columnUnits = filtered.filter(u => {
                   if (u.is_ready) return false;
                   const stage = u.stages?.find(s => s.id === def.id);
@@ -3040,18 +3026,18 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
                 });
 
                 return (
-                  <div key={def.id} style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-                    {/* Column header */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: def.dot, boxShadow: `0 0 8px ${def.dot}60` }} />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: def.color, textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>{def.label}</span>
-                      <span style={{ fontSize: 11, fontWeight: 800, color: def.color, background: def.bg, border: `1px solid ${def.accent}`, borderRadius: 6, padding: "1px 7px" }}>
+                  <div key={def.id} style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                    {/* Column header — ByeWind style */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "0 2px" }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: def.dot, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "#3c3c43", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>{def.label}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "#8e8e93", background: "#f2f2f7", borderRadius: 6, padding: "1px 7px" }}>
                         {columnUnits.length}
                       </span>
                     </div>
 
                     {/* Cards */}
-                    <div className="stage-col" style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div className="stage-col" style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
                       {columnUnits.map(to => (
                         <DeskUnitCard
                           key={to.id}
@@ -3065,7 +3051,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
                         />
                       ))}
                       {columnUnits.length === 0 && (
-                        <div style={{ border: "1px dashed #f0ece6", borderRadius: 12, padding: "20px 12px", textAlign: "center" }}>
+                        <div style={{ border: "0.5px dashed #e5e5ea", borderRadius: 10, padding: "20px 12px", textAlign: "center" }}>
                           <p style={{ fontSize: 11, color: "#c7c7cc" }}>No units</p>
                         </div>
                       )}
@@ -3075,11 +3061,11 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
               })}
 
               {/* Ready column */}
-              <div style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#16a34a", boxShadow: "0 0 8px #05966960" }} />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>Move-In Ready</span>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#16a34a", background: "#dcfce7", border: "1px solid #05966935", borderRadius: 6, padding: "1px 7px" }}>
+              <div style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "0 2px" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", flexShrink: 0 }} />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#3c3c43", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>Move-In Ready</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#8e8e93", background: "#f2f2f7", borderRadius: 6, padding: "1px 7px" }}>
                     {filtered.filter(u => u.is_ready).length}
                   </span>
                 </div>
@@ -3101,8 +3087,8 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
               <div style={{ width: 20, flexShrink: 0 }} />
             </div>
 
-            {/*  Right panel: Unit detail + Activity  */}
-            <div style={{ width: selectedTO ? 380 : 300, flexShrink: 0, borderLeft: "1px solid #f0ece6", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width 0.25s ease" }}>
+            {/* Right panel: Unit detail + Activity */}
+            <div style={{ width: selectedTO ? 360 : 280, flexShrink: 0, borderLeft: "0.5px solid #e5e5ea", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width 0.25s ease" }}>
               {selectedTO ? (
                 <DeskUnitDetail
                   to={selectedTO}
@@ -3128,21 +3114,21 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
         )}
       </div>
 
-      {/*  Toast notification  */}
+      {/* Toast notification */}
       <AnimatePresence>
         {notification && (
           <motion.div
             initial={{ opacity: 0, y: 16, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: 16, x: "-50%" }}
-            style={{ position: "fixed", bottom: 24, left: "50%", zIndex: 200, background: "#e5e5ea", border: "1px solid #e07d2a40", borderRadius: 12, padding: "10px 18px", fontSize: 13, fontWeight: 600, color: "#000000", boxShadow: "0 4px 24px rgba(0,0,0,0.5)", whiteSpace: "nowrap" }}
+            style={{ position: "fixed", bottom: 24, left: "50%", zIndex: 200, background: "#000", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 500, color: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.3)", whiteSpace: "nowrap", fontFamily: "'Inter',sans-serif" }}
           >
             {notification}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/*  New Turnover modal  */}
+      {/* New Turnover modal */}
       <AnimatePresence>
         {showNewTurnover && (
           <DeskNewTurnoverModal db={db} onCreate={createTurnover} onClose={() => setShowNewTurnover(false)} />
@@ -3165,17 +3151,16 @@ function DeskUnitCard({ to, stageDef, db, isSelected, onClick, onSetStageStatus,
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       className="desk-card"
       onClick={onClick}
       style={{
-        background: isSelected ? "#f4f1ed" : "#ffffff",
-        border: `1px solid ${isSelected ? "#e07d2a60" : "#e5e5ea"}`,
-        borderRadius: 12, padding: 12, cursor: "pointer",
-        boxShadow: isSelected ? "0 0 0 1px #e07d2a40, 0 4px 20px rgba(124,106,247,0.12)" : "none",
-        transition: "border-color 0.15s, background 0.15s",
+        background: "#ffffff",
+        border: `0.5px solid ${isSelected ? "#000" : "#e5e5ea"}`,
+        borderRadius: 10, padding: 12, cursor: "pointer",
+        boxShadow: isSelected ? "0 0 0 1.5px #000" : "0 1px 3px rgba(0,0,0,0.06)",
       }}
     >
       {/* Header */}
@@ -3231,7 +3216,7 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       {/* Header */}
-      <div style={{ padding: "14px 16px", borderBottom: "1px solid #f0ece6", flexShrink: 0 }}>
+      <div style={{ padding: "14px 16px", borderBottom: "1px solid #e5e5ea", flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
           <div>
             <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>{to.property_name}</p>
@@ -3347,7 +3332,7 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
               <AnimatePresence>
                 {isOpen && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                    style={{ overflow: "hidden", background: "#f4f1ed", border: `1px solid ${isIP ? def.accent : "#f2f2f7"}`, borderTop: "none", borderRadius: "0 0 10px 10px" }}
+                    style={{ overflow: "hidden", background: "#f2f2f7", border: `1px solid ${isIP ? def.accent : "#f2f2f7"}`, borderTop: "none", borderRadius: "0 0 10px 10px" }}
                   >
                     {/* Assign member */}
                     <div style={{ padding: "8px 12px", borderBottom: "1px solid #ede9e3" }}>
@@ -3404,7 +3389,7 @@ function DeskActivityFeed({ log, db }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-      <div style={{ padding: "14px 16px", borderBottom: "1px solid #f0ece6", flexShrink: 0 }}>
+      <div style={{ padding: "14px 16px", borderBottom: "1px solid #e5e5ea", flexShrink: 0 }}>
         <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 2 }}>Live Feed</p>
         <h3 style={{ fontSize: 16, fontWeight: 800, color: "#000000" }}>Activity</h3>
         <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 2 }}>Updates from field team · auto-refreshes</p>
@@ -3418,7 +3403,7 @@ function DeskActivityFeed({ log, db }) {
             <p style={{ fontSize: 11, color: "#c6c6c8", marginTop: 4 }}>Field updates will appear here in real time</p>
           </div>
         ) : log.map((entry, i) => (
-          <div key={entry.id || i} style={{ display: "flex", gap: 10, padding: "10px 0", borderBottom: i < log.length - 1 ? "1px solid #f0ece6" : "none" }}>
+          <div key={entry.id || i} style={{ display: "flex", gap: 10, padding: "10px 0", borderBottom: i < log.length - 1 ? "1px solid #e5e5ea" : "none" }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <span style={{ fontSize: 13 }}>{icons[entry.type] || ""}</span>
             </div>
@@ -3431,7 +3416,7 @@ function DeskActivityFeed({ log, db }) {
       </div>
 
       {/* Team online strip */}
-      <div style={{ padding: "10px 16px", borderTop: "1px solid #f0ece6", flexShrink: 0 }}>
+      <div style={{ padding: "10px 16px", borderTop: "1px solid #e5e5ea", flexShrink: 0 }}>
         <p style={{ fontSize: 10, color: "#b8b0a8", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 7 }}>Team</p>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {db.team.filter(m => m.is_active).map(m => (
