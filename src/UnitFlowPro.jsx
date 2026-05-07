@@ -2939,190 +2939,273 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
     }, 0) / units.length),
   };
 
-  //  Render 
+  //  Render — Cake-style dashboard layout
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", fontFamily: "'Inter', -apple-system, sans-serif" }}>
       <style>{THEME.css}</style>
       <style>{`
+        .desk-nav-item { transition: background 0.15s; }
+        .desk-nav-item:hover { background: #f2f2f7 !important; }
+        .desk-nav-item.active { background: #eff6ff !important; color: #2563eb !important; }
         .desk-card { transition: box-shadow 0.15s; }
-        .desk-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
-        .desk-btn:hover { opacity: 0.85; }
-        .stage-col::-webkit-scrollbar { width: 3px; }
-        .stage-col::-webkit-scrollbar-track { background: transparent; }
-        .stage-col::-webkit-scrollbar-thumb { background: #c6c6c8; border-radius: 2px; }
-        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.4)} }
+        .desk-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important; }
+        .desk-row:hover { background: #f8f8fa !important; }
+        @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
       `}</style>
 
-      {/* Top bar — ByeWind style */}
-      <div style={{ height: 56, background: "#ffffff", borderBottom: "0.5px solid #e5e5ea", display: "flex", alignItems: "center", padding: "0 24px", gap: 16, flexShrink: 0, position: "sticky", top: 0, zIndex: 100 }}>
+      {/* LEFT SIDEBAR */}
+      <div style={{ width: 220, flexShrink: 0, background: "#ffffff", borderRight: "0.5px solid #e5e5ea", display: "flex", flexDirection: "column", position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginRight: 8 }}>
-          <div style={{ width: 28, height: 28, background: "#000", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <div style={{ padding: "18px 20px 14px", borderBottom: "0.5px solid #e5e5ea" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 28, height: 28, background: "#000", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "#000", letterSpacing: "-0.01em", lineHeight: 1 }}>Mainlync</p>
+              <p style={{ fontSize: 10, color: "#8e8e93", marginTop: 1 }}>PM Hub</p>
+            </div>
           </div>
-          <span style={{ fontSize: 14, fontWeight: 700, color: "#000", letterSpacing: "-0.01em" }}>Mainlync</span>
-          <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 500, background: "#f2f2f7", borderRadius: 6, padding: "2px 7px" }}>PM Hub</span>
         </div>
 
-        {/* Tab switcher */}
-        <div style={{ display: "flex", gap: 1, background: "#f2f2f7", borderRadius: 8, padding: "3px" }}>
-          {[["board","Make Ready Board"],["analytics","Analytics"]].map(([t,label]) => (
-            <button key={t} onClick={() => setActiveTab(t)} style={{ padding: "5px 12px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 500, background: activeTab === t ? "#ffffff" : "transparent", color: activeTab === t ? "#000" : "#8e8e93", fontFamily: "'Inter',sans-serif", boxShadow: activeTab === t ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}>
-              {label}
+        {/* Nav items */}
+        <nav style={{ flex: 1, padding: "10px 10px", display: "flex", flexDirection: "column", gap: 2, overflowY: "auto" }}>
+          {[
+            { id: "board",     label: "Make Ready Board", icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
+            { id: "analytics", label: "Analytics",        icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
+            { id: "team",      label: "Team",             icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+            { id: "relay",     label: "Relay AI",         icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
+          ].map(item => (
+            <button key={item.id} onClick={() => setActiveTab(item.id)}
+              className={`desk-nav-item${activeTab === item.id ? " active" : ""}`}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, border: "none", cursor: "pointer", textAlign: "left", width: "100%", background: activeTab === item.id ? "#eff6ff" : "transparent", color: activeTab === item.id ? "#2563eb" : "#3c3c43", fontSize: 13, fontWeight: activeTab === item.id ? 600 : 400, fontFamily: "'Inter', sans-serif" }}>
+              <span style={{ color: activeTab === item.id ? "#2563eb" : "#8e8e93", flexShrink: 0 }}>{item.icon}</span>
+              {item.label}
             </button>
           ))}
+
+          <div style={{ height: "0.5px", background: "#e5e5ea", margin: "8px 0" }} />
+
+          {/* Properties */}
+          <p style={{ fontSize: 10, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.07em", padding: "4px 10px", marginBottom: 2 }}>Properties</p>
+          {[{ id: "all", name: "All Properties" }, ...db.properties].map(p => (
+            <button key={p.id} onClick={() => setFilterProperty(p.id)}
+              className="desk-nav-item"
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, border: "none", cursor: "pointer", textAlign: "left", width: "100%", background: filterProperty === p.id ? "#f2f2f7" : "transparent", color: filterProperty === p.id ? "#000" : "#8e8e93", fontSize: 12, fontFamily: "'Inter', sans-serif", fontWeight: filterProperty === p.id ? 600 : 400 }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: filterProperty === p.id ? "#000" : "#c7c7cc", flexShrink: 0 }} />
+              {p.name || "All Properties"}
+            </button>
+          ))}
+        </nav>
+
+        {/* Bottom — New Turnover */}
+        <div style={{ padding: "12px 14px", borderTop: "0.5px solid #e5e5ea" }}>
+          <button onClick={() => setShowNewTurnover(true)}
+            style={{ width: "100%", padding: "9px 14px", background: "#000", border: "none", borderRadius: 8, color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontFamily: "'Inter', sans-serif" }}>
+            <Icon name="plus" size={13} /> New Turnover
+          </button>
         </div>
-
-        {/* Property filter */}
-        <select value={filterProperty} onChange={e => setFilterProperty(e.target.value)}
-          style={{ padding: "6px 10px", background: "#f2f2f7", border: "none", borderRadius: 8, color: "#000", fontSize: 12, cursor: "pointer", outline: "none", fontFamily: "'Inter',sans-serif" }}>
-          <option value="all">All Properties</option>
-          {db.properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-
-        <div style={{ flex: 1 }} />
-
-        {/* Sync indicator */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: syncPulse ? "#16a34a" : "#c6c6c8", transition: "background 0.3s" }} />
-          <span style={{ fontSize: 11, color: "#8e8e93" }}>{lastSync ? `Synced ${timeAgo(lastSync)}` : "Syncing…"}</span>
-        </div>
-
-        {/* New turnover */}
-        <button onClick={() => setShowNewTurnover(true)} className="desk-btn"
-          style={{ padding: "7px 14px", background: "#000", border: "none", borderRadius: 8, color: "white", fontSize: 12, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Inter',sans-serif" }}>
-          <Icon name="plus" size={13} /> New Turnover
-        </button>
       </div>
 
-      {/* Stats strip — ByeWind dashboard cards */}
-      <div style={{ background: "#ffffff", borderBottom: "0.5px solid #e5e5ea", padding: "12px 24px", display: "flex", gap: 12, flexShrink: 0 }}>
-        {[
-          { label: "Total Active",  value: stats.total,   color: "#000" },
-          { label: "In Progress",   value: stats.active,  color: "#000" },
-          { label: "Move-In Ready", value: stats.ready,   color: "#16a34a" },
-          { label: "Overdue",       value: stats.overdue, color: stats.overdue > 0 ? "#dc2626" : "#8e8e93" },
-          { label: "Avg Days Open", value: stats.avgDays, color: "#000" },
-        ].map((s, i) => (
-          <div key={s.label} style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 12, borderRight: i < 4 ? "0.5px solid #e5e5ea" : "none" }}>
-            <span style={{ fontSize: 24, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</span>
-            <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em", lineHeight: 1.3, maxWidth: 64 }}>{s.label}</span>
+      {/* MAIN CONTENT */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+        {/* Top bar */}
+        <div style={{ height: 52, background: "#ffffff", borderBottom: "0.5px solid #e5e5ea", display: "flex", alignItems: "center", padding: "0 24px", gap: 16, flexShrink: 0 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: "#000", letterSpacing: "-0.02em", flex: 1 }}>
+            {filterProperty === "all" ? "All Properties" : db.properties.find(p => p.id === filterProperty)?.name || "Dashboard"}
+          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: syncPulse ? "#16a34a" : "#c7c7cc", transition: "background 0.3s" }} />
+            <span style={{ fontSize: 11, color: "#8e8e93" }}>{lastSync ? `Synced ${timeAgo(lastSync)}` : "Syncing…"}</span>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Main content */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+        {/* Content area */}
+        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
 
-        {activeTab === "board" && (
-          <>
-            {/* Kanban board */}
-            <div style={{ flex: 1, overflowX: "auto", overflowY: "hidden", display: "flex", padding: "16px 0 16px 16px", gap: 12 }}>
-              {MR_STAGES.map(def => {
-                const columnUnits = filtered.filter(u => {
-                  if (u.is_ready) return false;
-                  const stage = u.stages?.find(s => s.id === def.id);
-                  return stage && stage.status !== "done";
-                });
+          {activeTab === "board" && (
+            <div style={{ flex: 1, overflow: "auto", padding: "20px 24px" }}>
 
-                return (
-                  <div key={def.id} style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                    {/* Column header — ByeWind style */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "0 2px" }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: def.dot, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#3c3c43", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>{def.label}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#8e8e93", background: "#f2f2f7", borderRadius: 6, padding: "1px 7px" }}>
-                        {columnUnits.length}
-                      </span>
-                    </div>
-
-                    {/* Cards */}
-                    <div className="stage-col" style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
-                      {columnUnits.map(to => (
-                        <DeskUnitCard
-                          key={to.id}
-                          to={to}
-                          stageDef={def}
-                          db={db}
-                          isSelected={selectedUnit === to.id}
-                          onClick={() => setSelectedUnit(selectedUnit === to.id ? null : to.id)}
-                          onSetStageStatus={setStageStatus}
-                          onAssignStage={assignStageToMember}
-                        />
-                      ))}
-                      {columnUnits.length === 0 && (
-                        <div style={{ border: "0.5px dashed #e5e5ea", borderRadius: 10, padding: "20px 12px", textAlign: "center" }}>
-                          <p style={{ fontSize: 11, color: "#c7c7cc" }}>No units</p>
-                        </div>
-                      )}
-                    </div>
+              {/* Stats row — Cake style */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 20 }}>
+                {[
+                  { label: "Total Turnovers", value: stats.total },
+                  { label: "In Progress",      value: stats.active },
+                  { label: "Move-In Ready",    value: stats.ready,   color: "#16a34a" },
+                  { label: "Overdue",          value: stats.overdue, color: stats.overdue > 0 ? "#dc2626" : "#8e8e93" },
+                  { label: "Avg Days Open",    value: stats.avgDays },
+                ].map(s => (
+                  <div key={s.label} style={{ background: "#ffffff", borderRadius: 12, padding: "16px 18px", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                    <p style={{ fontSize: 11, color: "#8e8e93", marginBottom: 6, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</p>
+                    <p style={{ fontSize: 28, fontWeight: 700, color: s.color || "#000", letterSpacing: "-0.03em", lineHeight: 1 }}>{s.value}</p>
                   </div>
-                );
-              })}
+                ))}
+              </div>
 
-              {/* Ready column */}
-              <div style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "0 2px" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#3c3c43", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>Move-In Ready</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#8e8e93", background: "#f2f2f7", borderRadius: 6, padding: "1px 7px" }}>
-                    {filtered.filter(u => u.is_ready).length}
-                  </span>
+              {/* Make Ready Board — compact table view */}
+              <div style={{ background: "#ffffff", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)", marginBottom: 20 }}>
+                {/* Board header */}
+                <div style={{ padding: "14px 20px", borderBottom: "0.5px solid #e5e5ea", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Make Ready Board</p>
+                    <p style={{ fontSize: 12, color: "#8e8e93", marginTop: 1 }}>{filtered.filter(u => !u.is_ready).length} active turnovers</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[["all","All"],["active","Active"],["ready","Ready"]].map(([v,l]) => (
+                      <button key={v} onClick={() => setFilterProperty(v === "all" ? "all" : v)}
+                        style={{ padding: "4px 10px", borderRadius: 6, border: "0.5px solid #e5e5ea", background: "#f2f2f7", fontSize: 11, fontWeight: 500, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>{l}</button>
+                    ))}
+                  </div>
                 </div>
-                <div className="stage-col" style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
-                  {filtered.filter(u => u.is_ready).map(to => (
-                    <DeskUnitCard
-                      key={to.id}
-                      to={to}
-                      stageDef={{ id: "ready", label: "Ready", color: "#16a34a", bg: "#dcfce7", accent: "#86efac", dot: "#16a34a" }}
-                      db={db}
-                      isSelected={selectedUnit === to.id}
-                      onClick={() => setSelectedUnit(selectedUnit === to.id ? null : to.id)}
-                      onSetStageStatus={setStageStatus}
-                      onAssignStage={assignStageToMember}
-                    />
+
+                {/* Table header */}
+                <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 120px 100px 80px 140px 100px", gap: 0, padding: "8px 20px", background: "#f8f8fa", borderBottom: "0.5px solid #e5e5ea" }}>
+                  {["Unit","Property","Assigned","Lease","Days","Progress","Status"].map(h => (
+                    <p key={h} style={{ fontSize: 10, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</p>
                   ))}
                 </div>
+
+                {/* Rows */}
+                {filtered.length === 0 && (
+                  <div style={{ padding: "32px", textAlign: "center" }}>
+                    <p style={{ fontSize: 13, color: "#8e8e93" }}>No turnovers match this filter</p>
+                  </div>
+                )}
+                {filtered.map((to, i) => {
+                  const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+                  const pct  = overallPct(to);
+                  const isOverdue = days < 0 && !to.is_ready;
+                  const statusColor = to.is_ready ? "#16a34a" : isOverdue ? "#dc2626" : days <= 3 ? "#e07d2a" : "#8e8e93";
+                  const statusLabel = to.is_ready ? "Ready" : isOverdue ? `${Math.abs(days)}d late` : days === 0 ? "Today" : `${days}d left`;
+                  const stages = to.stages || [];
+                  const doneStages = stages.filter(s => s.status === "done").length;
+                  const activeStages = stages.filter(s => s.status === "in_progress").length;
+
+                  return (
+                    <div key={to.id} className="desk-row" onClick={() => setSelectedUnit(selectedUnit === to.id ? null : to.id)}
+                      style={{ display: "grid", gridTemplateColumns: "80px 1fr 120px 100px 80px 140px 100px", gap: 0, padding: "12px 20px", borderBottom: i < filtered.length - 1 ? "0.5px solid #e5e5ea" : "none", cursor: "pointer", background: selectedUnit === to.id ? "#f8f8fa" : "transparent", alignItems: "center" }}>
+                      {/* Unit */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 30, height: 30, borderRadius: 8, background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "#000" }}>{to.unit_number}</span>
+                        </div>
+                      </div>
+                      {/* Property */}
+                      <p style={{ fontSize: 13, fontWeight: 500, color: "#000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingRight: 8 }}>{to.property_name}</p>
+                      {/* Assigned */}
+                      <p style={{ fontSize: 12, color: "#3c3c43", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{to.assigned_name || "—"}</p>
+                      {/* Lease */}
+                      <span style={{ fontSize: 11, fontWeight: 500, color: to.lease_status === "leased" ? "#16a34a" : "#e07d2a" }}>
+                        {to.lease_status === "leased" ? "Leased" : "Unleased"}
+                      </span>
+                      {/* Days */}
+                      <span style={{ fontSize: 12, fontWeight: 600, color: statusColor }}>{statusLabel}</span>
+                      {/* Progress */}
+                      <div>
+                        <div style={{ display: "flex", gap: 3, marginBottom: 4 }}>
+                          {stages.map(s => (
+                            <div key={s.id} style={{ flex: 1, height: 4, borderRadius: 2, background: s.status === "done" ? "#16a34a" : s.status === "in_progress" ? "#e07d2a" : "#e5e5ea" }} />
+                          ))}
+                        </div>
+                        <p style={{ fontSize: 10, color: "#8e8e93" }}>{doneStages}/{stages.length} stages · {pct}%</p>
+                      </div>
+                      {/* Status badge */}
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 6, background: to.is_ready ? "#f0fdf4" : isOverdue ? "#fef2f2" : "#f8f8fa", color: statusColor }}>
+                        <div style={{ width: 5, height: 5, borderRadius: "50%", background: statusColor }} />
+                        {to.is_ready ? "Ready" : isOverdue ? "Overdue" : activeStages > 0 ? "Active" : "Queued"}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-              <div style={{ width: 20, flexShrink: 0 }} />
             </div>
+          )}
 
-            {/* Right panel: Unit detail + Activity */}
-            <div style={{ width: selectedTO ? 360 : 280, flexShrink: 0, borderLeft: "0.5px solid #e5e5ea", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width 0.25s ease" }}>
-              {selectedTO ? (
-                <DeskUnitDetail
-                  to={selectedTO}
-                  db={db}
-                  onClose={() => setSelectedUnit(null)}
-                  onSetStageStatus={setStageStatus}
-                  onAssignStage={assignStageToMember}
-                  onToggleTask={toggleTask}
-                  onMarkReady={markReady}
-                  onDelete={deleteTurnover}
-                />
-              ) : (
-                <DeskActivityFeed log={activityLog} db={db} />
-              )}
+          {activeTab === "analytics" && (
+            <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+              <DeskAnalytics units={units} db={db} />
             </div>
-          </>
-        )}
+          )}
 
-        {activeTab === "analytics" && (
-          <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
-            <DeskAnalytics units={units} db={db} />
-          </div>
+          {activeTab === "team" && (
+            <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+              <div style={{ background: "#ffffff", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{ padding: "14px 20px", borderBottom: "0.5px solid #e5e5ea" }}>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Team Members</p>
+                </div>
+                {db.team.map((m, i) => (
+                  <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", borderBottom: i < db.team.length - 1 ? "0.5px solid #e5e5ea" : "none" }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#3c3c43" }}>{m.avatar}</span>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: "#000" }}>{m.name}</p>
+                      <p style={{ fontSize: 11, color: "#8e8e93" }}>{m.role} · {m.specialty}</p>
+                    </div>
+                    <span style={{ fontSize: 11, color: m.is_active ? "#16a34a" : "#8e8e93", background: m.is_active ? "#f0fdf4" : "#f2f2f7", padding: "2px 8px", borderRadius: 6, fontWeight: 500 }}>
+                      {m.is_active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "relay" && (
+            <div style={{ flex: 1, overflow: "auto", padding: 24 }}>
+              <div style={{ background: "#ffffff", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                <div style={{ padding: "14px 20px", borderBottom: "0.5px solid #e5e5ea", display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: "#000", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Relay — Activity Log</p>
+                    <p style={{ fontSize: 11, color: "#8e8e93" }}>Agentic AI actions and alerts</p>
+                  </div>
+                </div>
+                {activityLog.length === 0 ? (
+                  <div style={{ padding: "32px", textAlign: "center" }}>
+                    <p style={{ fontSize: 13, color: "#8e8e93" }}>No Relay activity yet. Run the agent from the mobile app.</p>
+                  </div>
+                ) : activityLog.map((entry, i) => (
+                  <div key={entry.id || i} style={{ display: "flex", gap: 12, padding: "12px 20px", borderBottom: i < activityLog.length - 1 ? "0.5px solid #e5e5ea" : "none" }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a", flexShrink: 0, marginTop: 5 }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 13, color: "#000" }}>{entry.text || entry.description}</p>
+                      <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 2 }}>{timeAgo(entry.ts || entry.created_at)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* RIGHT SIDEBAR — Unit detail or activity feed */}
+      <div style={{ width: selectedUnit ? 340 : 280, flexShrink: 0, background: "#ffffff", borderLeft: "0.5px solid #e5e5ea", display: "flex", flexDirection: "column", overflow: "hidden", transition: "width 0.2s ease" }}>
+        {selectedUnit && units.find(u => u.id === selectedUnit) ? (
+          <DeskUnitDetail
+            to={units.find(u => u.id === selectedUnit)}
+            db={db}
+            onClose={() => setSelectedUnit(null)}
+            onSetStageStatus={setStageStatus}
+            onAssignStage={assignStageToMember}
+            onToggleTask={toggleTask}
+            onMarkReady={markReady}
+            onDelete={deleteTurnover}
+          />
+        ) : (
+          <DeskActivityFeed log={activityLog} db={db} />
         )}
       </div>
 
-      {/* Toast notification */}
+      {/* Toast */}
       <AnimatePresence>
         {notification && (
-          <motion.div
-            initial={{ opacity: 0, y: 16, x: "-50%" }}
-            animate={{ opacity: 1, y: 0, x: "-50%" }}
-            exit={{ opacity: 0, y: 16, x: "-50%" }}
-            style={{ position: "fixed", bottom: 24, left: "50%", zIndex: 200, background: "#000", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 500, color: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.3)", whiteSpace: "nowrap", fontFamily: "'Inter',sans-serif" }}
-          >
+          <motion.div initial={{ opacity: 0, y: 16, x: "-50%" }} animate={{ opacity: 1, y: 0, x: "-50%" }} exit={{ opacity: 0, y: 16, x: "-50%" }}
+            style={{ position: "fixed", bottom: 24, left: "50%", zIndex: 200, background: "#000", borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 500, color: "white", boxShadow: "0 4px 24px rgba(0,0,0,0.3)", whiteSpace: "nowrap", fontFamily: "'Inter',sans-serif" }}>
             {notification}
           </motion.div>
         )}
