@@ -88,96 +88,218 @@ function Icon({ name, size = 18, style = {} }) {
 // ─────────────────────────────────────────────
 
 const THEME = {
+  // ── iOS Native Design Tokens ──────────────────
+  // Backgrounds
+  bg:        "#f2f2f7",   // iOS systemGroupedBackground
+  bg2:       "#ffffff",   // iOS secondarySystemGroupedBackground
+  bg3:       "#f2f2f7",   // iOS tertiarySystemGroupedBackground
+  // Labels
+  label:     "#000000",   // iOS label
+  label2:    "#3c3c43",   // iOS secondaryLabel (60% opacity)
+  label3:    "#8e8e93",   // iOS tertiaryLabel
+  label4:    "#c7c7cc",   // iOS quaternaryLabel
+  // Separators
+  sep:       "#c6c6c8",   // iOS separator
+  sepNonop:  "#e5e5ea",   // non-opaque separator
+  // System fills
+  fill:      "#787880",   // iOS systemFill (15% opacity)
+  fill2:     "#787880",   // secondary
+  // iOS accent
+  blue:      "#007aff",   // iOS blue — used only for active nav
+  // Status — semantic only, never for branding
+  critical:  "#dc2626",
+  atRisk:    "#e07d2a",
+  onTrack:   "#16a34a",
+  ready:     "#0284c7",
+
   css: `
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f7f5f2; color: #1a1614; -webkit-font-smoothing: antialiased; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #c8c0b8; border-radius: 2px; }
-    input, textarea, select { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f2f7;
+      color: #000000;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { display: none; }
+    input, textarea, select { font-family: 'Inter', -apple-system, sans-serif; }
 
-    .card { background: #ffffff; border: 1px solid #e8e4de; border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .card-elevated { background: #faf9f7; border: 1px solid #e0dbd4; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 100px; font-size: 10px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; }
+    /* ── Cards & Groups ── */
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+    }
+    .card-group {
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
 
-    .badge-emergency { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-    .badge-high      { background: #fff7ed; color: #c2570a; border: 1px solid #fed7aa; }
-    .badge-medium    { background: #fefce8; color: #a16207; border: 1px solid #fde68a; }
-    .badge-low       { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-    .badge-open      { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
-    .badge-in_progress { background: #fff7ed; color: #c2570a; border: 1px solid #fed7aa; }
-    .badge-on_hold   { background: #fefce8; color: #a16207; border: 1px solid #fde68a; }
-    .badge-completed { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    /* ── Status left border ── */
+    .card-critical { border-left: 3px solid #dc2626; }
+    .card-at_risk  { border-left: 3px solid #e07d2a; }
+    .card-on_track { border-left: 3px solid #16a34a; }
+    .card-ready    { border-left: 3px solid #0284c7; }
 
-    .input-dark {
+    /* ── Rows ── */
+    .row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px;
+      background: #ffffff;
+    }
+    .row + .row { border-top: 0.5px solid #e5e5ea; }
+    .row-title { font-size: 14px; font-weight: 500; color: #000; }
+    .row-sub   { font-size: 12px; color: #8e8e93; margin-top: 1px; }
+
+    /* ── Section headers ── */
+    .section-header {
+      font-size: 11px; font-weight: 600; color: #8e8e93;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      padding: 16px 16px 6px;
+    }
+
+    /* ── Inputs ── */
+    .input-dark, .input-field {
       width: 100%;
       background: #ffffff;
-      border: 1px solid #d6d0c8;
-      color: #1a1614;
-      border-radius: 12px;
-      padding: 11px 14px;
-      font-size: 14px;
+      border: none;
+      border-bottom: 1.5px solid #c6c6c8;
+      color: #000000;
+      border-radius: 0;
+      padding: 10px 0;
+      font-size: 17px;
+      font-family: 'Inter', sans-serif;
       outline: none;
       transition: border-color 0.2s;
     }
-    .input-dark:focus { border-color: #e07d2a; box-shadow: 0 0 0 3px #e07d2a20; }
-    .input-dark::placeholder { color: #a09890; }
+    .input-dark:focus, .input-field:focus { border-color: #000; }
+    .input-dark::placeholder, .input-field::placeholder { color: #c7c7cc; }
 
+    /* ── Buttons ── */
     .btn-primary {
-      background: linear-gradient(135deg, #e07d2a, #c45e0a);
-      color: white; border: none; border-radius: 12px;
-      padding: 12px 20px; font-size: 14px; font-weight: 700;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 14px #e07d2a40;
+      width: 100%;
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 100px;
+      padding: 16px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: opacity 0.15s;
     }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px #e07d2a50; }
-    .btn-primary:disabled { background: #f0ece6; color: #a09890; box-shadow: none; cursor: not-allowed; transform: none; }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:active { opacity: 0.7; transform: scale(0.98); }
+    .btn-primary:disabled {
+      background: #e5e5ea; color: #c7c7cc;
+      cursor: not-allowed; transform: none; opacity: 1;
+    }
 
     .btn-ghost {
-      background: transparent; color: #6b6560;
-      border: 1px solid #d6d0c8; border-radius: 12px;
-      padding: 12px 20px; font-size: 14px; font-weight: 600;
-      font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer; transition: all 0.2s;
+      width: 100%;
+      background: #f2f2f7;
+      color: #000000;
+      border: none;
+      border-radius: 100px;
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
     }
-    .btn-ghost:hover { background: #f0ece6; color: #1a1614; border-color: #b0a89e; }
+    .btn-ghost:hover { background: #e5e5ea; }
+
+    .btn-link {
+      background: none; border: none; cursor: pointer;
+      color: #007aff; font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; padding: 0;
+    }
 
     .btn-danger {
-      background: #fef2f2; color: #dc2626;
-      border: 1px solid #fecaca; border-radius: 12px;
-      padding: 12px 20px; font-size: 14px; font-weight: 600;
-      font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+      background: #fff1f2; color: #dc2626;
+      border: none; border-radius: 100px;
+      padding: 14px 20px; font-size: 15px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer; width: 100%;
     }
-    .btn-danger:hover { background: #fee2e2; }
 
-    .progress-bar { height: 4px; background: #e8e4de; border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, #e07d2a, #c45e0a); border-radius: 2px; transition: width 0.4s ease; }
+    /* ── Progress bar ── */
+    .progress-bar { height: 3px; background: #e5e5ea; border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
 
+    /* ── Chips / Tags ── */
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 6px;
+      font-size: 11px; font-weight: 600;
+    }
+    .chip-critical { background: #fef2f2; color: #dc2626; }
+    .chip-at_risk  { background: #fff7ed; color: #c45e0a; }
+    .chip-on_track { background: #f0fdf4; color: #15803d; }
+    .chip-ready    { background: #f0f9ff; color: #0369a1; }
+    .chip-leased   { background: #f0fdf4; color: #15803d; }
+    .chip-unleased { background: #fefce8; color: #a16207; }
+
+    /* ── Status dot ── */
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+    .dot-critical { background: #dc2626; }
+    .dot-at_risk  { background: #e07d2a; }
+    .dot-on_track { background: #16a34a; }
+    .dot-ready    { background: #0284c7; }
+
+    /* ── Unit avatar ── */
+    .unit-avatar {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: #f2f2f7;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #3c3c43;
+      flex-shrink: 0;
+    }
+
+    /* ── Stage icons ── */
+    .stage-done   { background: #f2f2f7; }
+    .stage-active { background: #fffbf5; }
+    .stage-idle   { background: #ffffff; }
+
+    /* ── Modal sheet ── */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-      backdropFilter: blur(4px); z-index: 80;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      z-index: 80;
       display: flex; align-items: flex-end; justify-content: center;
       max-width: 480px; margin: 0 auto;
     }
     .modal-sheet {
-      background: #ffffff; border-radius: 24px 24px 0 0;
-      border-top: 1px solid #e8e4de;
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.10);
-      padding: 24px 20px 40px; width: 100%;
-      max-height: 90vh; overflow-y: auto;
+      background: #ffffff;
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 40px;
+      width: 100%; max-height: 92vh; overflow-y: auto;
+    }
+    .modal-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: #d1d1d6; margin: 0 auto 16px;
     }
 
+    /* ── Skeleton ── */
     .skeleton {
-      background: linear-gradient(90deg, #ede9e3 25%, #e0dbd4 50%, #ede9e3 75%);
+      background: linear-gradient(90deg, #f2f2f7 25%, #e5e5ea 50%, #f2f2f7 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 8px;
     }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    @keyframes pulse-a { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes pulse-a { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+    @keyframes spin    { to { transform: rotate(360deg); } }
+
+    /* ── Utility ── */
+    .chevron-right {
+      font-size: 14px; color: #c7c7cc; flex-shrink: 0;
+    }
   `
 };
+
+
 
 // 
 //  SYSTEMS ARCHITECT: DATA SCHEMAS + SEED
@@ -272,87 +394,67 @@ async function relayStageComplete(to, stageId, db) {
     cleaning: "Cleaning", repairs: "Repairs", paint: "Paint",
     flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection"
   };
-  const stageLabel = stageLabels[stageId] || stageId;
-  const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
-  const pct  = overallPct({ ...to, stages: to.stages.map(s => s.id === stageId ? { ...s, status: "done" } : s) });
-  const assignedName = to.stages?.find(s => s.id === stageId)?.assigned_name || to.assigned_name || "the team";
-
-  // Find next idle stage
-  const stageOrder = ["cleaning", "repairs", "paint", "flooring", "final_clean", "inspection"];
-  const nextStage = stageOrder.find(sid => {
+  const stageOrder  = ["cleaning", "repairs", "paint", "flooring", "final_clean", "inspection"];
+  const stageLabel  = stageLabels[stageId] || stageId;
+  const days        = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+  const updatedStages = (to.stages || []).map(s => s.id === stageId ? { ...s, status: "done" } : s);
+  const pct         = overallPct({ ...to, stages: updatedStages });
+  const nextStage   = stageOrder.find(sid => {
     const s = to.stages?.find(st => st.id === sid);
     return s && s.status === "idle" && sid !== stageId;
   });
   const nextLabel = nextStage ? stageLabels[nextStage] : null;
 
-  // Generate AI message
-  try {
-    const response = await fetch("/.netlify/functions/ai-briefing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-opus-4-5",
-        max_tokens: 120,
-        messages: [{
-          role: "user",
-          content: `You are Relay, Mainlync's agentic AI for property management.
-${stageLabel} just completed on Unit ${to.unit_number} at ${to.property_name} by ${assignedName}.
-Overall progress: ${pct}%. Days to target move-in: ${days > 0 ? days : "overdue by " + Math.abs(days)}.
-${nextLabel ? `Next stage recommended: ${nextLabel}.` : "All stages complete — ready for move-in review."}
-Write one short update (2 sentences max) for the unit thread that both maintenance and leasing can see.
-Sound like a helpful coordinator. Be specific. Use the unit number and stage name.`
-        }],
-      }),
-    });
-    const data = await response.json();
-    const message = data.content?.[0]?.text || `${stageLabel} complete on Unit ${to.unit_number}. Progress: ${pct}%.`;
-    await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
-  } catch {
-    // Silent fallback — post basic update
-    await postThreadMessage(
-      to.unit_id, to.unit_number, to.property_name, "Relay", "ai",
-      `${stageLabel} is complete on Unit ${to.unit_number} at ${to.property_name}. Overall progress: ${pct}%.${nextLabel ? ` ${nextLabel} is up next.` : " Unit is ready for final review."}`
-    );
-  }
+  // Template message — no API cost
+  let message = `${stageLabel} is complete on Unit ${to.unit_number}. Progress: ${pct}%.`;
+  if (nextLabel) message += ` ${nextLabel} is up next.`;
+  else if (pct >= 99) message += ` All stages complete — ready for move-in review.`;
+  if (days < 0) message += ` Note: unit is ${Math.abs(days)}d past target.`;
+  else if (days <= 3) message += ` ${days}d to target move-in.`;
+
+  await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
 }
 
-// Relay posts a stall alert to the unit thread
+// Relay posts a stall alert — template for standard stalls, Claude only when urgent
 async function relayStallAlert(to, stalledStageId) {
   const stageLabels = {
     cleaning: "Cleaning", repairs: "Repairs", paint: "Paint",
     flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection"
   };
-  const stageLabel = stageLabels[stalledStageId] || stalledStageId;
-  const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+  const stageLabel   = stageLabels[stalledStageId] || stalledStageId;
+  const days         = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
   const assignedName = to.stages?.find(s => s.id === stalledStageId)?.assigned_name || to.assigned_name || "the assigned tech";
+  const firstName    = assignedName.split(" ")[0];
+  const isUrgent     = days <= 3 || days < 0 || to.lease_status === "leased";
 
-  try {
-    const response = await fetch("/.netlify/functions/ai-briefing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-opus-4-5",
-        max_tokens: 100,
-        messages: [{
-          role: "user",
-          content: `You are Relay, Mainlync's agentic AI.
-${stageLabel} on Unit ${to.unit_number} at ${to.property_name} has had no activity for 24+ hours.
-Assigned to: ${assignedName}. Days to target: ${days > 0 ? days : "overdue by " + Math.abs(days)}.
-Write one short message (2 sentences) for the unit thread nudging the assigned person to update the status.
-Be direct but not aggressive. Use their name. Sound human.`
-        }],
-      }),
-    });
-    const data = await response.json();
-    const message = data.content?.[0]?.text || `${stageLabel} on Unit ${to.unit_number} hasn't had any activity in 24+ hours. ${assignedName} — can you post a quick update on where things stand?`;
-    await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
-  } catch {
-    await postThreadMessage(
-      to.unit_id, to.unit_number, to.property_name, "Relay", "ai",
-      `${stageLabel} on Unit ${to.unit_number} hasn't had any activity in 24+ hours. ${assignedName} — can you post a quick update on where things stand?`
-    );
+  if (isUrgent) {
+    try {
+      const response = await fetch("/.netlify/functions/ai-briefing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-opus-4-5",
+          max_tokens: 80,
+          messages: [{
+            role: "user",
+            content: `Relay AI: ${stageLabel} on Unit ${to.unit_number} stalled 24h+. Assigned to ${assignedName}. ${days < 0 ? Math.abs(days) + " days overdue." : days + " days to target."} Lease: ${to.lease_status}. Write one urgent but calm 2-sentence message. Start with first name.`,
+          }],
+        }),
+      });
+      const data    = await response.json();
+      const message = data.content?.[0]?.text;
+      if (message) {
+        await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
+        return;
+      }
+    } catch {}
   }
+
+  // Standard template — no API cost
+  const message = `${stageLabel} on Unit ${to.unit_number} hasn't had activity in 24+ hours. ${firstName} — can you post a quick update?${days <= 3 && days >= 0 ? ` Target move-in is in ${days}d.` : ""}`;
+  await postThreadMessage(to.unit_id, to.unit_number, to.property_name, "Relay", "ai", message);
 }
+
 
 // Relay drafts an owner report when a unit goes move-in ready
 async function relayOwnerReport(to) {
@@ -434,10 +536,10 @@ function checkForStalls(turnovers, lastStallCheck) {
 
 const MR_STAGES = [
   { id: "cleaning",    label: "Cleaning",    short: "Clean",   color: "#c2570a", bg: "#fff7ed", accent: "#fed7aa", dot: "#e07d2a" },
-  { id: "repairs",     label: "Repairs",     short: "Repairs", color: "#1d4ed8", bg: "#eff6ff", accent: "#bfdbfe", dot: "#3b82f6" },
+  { id: "repairs",     label: "Repairs",     short: "Repairs", color: "#0f172a", bg: "#f1f5f9", accent: "#e2e8f0", dot: "#0f172a" },
   { id: "paint",       label: "Paint",       short: "Paint",   color: "#9d174d", bg: "#fdf2f8", accent: "#fbcfe8", dot: "#ec4899" },
   { id: "flooring",    label: "Flooring",    short: "Floor",   color: "#065f46", bg: "#f0fdf4", accent: "#bbf7d0", dot: "#10b981" },
-  { id: "final_clean", label: "Final Clean", short: "Final",   color: "#1e40af", bg: "#eff6ff", accent: "#bfdbfe", dot: "#60a5fa" },
+  { id: "final_clean", label: "Final Clean", short: "Final",   color: "#1e40af", bg: "#f1f5f9", accent: "#e2e8f0", dot: "#60a5fa" },
   { id: "inspection",  label: "Inspection",  short: "Inspect", color: "#6b21a8", bg: "#faf5ff", accent: "#e9d5ff", dot: "#a855f7" },
 ];
 
@@ -513,9 +615,9 @@ function overallPct(to) {
 }
 
 const STATUS_STYLE = {
-  idle:        { bg: "#ffffff", border: "#e8e4de", color: "#a09890", label: "Not Started" },
+  idle:        { bg: "#ffffff", border: "#e5e5ea", color: "#8e8e93", label: "Not Started" },
   in_progress: { bg: null,      border: null,       color: null,      label: "In Progress" },
-  done:        { bg: "#dcfce7", border: "#86efac",  color: "#059669", label: "Done" },
+  done:        { bg: "#dcfce7", border: "#86efac",  color: "#16a34a", label: "Done" },
 };
 
 //  Main Board 
@@ -635,12 +737,12 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
           {[
             { label: "Total",   value: total,   color: "#f0a05a" },
             { label: "Active",  value: active,  color: "#7fa8ff" },
-            { label: "Ready",   value: ready,   color: "#059669" },
-            { label: "Overdue", value: overdue, color: overdue > 0 ? "#dc2626" : "#a09890" },
+            { label: "Ready",   value: ready,   color: "#16a34a" },
+            { label: "Overdue", value: overdue, color: overdue > 0 ? "#dc2626" : "#8e8e93" },
           ].map(s => (
             <div key={s.label} style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 9, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 9, color: "#8e8e93", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -651,18 +753,18 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
             <button key={v} onClick={() => setFilterStatus(v)} style={{
               padding: "5px 13px", borderRadius: 100, fontSize: 11, fontWeight: 600,
               border: "none", cursor: "pointer",
-              background: filterStatus === v ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#ffffff",
-              color: filterStatus === v ? "white" : "#a09890",
+              background: filterStatus === v ? "#000000" : "#ffffff",
+              color: filterStatus === v ? "white" : "#8e8e93",
               boxShadow: filterStatus === v ? "0 2px 10px #e07d2a40" : "none",
             }}>{l}</button>
           ))}
-          <div style={{ width: 1, background: "#e8e4de", margin: "0 2px" }} />
+          <div style={{ width: 1, background: "#e5e5ea", margin: "0 2px" }} />
           {[["all","All"], ["leased","Leased"], ["unleased","Unleased"]].map(([v, l]) => (
             <button key={v} onClick={() => setFilterLease(v)} style={{
               padding: "5px 13px", borderRadius: 100, fontSize: 11, fontWeight: 600,
               border: "none", cursor: "pointer",
-              background: filterLease === v ? "#d6d0c8" : "#ffffff",
-              color: filterLease === v ? "#3d3530" : "#a09890",
+              background: filterLease === v ? "#c6c6c8" : "#ffffff",
+              color: filterLease === v ? "#000000" : "#8e8e93",
             }}>{l}</button>
           ))}
         </div>
@@ -671,7 +773,7 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
       {/*  Unit cards  */}
       <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
         {displayed.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 24px", color: "#a09890" }}>
+          <div style={{ textAlign: "center", padding: "40px 24px", color: "#8e8e93" }}>
             <div style={{ fontSize: 32, marginBottom: 10 }}></div>
             <p style={{ fontSize: 14 }}>No units match this filter</p>
           </div>
@@ -705,7 +807,7 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
               }}
             >
               <div style={{ display: "flex", justifyContent: "center", paddingTop: 10 }}>
-                <div style={{ width: 36, height: 4, background: "#d6d0c8", borderRadius: 2 }} />
+                <div style={{ width: 36, height: 4, background: "#c6c6c8", borderRadius: 2 }} />
               </div>
               <UnitDrawer
                 to={selectedTO}
@@ -748,7 +850,7 @@ function UnitCard({ to, onOpen }) {
       onClick={onOpen}
       style={{
         background: to.is_ready ? "#f0fdf4" : "#ffffff",
-        border: `1px solid ${to.is_ready ? "#86efac" : "#e8e4de"}`,
+        border: `1px solid ${to.is_ready ? "#86efac" : "#e5e5ea"}`,
         borderRadius: 18, padding: 16, cursor: "pointer",
       }}
     >
@@ -757,26 +859,26 @@ function UnitCard({ to, onOpen }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 42, height: 42, borderRadius: 13,
-            background: to.is_ready ? "#dcfce7" : "#f0ece6",
-            border: `1px solid ${to.is_ready ? "#4ade80" : "#d6d0c8"}`,
+            background: to.is_ready ? "#dcfce7" : "#f2f2f7",
+            border: `1px solid ${to.is_ready ? "#4ade80" : "#c6c6c8"}`,
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}>
-            <span style={{ fontSize: 14, fontWeight: 800, color: to.is_ready ? "#059669" : "#3d3530" }}>
+            <span style={{ fontSize: 14, fontWeight: 800, color: to.is_ready ? "#16a34a" : "#000000" }}>
               {to.unit_number}
             </span>
           </div>
           <div>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#1a1614" }}>{to.property_name}</h3>
-            <p style={{ fontSize: 11, color: "#a09890", marginTop: 1 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#000000" }}>{to.property_name}</h3>
+            <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 1 }}>
               {to.assigned_name ? ` ${to.assigned_name}` : "Unassigned"}
             </p>
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
           {to.is_ready ? (
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#059669", background: "#dcfce7", border: "1px solid #05966935", borderRadius: 8, padding: "3px 8px" }}> Ready</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a", background: "#dcfce7", border: "1px solid #05966935", borderRadius: 8, padding: "3px 8px" }}> Ready</span>
           ) : (
-            <span style={{ fontSize: 10, fontWeight: 600, color: isOverdue ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#a09890" }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: isOverdue ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#8e8e93" }}>
               {isOverdue ? ` ${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? "Due today" : `${daysLeft}d left`}
             </span>
           )}
@@ -793,13 +895,13 @@ function UnitCard({ to, onOpen }) {
           return (
             <div key={s.id} style={{
               padding: "6px 8px", borderRadius: 10,
-              background: isDone ? s.def.bg : isIP ? s.def.bg : "#f9f7f4",
-              border: `1px solid ${isDone ? s.def.accent : isIP ? s.def.accent : "#f0ece6"}`,
+              background: isDone ? s.def.bg : isIP ? s.def.bg : "#f2f2f7",
+              border: `1px solid ${isDone ? s.def.accent : isIP ? s.def.accent : "#f2f2f7"}`,
               display: "flex", alignItems: "center", gap: 5,
             }}>
               <div style={{
                 width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-                background: isDone ? s.def.dot : isIP ? s.def.dot : "#d6d0c8",
+                background: isDone ? s.def.dot : isIP ? s.def.dot : "#c6c6c8",
                 opacity: isDone ? 1 : isIP ? 0.8 : 0.4,
               }} />
               <div style={{ minWidth: 0 }}>
@@ -807,7 +909,7 @@ function UnitCard({ to, onOpen }) {
                   {s.def.short}
                 </div>
                 {taskTotal > 0 && (
-                  <div style={{ fontSize: 8, color: isDone ? "#059669" : isIP ? s.def.color : "#d6d0c8", fontWeight: 600 }}>
+                  <div style={{ fontSize: 8, color: isDone ? "#16a34a" : isIP ? s.def.color : "#c6c6c8", fontWeight: 600 }}>
                     {taskDone}/{taskTotal}
                   </div>
                 )}
@@ -820,16 +922,16 @@ function UnitCard({ to, onOpen }) {
       {/* Overall progress bar */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-          <span style={{ fontSize: 10, color: "#a09890", fontWeight: 600 }}>
+          <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 600 }}>
             {doneCount}/{MR_STAGES.length} stages done{inProgCount > 0 ? ` · ${inProgCount} in progress` : ""}
           </span>
-          <span style={{ fontSize: 10, fontWeight: 800, color: pct === 100 ? "#059669" : "#e07d2a" }}>{pct}%</span>
+          <span style={{ fontSize: 10, fontWeight: 800, color: pct === 100 ? "#16a34a" : "#e07d2a" }}>{pct}%</span>
         </div>
-        <div style={{ height: 4, borderRadius: 2, background: "#f0ece6", overflow: "hidden" }}>
+        <div style={{ height: 4, borderRadius: 2, background: "#f2f2f7", overflow: "hidden" }}>
           <motion.div
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            style={{ height: "100%", borderRadius: 2, background: pct === 100 ? "#059669" : "linear-gradient(90deg, #e07d2a, #c45e0a)" }}
+            style={{ height: "100%", borderRadius: 2, background: pct === 100 ? "#16a34a" : "linear-gradient(90deg, #e07d2a, #c45e0a)" }}
           />
         </div>
       </div>
@@ -865,12 +967,12 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
       <div style={{ padding: "12px 16px 14px", borderBottom: "1px solid #f0ece6", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 13, background: "#f0ece6", border: "1px solid #d6d0c8", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1614" }}>{to.unit_number}</span>
+            <div style={{ width: 44, height: 44, borderRadius: 13, background: "#f2f2f7", border: "1px solid #d6d0c8", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#000000" }}>{to.unit_number}</span>
             </div>
             <div>
-              <h2 style={{ fontSize: 17, fontWeight: 800, color: "#1a1614" }}>Unit {to.unit_number}</h2>
-              <p style={{ fontSize: 12, color: "#a09890" }}>{to.property_name}</p>
+              <h2 style={{ fontSize: 17, fontWeight: 800, color: "#000000" }}>Unit {to.unit_number}</h2>
+              <p style={{ fontSize: 12, color: "#8e8e93" }}>{to.property_name}</p>
             </div>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
@@ -881,33 +983,33 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
             ) : (
               <button onClick={onDelete} style={{ padding: "6px 10px", background: "#dc2626", border: "none", borderRadius: 10, fontSize: 11, fontWeight: 700, color: "white", cursor: "pointer" }}>Delete?</button>
             )}
-            <button onClick={onClose} style={{ width: 32, height: 32, background: "#f0ece6", border: "1px solid #d6d0c8", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <Icon name="x" size={14} style={{ color: "#6b6560" }} />
+            <button onClick={onClose} style={{ width: 32, height: 32, background: "#f2f2f7", border: "1px solid #d6d0c8", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <Icon name="x" size={14} style={{ color: "#3c3c43" }} />
             </button>
           </div>
         </div>
 
         {/* Meta chips */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 8, background: to.lease_status === "leased" ? "#dcfce7" : "#f0b40012", color: to.lease_status === "leased" ? "#059669" : "#f5d05e", border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#f0b40035"}` }}>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 8, background: to.lease_status === "leased" ? "#dcfce7" : "#f0b40012", color: to.lease_status === "leased" ? "#16a34a" : "#f5d05e", border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#f0b40035"}` }}>
             {to.lease_status === "leased" ? " Leased" : " Unleased"}
           </span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: daysLeft < 0 ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#a09890", padding: "3px 0" }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: daysLeft < 0 ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#8e8e93", padding: "3px 0" }}>
             {daysLeft < 0 ? ` ${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? "Due today" : `${daysLeft}d to target`}
           </span>
           {to.assigned_name && (
-            <span style={{ fontSize: 10, color: "#6b6560", padding: "3px 0" }}> {to.assigned_name}</span>
+            <span style={{ fontSize: 10, color: "#3c3c43", padding: "3px 0" }}> {to.assigned_name}</span>
           )}
         </div>
 
         {/* Overall progress */}
         <div style={{ marginBottom: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-            <span style={{ fontSize: 11, color: "#a09890", fontWeight: 600 }}>Overall Progress</span>
-            <span style={{ fontSize: 11, fontWeight: 800, color: pct === 100 ? "#059669" : "#e07d2a" }}>{pct}%</span>
+            <span style={{ fontSize: 11, color: "#8e8e93", fontWeight: 600 }}>Overall Progress</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: pct === 100 ? "#16a34a" : "#e07d2a" }}>{pct}%</span>
           </div>
-          <div style={{ height: 5, borderRadius: 3, background: "#f0ece6", overflow: "hidden" }}>
-            <motion.div animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} style={{ height: "100%", borderRadius: 3, background: pct === 100 ? "#059669" : "linear-gradient(90deg,#e07d2a,#c45e0a)" }} />
+          <div style={{ height: 5, borderRadius: 3, background: "#f2f2f7", overflow: "hidden" }}>
+            <motion.div animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} style={{ height: "100%", borderRadius: 3, background: pct === 100 ? "#16a34a" : "linear-gradient(90deg,#e07d2a,#c45e0a)" }} />
           </div>
         </div>
 
@@ -919,10 +1021,10 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
           onClick={() => setShowThread(true)}
           style={{
             width: "100%", padding: "11px", borderRadius: 12, marginTop: 8,
-            background: "#eff6ff", border: "1px solid #bfdbfe",
-            color: "#1d4ed8", fontSize: 13, fontWeight: 700,
+            background: "#f1f5f9", border: "1px solid #bfdbfe",
+            color: "#0f172a", fontSize: 13, fontWeight: 700,
             cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
-            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
           }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -931,7 +1033,7 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
 
         {/* Move-In Ready toggle */}
         {to.is_ready ? (
-          <button onClick={onUnmarkReady} style={{ width: "100%", padding: "11px", borderRadius: 12, background: "#dcfce7", border: "1px solid #05966940", color: "#059669", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <button onClick={onUnmarkReady} style={{ width: "100%", padding: "11px", borderRadius: 12, background: "#dcfce7", border: "1px solid #05966940", color: "#16a34a", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             <Icon name="check_circle" size={16} /> Move-In Ready — Tap to Reopen
           </button>
         ) : (
@@ -939,8 +1041,8 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
             onClick={onMarkReady}
             style={{
               width: "100%", padding: "11px", borderRadius: 12, border: "none",
-              background: allDone ? "linear-gradient(135deg,#059669,#10b981)" : "#f0ece6",
-              color: allDone ? "white" : "#a09890",
+              background: allDone ? "linear-gradient(135deg,#059669,#10b981)" : "#f2f2f7",
+              color: allDone ? "white" : "#8e8e93",
               fontSize: 13, fontWeight: 700, cursor: allDone ? "pointer" : "default",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
               boxShadow: allDone ? "0 4px 14px #05966940" : "none",
@@ -954,7 +1056,7 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
 
       {/*  Stage accordion — scrollable  */}
       <div style={{ overflowY: "auto", flex: 1, padding: "12px 16px 32px" }}>
-        <p style={{ fontSize: 10, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+        <p style={{ fontSize: 10, color: "#8e8e93", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
           Work Stages — tap any to start, no set order required
         </p>
 
@@ -969,8 +1071,8 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
           const statusStyle = stageObj.status === "in_progress"
             ? { bg: def.bg, border: def.accent, color: def.color }
             : stageObj.status === "done"
-            ? { bg: "#dcfce7", border: "#86efac", color: "#059669" }
-            : { bg: "#f9f7f4", border: "#f0ece6", color: "#a09890" };
+            ? { bg: "#dcfce7", border: "#86efac", color: "#16a34a" }
+            : { bg: "#f2f2f7", border: "#f2f2f7", color: "#8e8e93" };
 
           return (
             <div key={def.id} style={{ marginBottom: 8 }}>
@@ -991,13 +1093,13 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
                 <div style={{
                   width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: stageObj.status === "done" ? "#059669" : stageObj.status === "in_progress" ? def.dot : "#e8e4de",
+                  background: stageObj.status === "done" ? "#16a34a" : stageObj.status === "in_progress" ? def.dot : "#e5e5ea",
                   border: stageObj.status === "idle" ? "1.5px solid #d6d0c8" : "none",
                 }}>
                   {stageObj.status === "done"
-                    ? <Icon name="check" size={11} style={{ color: "#f7f5f2" }} />
+                    ? <Icon name="check" size={11} style={{ color: "#f8fafc" }} />
                     : stageObj.status === "in_progress"
-                    ? <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f7f5f2" }} />
+                    ? <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#f8fafc" }} />
                     : null
                   }
                 </div>
@@ -1008,11 +1110,11 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
                 </span>
 
                 {/* Task count */}
-                <span style={{ fontSize: 11, fontWeight: 600, color: taskDone === taskTotal && taskTotal > 0 ? "#059669" : stageObj.status === "in_progress" ? def.color : "#b8b0a8" }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: taskDone === taskTotal && taskTotal > 0 ? "#16a34a" : stageObj.status === "in_progress" ? def.color : "#b8b0a8" }}>
                   {taskDone}/{taskTotal}
                 </span>
 
-                <Icon name={isOpen ? "chevron_down" : "chevron_right"} size={14} style={{ color: "#a09890" }} />
+                <Icon name={isOpen ? "chevron_down" : "chevron_right"} size={14} style={{ color: "#8e8e93" }} />
               </button>
 
               {/* Expanded content */}
@@ -1033,16 +1135,16 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
                     {/* Stage status controls */}
                     <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid #ede9e3", display: "flex", gap: 6 }}>
                       {[
-                        { val: "idle",        label: "Not Started", bg: "#f0ece6",  color: "#a09890" },
+                        { val: "idle",        label: "Not Started", bg: "#f2f2f7",  color: "#8e8e93" },
                         { val: "in_progress", label: "In Progress", bg: def.bg,     color: def.color, border: def.accent },
-                        { val: "done",        label: "Done",        bg: "#dcfce7", color: "#059669", border: "#86efac" },
+                        { val: "done",        label: "Done",        bg: "#dcfce7", color: "#16a34a", border: "#86efac" },
                       ].map(opt => (
                         <button
                           key={opt.val}
                           onClick={() => onSetStageStatus(to.id, def.id, opt.val)}
                           style={{
-                            flex: 1, padding: "6px 4px", borderRadius: 10, border: `1px solid ${opt.border || "#d6d0c8"}`,
-                            background: stageObj.status === opt.val ? opt.bg : "#f9f7f4",
+                            flex: 1, padding: "6px 4px", borderRadius: 10, border: `1px solid ${opt.border || "#c6c6c8"}`,
+                            background: stageObj.status === opt.val ? opt.bg : "#f2f2f7",
                             color: stageObj.status === opt.val ? opt.color : "#b8b0a8",
                             fontSize: 10, fontWeight: 700, cursor: "pointer",
                             outline: stageObj.status === opt.val ? `1.5px solid ${opt.border || def.dot}` : "none",
@@ -1075,12 +1177,12 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
                               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
                             }}
                           >
-                            {tk.completed && <Icon name="check" size={11} style={{ color: "#f7f5f2" }} />}
+                            {tk.completed && <Icon name="check" size={11} style={{ color: "#f8fafc" }} />}
                           </button>
                           <div style={{ flex: 1 }}>
                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                               <span style={{ fontSize: 14 }}>{tk.icon}</span>
-                              <span style={{ fontSize: 12, color: tk.completed ? "#a09890" : "#3d3530", textDecoration: tk.completed ? "line-through" : "none", lineHeight: 1.4 }}>
+                              <span style={{ fontSize: 12, color: tk.completed ? "#8e8e93" : "#000000", textDecoration: tk.completed ? "line-through" : "none", lineHeight: 1.4 }}>
                                 {tk.label}
                               </span>
                             </div>
@@ -1100,16 +1202,16 @@ function UnitDrawer({ to, db, updateDB, onSetStageStatus, onToggleTask, onAssign
                                       {m.avatar}
                                     </button>
                                   ))}
-                                  <button onClick={() => { onAssignTask(to.id, def.id, tk.id, null); setAssigningTask(null); }} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#f0ece6", border: "1px solid #d6d0c8", color: "#a09890", cursor: "pointer" }}></button>
+                                  <button onClick={() => { onAssignTask(to.id, def.id, tk.id, null); setAssigningTask(null); }} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#f2f2f7", border: "1px solid #d6d0c8", color: "#8e8e93", cursor: "pointer" }}></button>
                                 </div>
                               ) : (
-                                <button onClick={() => setAssigningTask({ stageId: def.id, taskId: tk.id })} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#ffffff", border: "1px solid #e8e4de", color: "#a09890", cursor: "pointer" }}>
+                                <button onClick={() => setAssigningTask({ stageId: def.id, taskId: tk.id })} style={{ fontSize: 9, padding: "2px 7px", borderRadius: 100, background: "#ffffff", border: "1px solid #e8e4de", color: "#8e8e93", cursor: "pointer" }}>
                                   assign
                                 </button>
                               )}
 
                               {tk.completed_at && (
-                                <span style={{ fontSize: 9, color: "#d6d0c8", marginLeft: "auto" }}>{timeAgo(tk.completed_at)}</span>
+                                <span style={{ fontSize: 9, color: "#c6c6c8", marginLeft: "auto" }}>{timeAgo(tk.completed_at)}</span>
                               )}
                             </div>
                           </div>
@@ -1166,7 +1268,7 @@ function Turnovers() {
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          style={{ width: 40, height: 40, background: "linear-gradient(135deg, #e07d2a, #c45e0a)", border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 14px #e07d2a40" }}
+          style={{ width: 40, height: 40, background: "#000000", border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 14px #e07d2a40" }}
         >
           <Icon name="plus" size={18} style={{ color: "white" }} />
         </button>
@@ -1180,40 +1282,40 @@ function Turnovers() {
           <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowCreate(false)}>
             <motion.div className="modal-sheet" initial={{ y: 100 }} animate={{ y: 0 }} exit={{ y: 100 }} onClick={e => e.stopPropagation()}>
               <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>New Turnover</h2>
-              <p style={{ fontSize: 12, color: "#a09890", marginBottom: 20 }}>All 6 work stages are created automatically. Your team can start them in any order.</p>
+              <p style={{ fontSize: 12, color: "#8e8e93", marginBottom: 20 }}>All 6 work stages are created automatically. Your team can start them in any order.</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div>
-                  <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Unit</label>
+                  <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Unit</label>
                   <select className="input-dark" value={form.unit_id} onChange={e => setForm(f => ({ ...f, unit_id: e.target.value }))}>
                     <option value="">Select unit...</option>
                     {db.units.map(u => <option key={u.id} value={u.id}>#{u.unit_number} — {db.properties.find(p => p.id === u.property_id)?.name}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Target Move-In Ready Date</label>
+                  <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Target Move-In Ready Date</label>
                   <input className="input-dark" type="date" value={form.target_ready_date} onChange={e => setForm(f => ({ ...f, target_ready_date: e.target.value }))} />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Lead Technician</label>
+                  <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Lead Technician</label>
                   <select className="input-dark" value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))}>
                     <option value="">Unassigned</option>
                     {db.team.map(m => <option key={m.id} value={m.id}>{m.name} ({m.role})</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 8 }}>Lease Status</label>
+                  <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 8 }}>Lease Status</label>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                     {[["leased", " Leased"], ["unleased", " Unleased"]].map(([v, l]) => (
                       <button key={v} onClick={() => setForm(f => ({ ...f, lease_status: v }))} style={{
                         padding: "10px", borderRadius: 12,
                         border: form.lease_status === v ? "1px solid #e07d2a" : "1px solid #e8e4de",
-                        background: form.lease_status === v ? "#e07d2a20" : "#f9f7f4", cursor: "pointer",
-                        fontSize: 13, fontWeight: 600, color: form.lease_status === v ? "#f0a05a" : "#6b6560",
+                        background: form.lease_status === v ? "#e07d2a20" : "#f2f2f7", cursor: "pointer",
+                        fontSize: 13, fontWeight: 600, color: form.lease_status === v ? "#f0a05a" : "#3c3c43",
                       }}>{l}</button>
                     ))}
                   </div>
                 </div>
-                <div style={{ background: "#f9f7f4", border: "1px solid #f0ece6", borderRadius: 12, padding: "12px 14px" }}>
+                <div style={{ background: "#f2f2f7", border: "1px solid #f0ece6", borderRadius: 12, padding: "12px 14px" }}>
                   <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, marginBottom: 8 }}>Stages (work in any order):</p>
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     {MR_STAGES.map(s => (
@@ -1241,7 +1343,7 @@ function Team() {
   const roleColors = {
     supervisor: { bg: "#c45e0a20", color: "#f0a05a", border: "#c45e0a40" },
     technician: { bg: "#4f7cf020", color: "#7fa8ff", border: "#4f7cf040" },
-    porter: { bg: "#bbf7d0", color: "#059669", border: "#4ade80" },
+    porter: { bg: "#bbf7d0", color: "#16a34a", border: "#4ade80" },
     vendor: { bg: "#ff8c0020", color: "#ffad5c", border: "#ff8c0040" },
   };
 
@@ -1262,7 +1364,7 @@ function Team() {
     <div style={{ padding: "16px 16px 100px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h1 className="syne" style={{ fontSize: 24, fontWeight: 800 }}>Team</h1>
-        <button onClick={() => setShowForm(true)} style={{ width: 40, height: 40, background: "linear-gradient(135deg, #e07d2a, #c45e0a)", border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+        <button onClick={() => setShowForm(true)} style={{ width: 40, height: 40, background: "#000000", border: "none", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <Icon name="plus" size={18} style={{ color: "white" }} />
         </button>
       </div>
@@ -1278,10 +1380,10 @@ function Team() {
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, color: "#1a1614" }}>{member.name}</h3>
+                  <h3 style={{ fontSize: 14, fontWeight: 600, color: "#000000" }}>{member.name}</h3>
                   <span className="chip" style={{ background: rc.bg, color: rc.color, border: `1px solid ${rc.border}` }}>{member.role}</span>
                 </div>
-                <p style={{ fontSize: 12, color: "#a09890" }}>{member.specialty} · {member.phone || "No phone"}</p>
+                <p style={{ fontSize: 12, color: "#8e8e93" }}>{member.specialty} · {member.phone || "No phone"}</p>
               </div>
               {active > 0 && (
                 <div style={{ width: 28, height: 28, background: "#e07d2a20", border: "1px solid #e07d2a40", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1303,13 +1405,13 @@ function Team() {
                 <input className="input-dark" placeholder="Phone (optional)" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <div>
-                    <label style={{ fontSize: 11, color: "#a09890", display: "block", marginBottom: 4 }}>Role</label>
+                    <label style={{ fontSize: 11, color: "#8e8e93", display: "block", marginBottom: 4 }}>Role</label>
                     <select className="input-dark" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
                       {roles.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, color: "#a09890", display: "block", marginBottom: 4 }}>Specialty</label>
+                    <label style={{ fontSize: 11, color: "#8e8e93", display: "block", marginBottom: 4 }}>Specialty</label>
                     <select className="input-dark" value={form.specialty} onChange={e => setForm(f => ({ ...f, specialty: e.target.value }))}>
                       {specialties.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
@@ -1352,7 +1454,7 @@ function clearRoleData() {
 // ─────────────────────────────────────────────
 
 function RoleSelectionScreen({ onSelect }) {
-  const [step, setStep] = useState("role"); // role | name
+  const [step, setStep] = useState("role");
   const [selectedRole, setSelectedRole] = useState(null);
   const [name, setName] = useState("");
 
@@ -1363,276 +1465,68 @@ function RoleSelectionScreen({ onSelect }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f7f5f2", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column", fontFamily: "'Inter', -apple-system, sans-serif" }}>
       <style>{THEME.css}</style>
-
-      {/* Logo */}
-      <div style={{ width: 56, height: 56, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #e07d2a40", marginBottom: 24 }}>
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-      </div>
-
       <AnimatePresence mode="wait">
         {step === "role" && (
-          <motion.div key="role" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ width: "100%", maxWidth: 360 }}>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", textAlign: "center", marginBottom: 8, letterSpacing: "-0.02em" }}>Welcome</h1>
-            <p style={{ fontSize: 14, color: "#6b6560", textAlign: "center", marginBottom: 32, lineHeight: 1.6 }}>Which team are you on? This sets up your experience.</p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <button
-                onClick={() => { setSelectedRole("maintenance"); setStep("name"); }}
-                style={{
-                  padding: "20px", borderRadius: 16, border: "2px solid #e8e4de",
-                  background: "#ffffff", cursor: "pointer", textAlign: "left",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#e07d2a"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#e8e4de"}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 13, background: "#fff7ed", border: "1px solid #fed7aa", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e07d2a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          <motion.div key="role" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
+            style={{ flex: 1, display: "flex", flexDirection: "column", padding: "72px 24px 40px" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 48 }}>
+              <div style={{ width: 52, height: 52, background: "#000", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+            </div>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#000", letterSpacing: "-0.02em", marginBottom: 6, lineHeight: 1.2 }}>Welcome to Mainlync.</h1>
+            <p style={{ fontSize: 15, color: "#8e8e93", marginBottom: 32, lineHeight: 1.5 }}>Which team are you on?</p>
+            <div className="card-group">
+              {[
+                { id: "maintenance", label: "Maintenance", sub: "Supervisors, technicians, porters" },
+                { id: "leasing",     label: "Leasing",     sub: "Agents, property managers" },
+              ].map(r => (
+                <button key={r.id} onClick={() => { setSelectedRole(r.id); setStep("name"); }}
+                  className="row" style={{ width: "100%", border: "none", cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {r.id === "maintenance"
+                        ? <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        : <><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>
+                      }
+                    </svg>
                   </div>
-                  <div>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1614", marginBottom: 3 }}>Maintenance Team</p>
-                    <p style={{ fontSize: 12, color: "#a09890", lineHeight: 1.4 }}>Supervisors, technicians, porters</p>
+                  <div style={{ flex: 1 }}>
+                    <div className="row-title">{r.label}</div>
+                    <div className="row-sub">{r.sub}</div>
                   </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => { setSelectedRole("leasing"); setStep("name"); }}
-                style={{
-                  padding: "20px", borderRadius: 16, border: "2px solid #e8e4de",
-                  background: "#ffffff", cursor: "pointer", textAlign: "left",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)", transition: "all 0.2s",
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#3b82f6"}
-                onMouseLeave={e => e.currentTarget.style.borderColor = "#e8e4de"}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 13, background: "#eff6ff", border: "1px solid #bfdbfe", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1614", marginBottom: 3 }}>Leasing Team</p>
-                    <p style={{ fontSize: 12, color: "#a09890", lineHeight: 1.4 }}>Leasing agents, property managers</p>
-                  </div>
-                </div>
-              </button>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none"><path d="M1 1l5 5-5 5" stroke="#c7c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              ))}
             </div>
           </motion.div>
         )}
 
         {step === "name" && (
-          <motion.div key="name" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} style={{ width: "100%", maxWidth: 360 }}>
-            <button onClick={() => setStep("role")} style={{ background: "none", border: "none", cursor: "pointer", color: "#a09890", fontSize: 13, marginBottom: 24, display: "flex", alignItems: "center", gap: 6 }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <motion.div key="name" initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
+            style={{ flex: 1, display: "flex", flexDirection: "column", padding: "72px 24px 40px" }}>
+            <button onClick={() => setStep("role")} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 15, marginBottom: 32, display: "flex", alignItems: "center", gap: 4, fontFamily: "'Inter', sans-serif", padding: 0 }}>
+              <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M8 1L2 7l6 6" stroke="#007aff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Back
             </button>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", marginBottom: 8, letterSpacing: "-0.02em" }}>What's your name?</h1>
-            <p style={{ fontSize: 14, color: "#6b6560", marginBottom: 28, lineHeight: 1.6 }}>
-              Your name will appear on messages and updates you post to unit threads so both teams know who said what.
-            </p>
-            <input
-              autoFocus
-              className="input-dark"
-              placeholder={selectedRole === "leasing" ? "e.g. Sarah from Leasing" : "e.g. Marcus Torres"}
-              value={name}
-              onChange={e => setName(e.target.value)}
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#000", letterSpacing: "-0.02em", marginBottom: 32, lineHeight: 1.2 }}>{"What's your name?"}</h1>
+            <input autoFocus className="input-field"
+              placeholder={selectedRole === "leasing" ? "e.g. Sarah Johnson" : "e.g. Marcus Torres"}
+              value={name} onChange={e => setName(e.target.value)}
               onKeyDown={e => e.key === "Enter" && confirmRole()}
-              style={{ width: "100%", marginBottom: 14, fontSize: 15 }}
+              style={{ marginBottom: 48, fontSize: 20, fontWeight: 500 }}
             />
-            <button
-              onClick={confirmRole}
-              disabled={!name.trim()}
-              style={{
-                width: "100%", padding: "14px", borderRadius: 13, border: "none",
-                background: name.trim() ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6",
-                color: name.trim() ? "white" : "#a09890",
-                fontSize: 14, fontWeight: 700, cursor: name.trim() ? "pointer" : "default",
-                boxShadow: name.trim() ? "0 4px 14px #e07d2a40" : "none",
-              }}
-            >
-              {selectedRole === "leasing" ? "Open Leasing View" : "Open Make Ready Board"}
-            </button>
+            <div style={{ marginTop: "auto" }}>
+              <button onClick={confirmRole} disabled={!name.trim()} className="btn-primary">Continue</button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
   );
 }
-
-// ─────────────────────────────────────────────
-// UNIT THREAD SYSTEM
-// ─────────────────────────────────────────────
-
-// Thread message storage key
-function threadKey(unitId) { return `thread_${unitId}`; }
-
-async function loadThreadMessages(unitId) {
-  if (isSupabaseConfigured()) {
-    try {
-      const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_role=neq.read&order=created_at.asc`,
-        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
-      );
-      if (r.ok) return r.json();
-    } catch {}
-  }
-  try {
-    const r = await window.storage.get(threadKey(unitId), true);
-    const msgs = r ? JSON.parse(r.value) : [];
-    return msgs.filter(m => m.author_role !== "read");
-  } catch { return []; }
-}
-
-// Read receipt storage key
-function readKey(unitId) { return `reads_${unitId}`; }
-
-// Record that someone opened the thread
-async function recordThreadRead(unitId, readerName, readerRole) {
-  try {
-    // Store in Supabase as a special thread message with type "read"
-    if (isSupabaseConfigured()) {
-      // Check if this person already has a read record for this unit
-      const check = await fetch(
-        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_name=eq.${encodeURIComponent(readerName)}&author_role=eq.read`,
-        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
-      );
-      const existing = check.ok ? await check.json() : [];
-
-      if (existing.length > 0) {
-        // Update existing read timestamp
-        await fetch(
-          `${SUPABASE_URL}/rest/v1/unit_threads?id=eq.${existing[0].id}`,
-          {
-            method: "PATCH",
-            headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ created_at: new Date().toISOString() }),
-          }
-        );
-      } else {
-        // Insert new read record
-        await fetch(`${SUPABASE_URL}/rest/v1/unit_threads`, {
-          method: "POST",
-          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
-          body: JSON.stringify({
-            id: genId("read"),
-            unit_id: unitId,
-            unit_number: "",
-            property_name: "",
-            author_name: readerName,
-            author_role: "read", // special marker — filtered out of messages
-            text: "",
-            created_at: new Date().toISOString(),
-          }),
-        });
-      }
-      return;
-    }
-    // Fallback to local storage
-    const key = readKey(unitId);
-    const existing = await window.storage.get(key, true).catch(() => null);
-    const reads = existing ? JSON.parse(existing.value) : [];
-    const filtered = reads.filter(r => r.name !== readerName);
-    await window.storage.set(key, JSON.stringify([...filtered, { name: readerName, role: readerRole, seen_at: new Date().toISOString() }]), true);
-  } catch {}
-}
-
-// Load who has seen the thread
-async function loadThreadReads(unitId) {
-  try {
-    if (isSupabaseConfigured()) {
-      const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_role=eq.read`,
-        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
-      );
-      if (r.ok) {
-        const rows = await r.json();
-        return rows.map(row => ({ name: row.author_name, role: "team", seen_at: row.created_at }));
-      }
-    }
-    const r = await window.storage.get(readKey(unitId), true);
-    return r ? JSON.parse(r.value) : [];
-  } catch { return []; }
-}
-
-async function postThreadMessage(unitId, unitNumber, propertyName, authorName, authorRole, text, photoBase64 = null) {
-  const msg = {
-    id: genId("msg"),
-    unit_id: unitId,
-    unit_number: unitNumber,
-    property_name: propertyName,
-    author_name: authorName,
-    author_role: authorRole,
-    text,
-    photo_base64: photoBase64 || null,
-    created_at: new Date().toISOString(),
-  };
-
-  if (isSupabaseConfigured()) {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/unit_threads`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON,
-          "Authorization": `Bearer ${SUPABASE_ANON}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal",
-        },
-        body: JSON.stringify(msg),
-      });
-    } catch {}
-  }
-
-  // Fallback to shared storage
-  try {
-    const existing = await loadThreadMessages(unitId);
-    await window.storage.set(threadKey(unitId), JSON.stringify([...existing, msg]), true);
-  } catch {}
-
-  // Send push notification to the other team
-  try {
-    const otherTeam = authorRole === "leasing" ? "Maintenance" : "Leasing";
-    const preview   = text ? (text.length > 60 ? text.slice(0, 60) + "..." : text) : "Sent a photo";
-    await fetch("/.netlify/functions/agent-observe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "thread_notification",
-        title: `${otherTeam} — Unit ${unitNumber}`,
-        message: `${authorName}: ${preview}`,
-        unitId,
-        unitNumber,
-        propertyName,
-      }),
-    });
-  } catch {}
-
-  return msg;
-}
-
-// Auto-post AI translation message when stage status changes
-async function postAIStageUpdate(unitId, unitNumber, propertyName, stageId, newStatus, targetDate, pct) {
-  const days = Math.ceil((new Date(targetDate) - Date.now()) / 86400000);
-  const stageLabels = { cleaning: "Cleaning", repairs: "Repairs", paint: "Paint", flooring: "Flooring", final_clean: "Final Clean", inspection: "Inspection" };
-  const stageLabel = stageLabels[stageId] || stageId;
-
-  let text = "";
-  if (newStatus === "done") {
-    text = `${stageLabel} is complete on Unit ${unitNumber}. Overall progress: ${pct}%. ${days > 0 ? `${days} days to target move-in.` : days === 0 ? "Target date is today." : `${Math.abs(days)} days past target — needs attention.`}`;
-  } else if (newStatus === "in_progress") {
-    text = `${stageLabel} has started on Unit ${unitNumber}. Overall progress: ${pct}%. Target move-in: ${targetDate}.`;
-  }
-
-  if (text) {
-    await postThreadMessage(unitId, unitNumber, propertyName, "Relay", "ai", text);
-  }
-}
-
-// ─────────────────────────────────────────────
-// UNIT THREAD COMPONENT — used by both roles
-// ─────────────────────────────────────────────
 
 function UnitThread({ to, authorName, authorRole, onClose }) {
   const [allMessages, setAllMessages] = useState([]);
@@ -1650,38 +1544,24 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
   const humanMessages = allMessages.filter(m => m.author_role !== "ai");
   const relayMessages = allMessages.filter(m => m.author_role === "ai");
   const unreadRelay   = relayMessages.filter(m => new Date(m.created_at) > new Date(lastRelayView - 1000)).length;
-
-  // Readers from the other team
-  const otherReads = reads.filter(r => r.name !== authorName);
-  const maintenanceReads = otherReads.filter(r => r.role === "maintenance");
-  const leasingReads     = otherReads.filter(r => r.role === "leasing");
+  const otherReads    = reads.filter(r => r.name !== authorName);
 
   useEffect(() => {
-    // Record that this person opened the thread
     recordThreadRead(to.unit_id, authorName, authorRole);
-
-    // Load messages and reads
-    loadThreadMessages(to.unit_id).then(msgs => {
-      setAllMessages(msgs || []);
-      setLoading(false);
-    });
+    loadThreadMessages(to.unit_id).then(msgs => { setAllMessages(msgs || []); setLoading(false); });
     loadThreadReads(to.unit_id).then(r => setReads(r || []));
-
     const interval = setInterval(async () => {
       const fresh = await loadThreadMessages(to.unit_id);
       setAllMessages(fresh || []);
-      const freshReads = await loadThreadReads(to.unit_id);
-      setReads(freshReads || []);
+      const fr = await loadThreadReads(to.unit_id);
+      setReads(fr || []);
     }, 15000);
     return () => clearInterval(interval);
   }, [to.unit_id]);
 
   useEffect(() => {
     if (activeTab === "thread") bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    if (activeTab === "relay") {
-      relayBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      setLastRelayView(Date.now());
-    }
+    if (activeTab === "relay") { relayBottomRef.current?.scrollIntoView({ behavior: "smooth" }); setLastRelayView(Date.now()); }
   }, [allMessages, activeTab]);
 
   function handlePhoto(file) {
@@ -1699,143 +1579,127 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
     setText(""); setPhoto(null); setSending(false);
   }
 
-  const roleColors = {
-    maintenance: { bg: "#fff7ed", border: "#fed7aa", color: "#c2570a", dot: "#e07d2a" },
-    leasing:     { bg: "#eff6ff", border: "#bfdbfe", color: "#1d4ed8", dot: "#3b82f6" },
-  };
+  const roleColor = { maintenance: "#e07d2a", leasing: "#007aff" };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", zIndex: 200, maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 200, maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column" }}>
 
       {/* Header */}
-      <div style={{ background: "#ffffff", borderBottom: "1px solid #e8e4de", padding: "14px 16px 0", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-          <button onClick={onClose} style={{ width: 34, height: 34, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-            <Icon name="chevron_left" size={16} style={{ color: "#6b6560" }} />
+      <div style={{ background: "rgba(249,249,249,0.97)", borderBottom: "0.5px solid #c6c6c8", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 8px" }}>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 15, fontFamily: "'Inter', sans-serif", fontWeight: 500, display: "flex", alignItems: "center", gap: 3, padding: 0 }}>
+            <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M8 1L2 7l6 6" stroke="#007aff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Back
           </button>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1614" }}>Unit {to.unit_number} — {to.property_name}</p>
-            <p style={{ fontSize: 11, color: "#a09890" }}>
-              {reads.length > 0
-                ? `Active: ${reads.map(r => r.name.split(" ")[0]).join(", ")}`
-                : "Maintenance & Leasing"}
+          <div style={{ flex: 1, textAlign: "center" }}>
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>Unit {to.unit_number}</p>
+            <p style={{ fontSize: 12, color: "#8e8e93" }}>
+              {reads.length > 0 ? reads.map(r => r.name.split(" ")[0]).join(", ") : to.property_name}
             </p>
           </div>
+          <div style={{ width: 60 }} />
         </div>
         {/* Tabs */}
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", borderBottom: "0.5px solid #e5e5ea" }}>
           {[
             { id: "thread", label: "Thread" },
-            { id: "relay",  label: "Relay", badge: unreadRelay > 0, count: unreadRelay },
+            { id: "relay",  label: "Relay", badge: unreadRelay > 0 },
           ].map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: "10px 0", background: "none", border: "none", borderBottom: `2px solid ${activeTab === tab.id ? "#e07d2a" : "transparent"}`, cursor: "pointer", fontSize: 13, fontWeight: 700, color: activeTab === tab.id ? "#e07d2a" : "#a09890", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: "10px 0", background: "none", border: "none", borderBottom: `2px solid ${activeTab === tab.id ? "#007aff" : "transparent"}`, cursor: "pointer", fontSize: 14, fontWeight: 500, color: activeTab === tab.id ? "#007aff" : "#8e8e93", display: "flex", alignItems: "center", justifyContent: "center", gap: 5, fontFamily: "'Inter', sans-serif" }}>
               {tab.label}
-              {tab.badge && <span style={{ width: 16, height: 16, borderRadius: "50%", background: "#059669", color: "white", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{tab.count}</span>}
+              {tab.badge && <span style={{ width: 15, height: 15, borderRadius: "50%", background: "#dc2626", color: "white", fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{unreadRelay}</span>}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Thread tab — humans only */}
+      {/* Thread tab */}
       {activeTab === "thread" && (
         <>
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f7f5f2", display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px", background: "#f2f2f7", display: "flex", flexDirection: "column", gap: 8 }}>
             {loading ? (
-              [1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)
+              [1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 56, borderRadius: 12 }} />)
             ) : humanMessages.length === 0 ? (
               <div style={{ textAlign: "center", padding: "48px 24px" }}>
-                <div style={{ width: 48, height: 48, background: "#f0ece6", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a09890" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                </div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No messages yet</p>
-                <p style={{ fontSize: 12, color: "#a09890" }}>Post an update, ask a question, or share a photo</p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#3c3c43", marginBottom: 4 }}>No messages yet</p>
+                <p style={{ fontSize: 13, color: "#8e8e93" }}>Post an update, question, or photo about this unit</p>
               </div>
             ) : humanMessages.map(msg => {
-              const rc = roleColors[msg.author_role] || roleColors.maintenance;
               const isMe = msg.author_name === authorName;
+              const rc = roleColor[msg.author_role] || "#8e8e93";
               return (
                 <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: rc.dot }} />
-                    <span style={{ fontSize: 10, fontWeight: 700, color: rc.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>{msg.author_name} · {msg.author_role}</span>
-                    <span style={{ fontSize: 10, color: "#a09890" }}>{timeAgo(msg.created_at)}</span>
+                  <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 3, display: "flex", alignItems: "center", gap: 5 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: rc }} />
+                    {msg.author_name} · {timeAgo(msg.created_at)}
                   </div>
-                  <div style={{ maxWidth: "85%", background: isMe ? "#fff7ed" : "#ffffff", border: `1px solid ${isMe ? "#fed7aa" : "#e8e4de"}`, borderRadius: isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px", padding: "10px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-                    {msg.photo_base64 && <img src={msg.photo_base64} alt="unit photo" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />}
-                    {msg.text && <p style={{ fontSize: 13, color: "#1a1614", lineHeight: 1.5 }}>{msg.text}</p>}
+                  <div style={{ maxWidth: "80%", background: isMe ? "#000" : "#fff", borderRadius: isMe ? "18px 4px 18px 18px" : "4px 18px 18px 18px", padding: "10px 14px" }}>
+                    {msg.photo_base64 && <img src={msg.photo_base64} alt="unit" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />}
+                    {msg.text && <p style={{ fontSize: 14, color: isMe ? "#fff" : "#000", lineHeight: 1.4 }}>{msg.text}</p>}
                   </div>
                 </div>
               );
             })}
             <div ref={bottomRef} />
-
-            {/* Seen by indicator — shows when the other team has read the thread */}
             {otherReads.length > 0 && humanMessages.length > 0 && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "flex-end", padding: "4px 0" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span style={{ fontSize: 10, color: "#059669", fontWeight: 600 }}>
-                  Seen by {otherReads.map(r => r.name.split(" ")[0]).join(", ")}
-                  {" · "}{timeAgo(otherReads.sort((a,b) => new Date(b.seen_at) - new Date(a.seen_at))[0].seen_at)}
-                </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, justifyContent: "flex-end" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style={{ fontSize: 11, color: "#8e8e93" }}>Seen by {otherReads.map(r => r.name.split(" ")[0]).join(", ")} · {timeAgo(otherReads.sort((a,b) => new Date(b.seen_at)-new Date(a.seen_at))[0].seen_at)}</span>
               </div>
             )}
           </div>
 
           {photo && (
-            <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-              <img src={photo} alt="preview" style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover" }} />
-              <p style={{ fontSize: 12, color: "#6b6560", flex: 1 }}>Photo attached</p>
-              <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626" }}><Icon name="x" size={16} /></button>
+            <div style={{ background: "#fff", borderTop: "0.5px solid #e5e5ea", padding: "8px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+              <img src={photo} alt="preview" style={{ width: 44, height: 44, borderRadius: 8, objectFit: "cover" }} />
+              <p style={{ fontSize: 13, color: "#8e8e93", flex: 1 }}>Photo attached</p>
+              <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626", fontSize: 13 }}>Remove</button>
             </div>
           )}
 
-          <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "12px 16px", display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
-            <button onClick={() => fileRef.current?.click()} style={{ width: 38, height: 38, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div style={{ background: "rgba(249,249,249,0.97)", borderTop: "0.5px solid #c6c6c8", padding: "10px 16px 28px", display: "flex", gap: 10, alignItems: "flex-end", flexShrink: 0 }}>
+            <button onClick={() => fileRef.current?.click()} style={{ width: 34, height: 34, background: "#f2f2f7", border: "none", borderRadius: 100, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             </button>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhoto(e.target.files[0])} />
-            <textarea placeholder="Post an update, question, or photo..." value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} rows={1} style={{ flex: 1, resize: "none", background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1a1614", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none" }} />
-            <button onClick={sendMessage} disabled={sending || (!text.trim() && !photo)} style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: (text.trim() || photo) ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6", display: "flex", alignItems: "center", justifyContent: "center", cursor: (text.trim() || photo) ? "pointer" : "default", flexShrink: 0 }}>
-              <Icon name="send" size={16} style={{ color: (text.trim() || photo) ? "white" : "#a09890" }} />
+            <input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); sendMessage(); } }}
+              placeholder="Message..."
+              style={{ flex: 1, background: "#ffffff", border: "0.5px solid #c6c6c8", borderRadius: 100, padding: "9px 14px", fontSize: 14, fontFamily: "'Inter', sans-serif", outline: "none", color: "#000" }}
+            />
+            <button onClick={sendMessage} disabled={sending || (!text.trim() && !photo)}
+              style={{ width: 34, height: 34, borderRadius: 100, border: "none", background: (text.trim() || photo) ? "#007aff" : "#e5e5ea", display: "flex", alignItems: "center", justifyContent: "center", cursor: (text.trim() || photo) ? "pointer" : "default", flexShrink: 0 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={(text.trim() || photo) ? "white" : "#c7c7cc"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             </button>
           </div>
         </>
       )}
 
-      {/* Relay tab — AI feed, read only */}
+      {/* Relay tab */}
       {activeTab === "relay" && (
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f7f5f2", display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", border: "1px solid #86efac", borderRadius: 14, padding: "12px 14px", marginBottom: 4 }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px", background: "#f2f2f7", display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ background: "#fff", borderRadius: 12, padding: "12px 14px", marginBottom: 4 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 9, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              <div style={{ width: 26, height: 26, borderRadius: 8, background: "#000", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
               </div>
               <div>
-                <p style={{ fontSize: 12, fontWeight: 700, color: "#15803d" }}>Relay — Agentic AI</p>
-                <p style={{ fontSize: 10, color: "#6b6560" }}>Automatic updates. Read only. Won't interrupt your thread.</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#000" }}>Relay — Agentic AI</p>
+                <p style={{ fontSize: 11, color: "#8e8e93" }}>Automatic updates. Read only.</p>
               </div>
             </div>
           </div>
-
           {loading ? (
-            [1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)
+            [1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 56, borderRadius: 12 }} />)
           ) : relayMessages.length === 0 ? (
             <div style={{ textAlign: "center", padding: "48px 24px" }}>
-              <div style={{ width: 48, height: 48, background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              </div>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>Relay is watching</p>
-              <p style={{ fontSize: 12, color: "#a09890" }}>When stages complete or something needs attention Relay will post updates here automatically</p>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#3c3c43", marginBottom: 4 }}>Relay is watching</p>
+              <p style={{ fontSize: 13, color: "#8e8e93" }}>Stage updates and alerts will appear here automatically</p>
             </div>
           ) : relayMessages.map(msg => (
             <div key={msg.id} style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#059669" }} />
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.05em" }}>Relay</span>
-                <span style={{ fontSize: 10, color: "#a09890" }}>{timeAgo(msg.created_at)}</span>
-              </div>
-              <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderLeft: "3px solid #059669", borderRadius: "4px 14px 14px 14px", padding: "10px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                <p style={{ fontSize: 13, color: "#1a1614", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.text}</p>
+              <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 3 }}>Relay · {timeAgo(msg.created_at)}</div>
+              <div style={{ background: "#fff", borderLeft: "3px solid #16a34a", borderRadius: "2px 12px 12px 12px", padding: "10px 14px" }}>
+                <p style={{ fontSize: 13, color: "#000", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{msg.text}</p>
               </div>
             </div>
           ))}
@@ -1847,239 +1711,110 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
 }
 
 
-// ─────────────────────────────────────────────
-// LEASING VIEW — dedicated experience for leasing team
-// ─────────────────────────────────────────────
-
 function LeasingView({ userName, onSwitchRole }) {
   const { db } = useApp();
   const [selectedThread, setSelectedThread] = useState(null);
-  const [filterStatus, setFilterStatus]     = useState("all");
+  const [filter, setFilter] = useState("all");
 
   const turnovers = (db.turnovers || []).map(migrateTurnover);
   const withRisk  = analyzeRisk(turnovers);
 
-  const statusOrder = { critical: 0, at_risk: 1, on_track: 2 };
-  const sorted = [...withRisk]
-    .filter(t => !t.is_ready || filterStatus === "all")
-    .filter(t => {
-      if (filterStatus === "ready") return t.is_ready;
-      if (filterStatus === "at_risk") return t.riskLevel === "at_risk" || t.riskLevel === "critical";
-      if (filterStatus === "on_track") return t.riskLevel === "on_track" && !t.is_ready;
-      return true;
-    })
-    .sort((a, b) => (statusOrder[a.riskLevel] ?? 2) - (statusOrder[b.riskLevel] ?? 2));
+  const filtered = withRisk.filter(t => {
+    if (filter === "attention") return !t.is_ready && t.riskLevel !== "on_track";
+    if (filter === "on_track")  return !t.is_ready && t.riskLevel === "on_track";
+    if (filter === "ready")     return t.is_ready;
+    return true;
+  }).sort((a,b) => {
+    const order = { critical: 0, at_risk: 1, on_track: 2 };
+    return (order[a.riskLevel] ?? 2) - (order[b.riskLevel] ?? 2);
+  });
 
   const total    = withRisk.length;
+  const attention = withRisk.filter(t => !t.is_ready && t.riskLevel !== "on_track").length;
+  const onTrack  = withRisk.filter(t => !t.is_ready && t.riskLevel === "on_track").length;
   const ready    = withRisk.filter(t => t.is_ready).length;
-  const atRisk   = withRisk.filter(t => t.riskLevel === "at_risk" || t.riskLevel === "critical").length;
-  const onTrack  = withRisk.filter(t => t.riskLevel === "on_track" && !t.is_ready).length;
 
-  const statusConfig = {
-    on_track: { label: "On Track",  color: "#15803d", bg: "#f0fdf4", border: "#86efac", dot: "#059669" },
-    at_risk:  { label: "At Risk",   color: "#c2570a", bg: "#fff7ed", border: "#fed7aa", dot: "#e07d2a" },
-    critical: { label: "Critical",  color: "#dc2626", bg: "#fef2f2", border: "#fecaca", dot: "#dc2626" },
-    ready:    { label: "Ready",     color: "#15803d", bg: "#f0fdf4", border: "#86efac", dot: "#059669" },
-  };
+  const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f7f5f2", maxWidth: 480, margin: "0 auto", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", paddingBottom: 40 }}>
       <style>{THEME.css}</style>
 
       {/* Header */}
-      <div style={{ background: "#ffffff", borderBottom: "1px solid #e8e4de", padding: "16px 16px 14px", position: "sticky", top: 0, zIndex: 50 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
-          <div>
-            <p style={{ fontSize: 11, color: "#3b82f6", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>Leasing View</p>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Unit Status</h1>
-          </div>
-          <button
-            onClick={onSwitchRole}
-            style={{ fontSize: 11, color: "#a09890", background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 8, padding: "6px 10px", cursor: "pointer", fontWeight: 600, fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-          >
-            Switch role
-          </button>
+      <div style={{ background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", position: "sticky", top: 0, zIndex: 50 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#000", letterSpacing: "-0.02em" }}>Unit Status</h1>
+          <button onClick={onSwitchRole} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Switch role</button>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 14 }}>
-          {[
-            { label: "Total",    value: total,   color: "#6b6560", bg: "#f9f7f4" },
-            { label: "On Track", value: onTrack, color: "#15803d", bg: "#f0fdf4" },
-            { label: "At Risk",  value: atRisk,  color: atRisk > 0 ? "#c2570a" : "#a09890", bg: atRisk > 0 ? "#fff7ed" : "#f9f7f4" },
-            { label: "Ready",    value: ready,   color: "#1d4ed8", bg: "#eff6ff" },
-          ].map(s => (
-            <div key={s.label} style={{ background: s.bg, borderRadius: 12, padding: "10px 6px", textAlign: "center" }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 9, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Filters */}
+        {/* Filter tabs */}
         <div style={{ display: "flex", gap: 6, overflowX: "auto", scrollbarWidth: "none" }}>
-          {[["all","All"], ["at_risk","Needs Attention"], ["on_track","On Track"], ["ready","Ready"]].map(([v, l]) => (
-            <button
-              key={v}
-              onClick={() => setFilterStatus(v)}
-              style={{
-                padding: "5px 12px", borderRadius: 100, fontSize: 11, fontWeight: 600,
-                border: "none", cursor: "pointer", whiteSpace: "nowrap",
-                background: filterStatus === v ? "#3b82f6" : "#f9f7f4",
-                color: filterStatus === v ? "white" : "#6b6560",
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-              }}
-            >
-              {l}
+          {[
+            { id: "all",       label: `All (${total})` },
+            { id: "attention", label: `Attention (${attention})` },
+            { id: "on_track",  label: `On Track (${onTrack})` },
+            { id: "ready",     label: `Ready (${ready})` },
+          ].map(f => (
+            <button key={f.id} onClick={() => setFilter(f.id)} style={{ padding: "5px 12px", borderRadius: 100, fontSize: 13, fontWeight: 500, border: "none", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "'Inter', sans-serif", background: filter === f.id ? "#000" : "#e5e5ea", color: filter === f.id ? "#fff" : "#3c3c43" }}>
+              {f.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Unit list */}
-      <div style={{ padding: "16px 16px 100px", display: "flex", flexDirection: "column", gap: 10 }}>
-        {sorted.length === 0 && (
-          <div style={{ textAlign: "center", padding: "48px 24px", color: "#a09890" }}>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No units match</p>
+      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 1 }}>
+        {filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: "48px 24px" }}>
+            <p style={{ fontSize: 15, color: "#8e8e93" }}>No units match</p>
           </div>
         )}
-
-        {sorted.map(to => {
-          const days  = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
-          const pct   = overallPct(to);
-          const sc    = to.is_ready ? statusConfig.ready : (statusConfig[to.riskLevel] || statusConfig.on_track);
-          const doneStages = (to.stages || []).filter(s => s.status === "done").length;
-
-          return (
-            <motion.div
-              key={to.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                background: "#ffffff", border: `1px solid ${sc.border}`,
-                borderRadius: 18, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-              }}
-            >
-              {/* Top row */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: sc.bg, border: `1px solid ${sc.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: sc.color }}>{to.unit_number}</span>
+        <div className="card-group">
+          {filtered.map((to, i) => {
+            const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+            const pct  = overallPct(to);
+            const sc   = to.is_ready ? "#0284c7" : (statusColor[to.riskLevel] || "#8e8e93");
+            return (
+              <div key={to.id} style={{ borderLeft: `3px solid ${sc}` }}>
+                <div className="row" style={{ flexDirection: "column", alignItems: "stretch", gap: 8, padding: "12px 14px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div className="unit-avatar">{to.unit_number}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: "#000" }}>{to.property_name}</span>
+                        <span style={{ fontSize: 12, color: sc, fontWeight: 600 }}>
+                          {to.is_ready ? "Ready" : days < 0 ? `${Math.abs(days)}d late` : days === 0 ? "Today" : `${days}d`}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "#8e8e93", marginTop: 1 }}>
+                        {to.assigned_name ? `Lead: ${to.assigned_name}` : "Unassigned"} · {to.lease_status === "leased" ? "Leased" : "Unleased"}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>{to.property_name}</p>
-                    <p style={{ fontSize: 11, color: "#a09890", marginTop: 1 }}>
-                      {to.assigned_name ? `Lead: ${to.assigned_name}` : "Unassigned"}
-                    </p>
+                  <div className="progress-bar">
+                    <div className="progress-fill" style={{ width: `${pct}%`, background: sc }} />
                   </div>
+                  {to.riskReason && !to.is_ready && (
+                    <p style={{ fontSize: 12, color: sc, fontWeight: 500 }}>{to.riskReason}</p>
+                  )}
+                  <button onClick={() => setSelectedThread(to)} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 14, fontWeight: 500, fontFamily: "'Inter', sans-serif", textAlign: "left", padding: 0 }}>
+                    Team Thread →
+                  </button>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 8, background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
-                    {sc.label}
-                  </span>
-                  <p style={{ fontSize: 10, color: days < 0 ? "#dc2626" : days <= 3 ? "#e07d2a" : "#a09890", marginTop: 4, fontWeight: 600 }}>
-                    {to.is_ready ? "Move-in ready" : days < 0 ? `${Math.abs(days)}d overdue` : days === 0 ? "Due today" : `${days}d to move-in`}
-                  </p>
-                </div>
+                {i < filtered.length - 1 && <div style={{ height: "0.5px", background: "#e5e5ea", marginLeft: 58 }} />}
               </div>
-
-              {/* Progress bar */}
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                  <span style={{ fontSize: 11, color: "#a09890" }}>{doneStages} of 6 stages complete</span>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: pct === 100 ? "#059669" : sc.color }}>{pct}%</span>
-                </div>
-                <div style={{ height: 6, borderRadius: 3, background: "#f0ece6", overflow: "hidden" }}>
-                  <motion.div
-                    animate={{ width: `${pct}%` }}
-                    transition={{ duration: 0.6 }}
-                    style={{ height: "100%", borderRadius: 3, background: to.is_ready ? "#059669" : pct === 100 ? "#059669" : sc.dot }}
-                  />
-                </div>
-              </div>
-
-              {/* Risk reason */}
-              {to.riskReason && !to.is_ready && (
-                <div style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 8, padding: "7px 10px", marginBottom: 10, display: "flex", gap: 7 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: sc.dot, flexShrink: 0, marginTop: 3 }} />
-                  <p style={{ fontSize: 11, color: sc.color, fontWeight: 600, lineHeight: 1.4 }}>{to.riskReason}</p>
-                </div>
-              )}
-
-              {/* Lease status + Thread button */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 700, padding: "3px 9px", borderRadius: 8,
-                  background: to.lease_status === "leased" ? "#f0fdf4" : "#fefce8",
-                  color: to.lease_status === "leased" ? "#15803d" : "#a16207",
-                  border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#fde68a"}`,
-                }}>
-                  {to.lease_status === "leased" ? "Leased" : "Unleased"}
-                </span>
-
-                <button
-                  onClick={() => setSelectedThread(to)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    padding: "7px 12px", borderRadius: 10,
-                    background: "#eff6ff", border: "1px solid #bfdbfe",
-                    color: "#1d4ed8", fontSize: 11, fontWeight: 700,
-                    cursor: "pointer", fontFamily: "'Plus Jakarta Sans', sans-serif",
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  Team Thread
-                </button>
-              </div>
-            </motion.div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
-      {/* Unit thread overlay */}
       <AnimatePresence>
         {selectedThread && (
-          <UnitThread
-            to={selectedThread}
-            authorName={userName}
-            authorRole="leasing"
-            onClose={() => setSelectedThread(null)}
-          />
+          <UnitThread to={selectedThread} authorName={userName} authorRole="leasing" onClose={() => setSelectedThread(null)} />
         )}
       </AnimatePresence>
     </div>
   );
-}
-
-
-
-
-
-
-// ─────────────────────────────────────────────
-// AGENT PAGE — Relay control center
-// ─────────────────────────────────────────────
-
-const AGENT_LOG_KEY = "mainlync_agent_log";
-
-async function loadAgentLog() {
-  // Try Supabase first
-  if (isSupabaseConfigured()) {
-    try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/agent_log?order=created_at.desc&limit=50`, {
-        headers: {
-          "apikey": SUPABASE_ANON,
-          "Authorization": `Bearer ${SUPABASE_ANON}`,
-        }
-      });
-      if (r.ok) return r.json();
-    } catch {}
-  }
-  // Fallback to local storage
-  try {
-    const r = await window.storage.get(AGENT_LOG_KEY);
-    return r ? JSON.parse(r.value) : [];
-  } catch { return []; }
 }
 
 function AgentPage() {
@@ -2161,14 +1896,14 @@ function AgentPage() {
         <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>AI Operations</p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Relay</h1>
-            <p style={{ fontSize: 11, color: "#a09890", marginTop: 2 }}>Mainlync's Agentic AI — v{RELAY_VERSION}</p>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: "#000000", letterSpacing: "-0.02em" }}>Relay</h1>
+            <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 2 }}>Mainlync's Agentic AI — v{RELAY_VERSION}</p>
           </div>
           <button
             onClick={() => setSettingsOpen(s => !s)}
-            style={{ width: 36, height: 36, background: "#f0ece6", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+            style={{ width: 36, height: 36, background: "#f2f2f7", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3c3c43" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </button>
         </div>
       </div>
@@ -2176,18 +1911,18 @@ function AgentPage() {
       {/* Agent status card */}
       <div style={{ background: "linear-gradient(135deg, #fff7ed, #fef3e8)", border: "1px solid #fed7aa", borderRadius: 18, padding: 20, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px #e07d2a40" }}>
+          <div style={{ width: 44, height: 44, borderRadius: 14, background: "#000000", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 12px #e07d2a40" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 15, fontWeight: 800, color: "#1a1614" }}>Relay</p>
-            <p style={{ fontSize: 11, color: "#a09890" }}>
+            <p style={{ fontSize: 15, fontWeight: 800, color: "#000000" }}>Relay</p>
+            <p style={{ fontSize: 11, color: "#8e8e93" }}>
               {lastRun ? `Last run ${lastRun.toLocaleTimeString()}` : "Ready to run"}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#059669", boxShadow: "0 0 8px #05966980" }} />
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>Active</span>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", boxShadow: "0 0 8px #05966980" }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a" }}>Active</span>
           </div>
         </div>
 
@@ -2195,12 +1930,12 @@ function AgentPage() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
           {[
             { label: "Monitoring", value: activeTurnovers.length, color: "#e07d2a" },
-            { label: "Critical",   value: criticalCount,           color: criticalCount > 0 ? "#dc2626" : "#a09890" },
-            { label: "Log Entries", value: log.length,             color: "#6b6560" },
+            { label: "Critical",   value: criticalCount,           color: criticalCount > 0 ? "#dc2626" : "#8e8e93" },
+            { label: "Log Entries", value: log.length,             color: "#3c3c43" },
           ].map(s => (
             <div key={s.label} style={{ background: "rgba(255,255,255,0.7)", borderRadius: 10, padding: "10px 8px", textAlign: "center", border: "1px solid #fed7aa" }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: 9, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 9, color: "#8e8e93", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -2212,8 +1947,8 @@ function AgentPage() {
             disabled={running}
             style={{
               padding: "11px", borderRadius: 12, border: "none", cursor: running ? "default" : "pointer",
-              background: running ? "#f0ece6" : "linear-gradient(135deg,#e07d2a,#c45e0a)",
-              color: running ? "#a09890" : "white",
+              background: running ? "#f2f2f7" : "#000000",
+              color: running ? "#8e8e93" : "white",
               fontSize: 12, fontWeight: 700,
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
               boxShadow: running ? "none" : "0 4px 12px #e07d2a40",
@@ -2252,7 +1987,7 @@ function AgentPage() {
                   Checked {runResult.turnoversChecked} turnovers — {runResult.actions?.length || 0} action{runResult.actions?.length !== 1 ? "s" : ""} taken
                 </p>
                 {runResult.actions?.map((a, i) => (
-                  <p key={i} style={{ fontSize: 11, color: "#6b6560", marginTop: 3 }}>{a.type}: {a.message?.slice(0, 80)}...</p>
+                  <p key={i} style={{ fontSize: 11, color: "#3c3c43", marginTop: 3 }}>{a.type}: {a.message?.slice(0, 80)}...</p>
                 ))}
               </div>
             )}
@@ -2265,10 +2000,10 @@ function AgentPage() {
         {settingsOpen && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden", marginBottom: 16 }}>
             <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>Agent Settings</p>
+              <p style={{ fontSize: 12, fontWeight: 700, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>Agent Settings</p>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, display: "block", marginBottom: 6 }}>Supervisor Phone (for SMS alerts)</label>
+                <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, display: "block", marginBottom: 6 }}>Supervisor Phone (for SMS alerts)</label>
                 <div style={{ display: "flex", gap: 8 }}>
                   <input
                     className="input-dark"
@@ -2280,16 +2015,16 @@ function AgentPage() {
                   <button
                     onClick={sendTestSMS}
                     disabled={!settings.supervisorPhone}
-                    style={{ padding: "0 14px", borderRadius: 11, border: "1px solid #e8e4de", background: settings.supervisorPhone ? "#fff7ed" : "#f9f7f4", color: settings.supervisorPhone ? "#e07d2a" : "#a09890", fontSize: 12, fontWeight: 700, cursor: settings.supervisorPhone ? "pointer" : "default", whiteSpace: "nowrap" }}
+                    style={{ padding: "0 14px", borderRadius: 11, border: "1px solid #e8e4de", background: settings.supervisorPhone ? "#fff7ed" : "#f2f2f7", color: settings.supervisorPhone ? "#e07d2a" : "#8e8e93", fontSize: 12, fontWeight: 700, cursor: settings.supervisorPhone ? "pointer" : "default", whiteSpace: "nowrap" }}
                   >
                     Test SMS
                   </button>
                 </div>
-                <p style={{ fontSize: 10, color: "#a09890", marginTop: 4 }}>Used for urgent alerts when a unit goes critical</p>
+                <p style={{ fontSize: 10, color: "#8e8e93", marginTop: 4 }}>Used for urgent alerts when a unit goes critical</p>
               </div>
 
               <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, display: "block", marginBottom: 6 }}>Morning Briefing Time</label>
+                <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, display: "block", marginBottom: 6 }}>Morning Briefing Time</label>
                 <input
                   className="input-dark"
                   type="time"
@@ -2300,14 +2035,14 @@ function AgentPage() {
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderTop: "1px solid #f0ece6" }}>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1614" }}>SMS Urgent Alerts</p>
-                  <p style={{ fontSize: 11, color: "#a09890" }}>Text when units go critical</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#000000" }}>SMS Urgent Alerts</p>
+                  <p style={{ fontSize: 11, color: "#8e8e93" }}>Text when units go critical</p>
                 </div>
                 <button
                   onClick={() => setSettings(s => ({ ...s, smsAlerts: !s.smsAlerts }))}
                   style={{
                     width: 44, height: 24, borderRadius: 12, border: "none", cursor: "pointer",
-                    background: settings.smsAlerts ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#e8e4de",
+                    background: settings.smsAlerts ? "#000000" : "#e5e5ea",
                     position: "relative", transition: "background 0.2s",
                   }}
                 >
@@ -2321,7 +2056,7 @@ function AgentPage() {
 
       {/* Agent activity log */}
       <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-        <p style={{ fontSize: 11, fontWeight: 700, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>
           Activity Log {log.length > 0 ? `(${log.length})` : ""}
         </p>
 
@@ -2331,9 +2066,9 @@ function AgentPage() {
           </div>
         ) : log.length === 0 ? (
           <div style={{ textAlign: "center", padding: "32px 16px" }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d6d0c8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px" }}><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No activity yet</p>
-            <p style={{ fontSize: 11, color: "#a09890" }}>Tap "Run Now" to start the agent</p>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c6c6c8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px" }}><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#3c3c43", marginBottom: 4 }}>No activity yet</p>
+            <p style={{ fontSize: 11, color: "#8e8e93" }}>Tap "Run Now" to start the agent</p>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -2346,11 +2081,11 @@ function AgentPage() {
                       {tc.label}
                       {entry.unit_number && ` — Unit ${entry.unit_number}`}
                     </span>
-                    <span style={{ fontSize: 9, color: "#a09890", whiteSpace: "nowrap", marginLeft: 8 }}>
+                    <span style={{ fontSize: 9, color: "#8e8e93", whiteSpace: "nowrap", marginLeft: 8 }}>
                       {entry.created_at ? timeAgo(entry.created_at) : ""}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12, color: "#3d3530", lineHeight: 1.5 }}>{entry.description}</p>
+                  <p style={{ fontSize: 12, color: "#000000", lineHeight: 1.5 }}>{entry.description}</p>
                   {entry.action_taken && (
                     <p style={{ fontSize: 10, color: tc.color, marginTop: 4, fontWeight: 600 }}>
                       Action: {entry.action_taken}
@@ -2476,7 +2211,7 @@ function ShareButton({ to, db, updateDB }) {
         <div style={{
           width: "100%", padding: "11px 16px", borderRadius: 12,
           background: "#ffffff", border: "1px solid #e8e4de",
-          color: "#a09890", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          color: "#8e8e93", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
         }}>
           <Icon name="loader" size={14} /> Generating link...
         </div>
@@ -2494,12 +2229,12 @@ function ShareButton({ to, db, updateDB }) {
         >
           {/* Header */}
           <div style={{ padding: "10px 14px 8px", borderBottom: "1px solid #e07d2a20", display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "#000000", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Icon name="share" size={13} style={{ color: "white" }} />
             </div>
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: "#f0a05a" }}>Share Link Active</p>
-              <p style={{ fontSize: 10, color: "#a09890" }}>Anyone with this link can view & update progress</p>
+              <p style={{ fontSize: 10, color: "#8e8e93" }}>Anyone with this link can view & update progress</p>
             </div>
             <button onClick={refreshShare} title="Sync latest data" style={{ width: 28, height: 28, background: "#e07d2a20", border: "1px solid #e07d2a30", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
               <Icon name="refresh" size={12} style={{ color: "#e07d2a" }} />
@@ -2509,9 +2244,9 @@ function ShareButton({ to, db, updateDB }) {
           {/* URL display */}
           <div style={{ padding: "10px 14px" }}>
             <div style={{
-              background: "#f7f5f2", border: "1px solid #e8e4de", borderRadius: 10,
+              background: "#f8fafc", border: "1px solid #e8e4de", borderRadius: 10,
               padding: "8px 12px", marginBottom: 10,
-              fontFamily: "monospace", fontSize: 11, color: "#6b6560",
+              fontFamily: "monospace", fontSize: 11, color: "#3c3c43",
               wordBreak: "break-all", lineHeight: 1.5,
             }}>
               {url}
@@ -2523,7 +2258,7 @@ function ShareButton({ to, db, updateDB }) {
                 onClick={copyLink}
                 style={{
                   padding: "9px 6px", borderRadius: 10, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 700,
-                  background: state === "copied" ? "#059669" : "linear-gradient(135deg,#e07d2a,#c45e0a)",
+                  background: state === "copied" ? "#16a34a" : "#000000",
                   color: "white",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                   transition: "background 0.2s",
@@ -2552,7 +2287,7 @@ function ShareButton({ to, db, updateDB }) {
                 onClick={() => setState("idle")}
                 style={{
                   padding: "9px 6px", borderRadius: 10, border: "1px solid #e8e4de", cursor: "pointer", fontSize: 11, fontWeight: 600,
-                  background: "#ffffff", color: "#a09890",
+                  background: "#ffffff", color: "#8e8e93",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
                 }}
               >
@@ -2563,7 +2298,7 @@ function ShareButton({ to, db, updateDB }) {
             {/* Who can access note */}
             <div style={{ marginTop: 10, display: "flex", gap: 6, alignItems: "flex-start" }}>
               <span style={{ fontSize: 11 }}></span>
-              <p style={{ fontSize: 10, color: "#a09890", lineHeight: 1.5 }}>
+              <p style={{ fontSize: 10, color: "#8e8e93", lineHeight: 1.5 }}>
                 Vendors & techs can open this on their phone, check off tasks, and leave their name — no account needed. Changes sync back to your board.
               </p>
             </div>
@@ -2645,24 +2380,24 @@ function SharedUnitView({ token }) {
   }
 
   if (loading) return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#f7f5f2" }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#f8fafc" }}>
       <style>{THEME.css}</style>
-      <div style={{ width: 52, height: 52, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ width: 52, height: 52, background: "#000000", borderRadius: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Icon name="wrench" size={26} style={{ color: "white" }} />
       </div>
       <div style={{ display: "flex", gap: 5 }}>
         {[0,1,2].map(i => <div key={i} className="skeleton" style={{ width: 8, height: 8, borderRadius: "50%", animationDelay: `${i*0.2}s` }} />)}
       </div>
-      <p style={{ fontSize: 13, color: "#a09890" }}>Loading make-ready board...</p>
+      <p style={{ fontSize: 13, color: "#8e8e93" }}>Loading make-ready board...</p>
     </div>
   );
 
   if (notFound) return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, background: "#f7f5f2", textAlign: "center" }}>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, background: "#f8fafc", textAlign: "center" }}>
       <style>{THEME.css}</style>
       <div style={{ fontSize: 48, marginBottom: 16 }}></div>
-      <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a1614", marginBottom: 8 }}>Link not found</h2>
-      <p style={{ fontSize: 14, color: "#a09890", lineHeight: 1.6 }}>This make-ready link may have expired or been removed by the property manager.</p>
+      <h2 style={{ fontSize: 20, fontWeight: 800, color: "#000000", marginBottom: 8 }}>Link not found</h2>
+      <p style={{ fontSize: 14, color: "#8e8e93", lineHeight: 1.6 }}>This make-ready link may have expired or been removed by the property manager.</p>
     </div>
   );
 
@@ -2672,7 +2407,7 @@ function SharedUnitView({ token }) {
   const totalStages = MR_STAGES.length;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f7f5f2", maxWidth: 480, margin: "0 auto" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto" }}>
       <style>{THEME.css}</style>
 
       {/*  Header bar  */}
@@ -2684,22 +2419,22 @@ function SharedUnitView({ token }) {
         display: "flex", alignItems: "center", justifyContent: "space-between",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 34, height: 34, background: "#000000", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon name="wrench" size={16} style={{ color: "white" }} />
           </div>
           <div>
             <p style={{ fontSize: 11, fontWeight: 700, color: "#e07d2a", letterSpacing: "0.06em", textTransform: "uppercase" }}>Mainlync</p>
-            <p style={{ fontSize: 10, color: "#a09890" }}>Make-Ready Board</p>
+            <p style={{ fontSize: 10, color: "#8e8e93" }}>Make-Ready Board</p>
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
           {saving ? (
             <p style={{ fontSize: 10, color: "#e07d2a" }}>Saving...</p>
           ) : lastSaved ? (
-            <p style={{ fontSize: 10, color: "#a09890" }}>Saved {timeAgo(lastSaved.toISOString())}</p>
+            <p style={{ fontSize: 10, color: "#8e8e93" }}>Saved {timeAgo(lastSaved.toISOString())}</p>
           ) : null}
           {visitorName && (
-            <p style={{ fontSize: 10, color: "#a09890" }}>Logged as <span style={{ color: "#f0a05a", fontWeight: 700 }}>{visitorName}</span></p>
+            <p style={{ fontSize: 10, color: "#8e8e93" }}>Logged as <span style={{ color: "#f0a05a", fontWeight: 700 }}>{visitorName}</span></p>
           )}
         </div>
       </div>
@@ -2714,26 +2449,26 @@ function SharedUnitView({ token }) {
         }}>
           {to.is_ready && (
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, background: "#dcfce7", border: "1px solid #05966935", borderRadius: 10, padding: "7px 12px" }}>
-              <Icon name="check_circle" size={16} style={{ color: "#059669" }} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#059669" }}>This unit is Move-In Ready!</span>
+              <Icon name="check_circle" size={16} style={{ color: "#16a34a" }} />
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a" }}>This unit is Move-In Ready!</span>
             </div>
           )}
 
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
             <div>
-              <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", lineHeight: 1.1 }}>Unit {to.unit_number}</h1>
-              <p style={{ fontSize: 13, color: "#6b6560", marginTop: 4 }}>{to.property_name}</p>
+              <h1 style={{ fontSize: 26, fontWeight: 800, color: "#000000", lineHeight: 1.1 }}>Unit {to.unit_number}</h1>
+              <p style={{ fontSize: 13, color: "#3c3c43", marginTop: 4 }}>{to.property_name}</p>
             </div>
             <div style={{ textAlign: "right" }}>
               <span style={{
                 fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 8,
                 background: to.lease_status === "leased" ? "#dcfce7" : "#f0b40015",
-                color: to.lease_status === "leased" ? "#059669" : "#f5d05e",
+                color: to.lease_status === "leased" ? "#16a34a" : "#f5d05e",
                 border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#f0b40035"}`,
               }}>
                 {to.lease_status === "leased" ? " Leased" : " Unleased"}
               </span>
-              <p style={{ fontSize: 11, color: daysLeft < 0 ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#a09890", marginTop: 5, fontWeight: 600 }}>
+              <p style={{ fontSize: 11, color: daysLeft < 0 ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#8e8e93", marginTop: 5, fontWeight: 600 }}>
                 {daysLeft < 0 ? ` ${Math.abs(daysLeft)}d overdue` : daysLeft === 0 ? "Due today" : `${daysLeft}d to target`}
               </p>
             </div>
@@ -2743,25 +2478,25 @@ function SharedUnitView({ token }) {
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
             {/* Big percentage */}
             <div style={{ textAlign: "center", flexShrink: 0 }}>
-              <div style={{ fontSize: 36, fontWeight: 800, color: pct === 100 ? "#059669" : "#f0a05a", lineHeight: 1 }}>{pct}%</div>
-              <div style={{ fontSize: 10, color: "#a09890", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>Complete</div>
+              <div style={{ fontSize: 36, fontWeight: 800, color: pct === 100 ? "#16a34a" : "#f0a05a", lineHeight: 1 }}>{pct}%</div>
+              <div style={{ fontSize: 10, color: "#8e8e93", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 2 }}>Complete</div>
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ height: 8, borderRadius: 4, background: "#f0ece6", overflow: "hidden", marginBottom: 8 }}>
+              <div style={{ height: 8, borderRadius: 4, background: "#f2f2f7", overflow: "hidden", marginBottom: 8 }}>
                 <motion.div
                   animate={{ width: `${pct}%` }}
                   transition={{ duration: 0.8, ease: "easeOut" }}
-                  style={{ height: "100%", borderRadius: 4, background: pct === 100 ? "#059669" : "linear-gradient(90deg,#e07d2a,#c45e0a)" }}
+                  style={{ height: "100%", borderRadius: 4, background: pct === 100 ? "#16a34a" : "linear-gradient(90deg,#e07d2a,#c45e0a)" }}
                 />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                <div style={{ background: "#f9f7f4", borderRadius: 8, padding: "6px 10px" }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "#059669" }}>{doneStages}</div>
-                  <div style={{ fontSize: 9, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Stages Done</div>
+                <div style={{ background: "#f2f2f7", borderRadius: 8, padding: "6px 10px" }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: "#16a34a" }}>{doneStages}</div>
+                  <div style={{ fontSize: 9, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Stages Done</div>
                 </div>
-                <div style={{ background: "#f9f7f4", borderRadius: 8, padding: "6px 10px" }}>
+                <div style={{ background: "#f2f2f7", borderRadius: 8, padding: "6px 10px" }}>
                   <div style={{ fontSize: 16, fontWeight: 800, color: "#7fa8ff" }}>{totalStages - doneStages}</div>
-                  <div style={{ fontSize: 9, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Remaining</div>
+                  <div style={{ fontSize: 9, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>Remaining</div>
                 </div>
               </div>
             </div>
@@ -2781,15 +2516,15 @@ function SharedUnitView({ token }) {
                   onClick={() => setOpenStageId(openStageId === def.id ? null : def.id)}
                   style={{
                     padding: "7px 8px", borderRadius: 10, cursor: "pointer", textAlign: "left",
-                    background: isDone ? def.bg : isIP ? def.bg : "#f9f7f4",
-                    border: `1px solid ${isDone ? def.accent : isIP ? def.accent : "#f0ece6"}`,
+                    background: isDone ? def.bg : isIP ? def.bg : "#f2f2f7",
+                    border: `1px solid ${isDone ? def.accent : isIP ? def.accent : "#f2f2f7"}`,
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 2 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: isDone ? def.dot : isIP ? def.dot : "#d6d0c8", flexShrink: 0 }} />
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: isDone ? def.dot : isIP ? def.dot : "#c6c6c8", flexShrink: 0 }} />
                     <span style={{ fontSize: 9, fontWeight: 700, color: isDone ? def.color : isIP ? def.color : "#b8b0a8", textTransform: "uppercase", letterSpacing: "0.03em" }}>{def.short}</span>
                   </div>
-                  <div style={{ fontSize: 9, color: isDone ? "#059669" : isIP ? def.color : "#d6d0c8", fontWeight: 600 }}>{done}/{total}</div>
+                  <div style={{ fontSize: 9, color: isDone ? "#16a34a" : isIP ? def.color : "#c6c6c8", fontWeight: 600 }}>{done}/{total}</div>
                 </button>
               );
             })}
@@ -2800,27 +2535,27 @@ function SharedUnitView({ token }) {
         {!visitorName ? (
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            style={{ background: "#f0ece6", border: "1px solid #e07d2a30", borderRadius: 14, padding: "14px 16px", marginBottom: 16, display: "flex", gap: 12, alignItems: "center" }}
+            style={{ background: "#f2f2f7", border: "1px solid #e07d2a30", borderRadius: 14, padding: "14px 16px", marginBottom: 16, display: "flex", gap: 12, alignItems: "center" }}
           >
             <div style={{ width: 36, height: 36, background: "#e07d2a20", border: "1px solid #e07d2a40", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Icon name="users" size={16} style={{ color: "#f0a05a" }} />
             </div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614", marginBottom: 2 }}>Who's working today?</p>
-              <p style={{ fontSize: 11, color: "#a09890" }}>Enter your name to check off tasks</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: "#000000", marginBottom: 2 }}>Who's working today?</p>
+              <p style={{ fontSize: 11, color: "#8e8e93" }}>Enter your name to check off tasks</p>
             </div>
             <button
               onClick={() => setShowNamePrompt(true)}
-              style={{ padding: "8px 14px", borderRadius: 10, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", border: "none", color: "white", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
+              style={{ padding: "8px 14px", borderRadius: 10, background: "#000000", border: "none", color: "white", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}
             >
               Sign In
             </button>
           </motion.div>
         ) : (
           <div style={{ background: "#dcfce7", border: "1px solid #05966930", borderRadius: 12, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-            <Icon name="check_circle" size={14} style={{ color: "#059669" }} />
-            <span style={{ fontSize: 12, color: "#059669", fontWeight: 600 }}>Signed in as {visitorName}</span>
-            <button onClick={() => setVisitorName("")} style={{ marginLeft: "auto", fontSize: 11, color: "#a09890", background: "none", border: "none", cursor: "pointer" }}>Change</button>
+            <Icon name="check_circle" size={14} style={{ color: "#16a34a" }} />
+            <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>Signed in as {visitorName}</span>
+            <button onClick={() => setVisitorName("")} style={{ marginLeft: "auto", fontSize: 11, color: "#8e8e93", background: "none", border: "none", cursor: "pointer" }}>Change</button>
           </div>
         )}
 
@@ -2836,10 +2571,10 @@ function SharedUnitView({ token }) {
             const isOpen = openStageId === def.id;
 
             const statusStyle = isDone
-              ? { bg: "#dcfce7", border: "#86efac", color: "#059669" }
+              ? { bg: "#dcfce7", border: "#86efac", color: "#16a34a" }
               : isIP
               ? { bg: def.bg, border: def.accent, color: def.color }
-              : { bg: "#f9f7f4", border: "#f0ece6", color: "#a09890" };
+              : { bg: "#f2f2f7", border: "#f2f2f7", color: "#8e8e93" };
 
             return (
               <div key={def.id}>
@@ -2858,21 +2593,21 @@ function SharedUnitView({ token }) {
                   <div style={{
                     width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    background: isDone ? "#059669" : isIP ? def.dot : "#e8e4de",
+                    background: isDone ? "#16a34a" : isIP ? def.dot : "#e5e5ea",
                     border: !isDone && !isIP ? "1.5px solid #d6d0c8" : "none",
                   }}>
                     {isDone
-                      ? <Icon name="check" size={12} style={{ color: "#f7f5f2" }} />
+                      ? <Icon name="check" size={12} style={{ color: "#f8fafc" }} />
                       : isIP
-                      ? <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f7f5f2" }} />
+                      ? <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#f8fafc" }} />
                       : null
                     }
                   </div>
                   <span style={{ fontSize: 14, fontWeight: 700, flex: 1, textAlign: "left", color: statusStyle.color }}>{def.label}</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: taskDone === taskTotal && taskTotal > 0 ? "#059669" : statusStyle.color }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: taskDone === taskTotal && taskTotal > 0 ? "#16a34a" : statusStyle.color }}>
                     {taskDone}/{taskTotal}
                   </span>
-                  <Icon name={isOpen ? "chevron_down" : "chevron_right"} size={16} style={{ color: "#a09890" }} />
+                  <Icon name={isOpen ? "chevron_down" : "chevron_right"} size={16} style={{ color: "#8e8e93" }} />
                 </button>
 
                 <AnimatePresence>
@@ -2891,12 +2626,12 @@ function SharedUnitView({ token }) {
                     >
                       {/* Stage status indicator */}
                       <div style={{ padding: "8px 14px 6px", borderBottom: "1px solid #ede9e3", display: "flex", alignItems: "center", gap: 6 }}>
-                        <div style={{ width: 7, height: 7, borderRadius: "50%", background: isDone ? "#059669" : isIP ? def.dot : "#d6d0c8" }} />
-                        <span style={{ fontSize: 11, fontWeight: 600, color: isDone ? "#059669" : isIP ? def.color : "#a09890" }}>
+                        <div style={{ width: 7, height: 7, borderRadius: "50%", background: isDone ? "#16a34a" : isIP ? def.dot : "#c6c6c8" }} />
+                        <span style={{ fontSize: 11, fontWeight: 600, color: isDone ? "#16a34a" : isIP ? def.color : "#8e8e93" }}>
                           {isDone ? "Stage complete" : isIP ? "In progress" : "Not started"}
                         </span>
                         {taskDone > 0 && (
-                          <span style={{ marginLeft: "auto", fontSize: 10, color: "#a09890" }}>
+                          <span style={{ marginLeft: "auto", fontSize: 10, color: "#8e8e93" }}>
                             {taskDone} of {taskTotal} tasks done
                           </span>
                         )}
@@ -2922,12 +2657,12 @@ function SharedUnitView({ token }) {
                                 transition: "box-shadow 0.3s",
                               }}
                             >
-                              {tk.completed && <Icon name="check" size={13} style={{ color: "#f7f5f2" }} />}
+                              {tk.completed && <Icon name="check" size={13} style={{ color: "#f8fafc" }} />}
                             </button>
                             <div style={{ flex: 1 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
                                 <span style={{ fontSize: 16 }}>{tk.icon}</span>
-                                <span style={{ fontSize: 13, color: tk.completed ? "#a09890" : "#3d3530", textDecoration: tk.completed ? "line-through" : "none", fontWeight: tk.completed ? 400 : 500, lineHeight: 1.4 }}>
+                                <span style={{ fontSize: 13, color: tk.completed ? "#8e8e93" : "#000000", textDecoration: tk.completed ? "line-through" : "none", fontWeight: tk.completed ? 400 : 500, lineHeight: 1.4 }}>
                                   {tk.label}
                                 </span>
                               </div>
@@ -2939,7 +2674,7 @@ function SharedUnitView({ token }) {
                                     </span>
                                   )}
                                   {tk.assignee_name && tk.assignee_name !== tk.completed_by && (
-                                    <span style={{ fontSize: 10, color: "#a09890" }}>assigned to {tk.assignee_name}</span>
+                                    <span style={{ fontSize: 10, color: "#8e8e93" }}>assigned to {tk.assignee_name}</span>
                                   )}
                                   {tk.completed_at && (
                                     <span style={{ fontSize: 10, color: "#333348" }}>{timeAgo(tk.completed_at)}</span>
@@ -2968,13 +2703,13 @@ function SharedUnitView({ token }) {
         {/*  Powered by footer  */}
         <div style={{ marginTop: 40, textAlign: "center", padding: "20px 0" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 16px", background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 100 }}>
-            <div style={{ width: 20, height: 20, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 20, height: 20, background: "#000000", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="wrench" size={10} style={{ color: "white" }} />
             </div>
-            <span style={{ fontSize: 11, color: "#a09890", fontWeight: 600 }}>Powered by </span>
-            <span style={{ fontSize: 11, fontWeight: 800, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Mainlync</span>
+            <span style={{ fontSize: 11, color: "#8e8e93", fontWeight: 600 }}>Powered by </span>
+            <span style={{ fontSize: 11, fontWeight: 800, background: "#000000", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Mainlync</span>
           </div>
-          <p style={{ fontSize: 10, color: "#c8c0b8", marginTop: 8 }}>Make-ready coordination for property teams</p>
+          <p style={{ fontSize: 10, color: "#c7c7cc", marginTop: 8 }}>Make-ready coordination for property teams</p>
         </div>
       </div>
 
@@ -2991,9 +2726,9 @@ function SharedUnitView({ token }) {
               onClick={e => e.stopPropagation()}
               style={{ width: "100%", background: "#ffffff", borderRadius: "22px 22px 0 0", border: "1px solid #d6d0c8", borderBottom: "none", padding: "24px 20px 36px" }}
             >
-              <div style={{ width: 36, height: 4, background: "#d6d0c8", borderRadius: 2, margin: "0 auto 20px" }} />
-              <h3 style={{ fontSize: 18, fontWeight: 800, color: "#1a1614", marginBottom: 6 }}>What's your name?</h3>
-              <p style={{ fontSize: 13, color: "#a09890", marginBottom: 20, lineHeight: 1.5 }}>
+              <div style={{ width: 36, height: 4, background: "#c6c6c8", borderRadius: 2, margin: "0 auto 20px" }} />
+              <h3 style={{ fontSize: 18, fontWeight: 800, color: "#000000", marginBottom: 6 }}>What's your name?</h3>
+              <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 20, lineHeight: 1.5 }}>
                 Your name will be recorded when you check off tasks so the property manager knows who did what.
               </p>
               <input
@@ -3010,8 +2745,8 @@ function SharedUnitView({ token }) {
                 disabled={!nameInput.trim()}
                 style={{
                   width: "100%", padding: "13px", borderRadius: 13, border: "none",
-                  background: nameInput.trim() ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6",
-                  color: nameInput.trim() ? "white" : "#a09890",
+                  background: nameInput.trim() ? "#000000" : "#f2f2f7",
+                  color: nameInput.trim() ? "white" : "#8e8e93",
                   fontSize: 14, fontWeight: 700, cursor: nameInput.trim() ? "pointer" : "default",
                   boxShadow: nameInput.trim() ? "0 4px 14px #e07d2a40" : "none",
                 }}
@@ -3243,11 +2978,11 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
       <div style={{ height: 58, background: "#f4f1ed", borderBottom: "1px solid #f0ece6", display: "flex", alignItems: "center", padding: "0 24px", gap: 20, flexShrink: 0, position: "sticky", top: 0, zIndex: 100 }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 8 }}>
-          <div style={{ width: 32, height: 32, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 32, height: 32, background: "#000000", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon name="wrench" size={16} style={{ color: "white" }} />
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 800, color: "#1a1614", lineHeight: 1 }}>Mainlync</p>
+            <p style={{ fontSize: 13, fontWeight: 800, color: "#000000", lineHeight: 1 }}>Mainlync</p>
             <p style={{ fontSize: 9, color: "#e07d2a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>PM Hub</p>
           </div>
         </div>
@@ -3257,8 +2992,8 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
           {[["board","grid","Make Ready Board"], ["analytics","chart","Analytics"]].map(([t, icon, label]) => (
             <button key={t} onClick={() => setActiveTab(t)} style={{
               padding: "6px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
-              background: activeTab === t ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "transparent",
-              color: activeTab === t ? "white" : "#a09890",
+              background: activeTab === t ? "#000000" : "transparent",
+              color: activeTab === t ? "white" : "#8e8e93",
               display: "flex", alignItems: "center", gap: 6,
             }}>
               <Icon name={icon} size={13} /> {label}
@@ -3270,7 +3005,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
         <select
           value={filterProperty}
           onChange={e => setFilterProperty(e.target.value)}
-          style={{ padding: "6px 12px", background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 8, color: "#3d3530", fontSize: 12, cursor: "pointer", outline: "none" }}
+          style={{ padding: "6px 12px", background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 8, color: "#000000", fontSize: 12, cursor: "pointer", outline: "none" }}
         >
           <option value="all">All Properties</option>
           {db.properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -3283,12 +3018,12 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{
             width: 7, height: 7, borderRadius: "50%",
-            background: syncPulse ? "#059669" : "#d6d0c8",
+            background: syncPulse ? "#16a34a" : "#c6c6c8",
             boxShadow: syncPulse ? "0 0 8px #059669" : "none",
             animation: syncPulse ? "pulse-dot 0.6s ease" : "none",
             transition: "background 0.3s",
           }} />
-          <span style={{ fontSize: 11, color: "#a09890" }}>
+          <span style={{ fontSize: 11, color: "#8e8e93" }}>
             {lastSync ? `Synced ${timeAgo(lastSync)}` : "Syncing…"}
           </span>
         </div>
@@ -3298,7 +3033,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
           onClick={() => setShowNewTurnover(true)}
           className="desk-btn"
           style={{
-            padding: "8px 16px", background: "linear-gradient(135deg,#e07d2a,#c45e0a)", border: "none", borderRadius: 10,
+            padding: "8px 16px", background: "#000000", border: "none", borderRadius: 10,
             color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer",
             display: "flex", alignItems: "center", gap: 7, boxShadow: "0 2px 12px #e07d2a40",
           }}
@@ -3312,14 +3047,14 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
         {[
           { label: "Total Active",  value: stats.total,   color: "#f0a05a" },
           { label: "In Progress",   value: stats.active,  color: "#7fa8ff" },
-          { label: "Move-In Ready", value: stats.ready,   color: "#059669" },
-          { label: "Overdue",       value: stats.overdue, color: stats.overdue > 0 ? "#dc2626" : "#a09890" },
+          { label: "Move-In Ready", value: stats.ready,   color: "#16a34a" },
+          { label: "Overdue",       value: stats.overdue, color: stats.overdue > 0 ? "#dc2626" : "#8e8e93" },
           { label: "Avg Days Open", value: stats.avgDays, color: "#ffad5c" },
         ].map(s => (
           <div key={s.label} style={{ display: "flex", align: "center", gap: 10 }}>
             <span style={{ fontSize: 22, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</span>
-            <span style={{ fontSize: 10, color: "#a09890", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "center", lineHeight: 1.3 }}>{s.label}</span>
-            <div style={{ width: 1, background: "#f0ece6", margin: "0 4px", alignSelf: "stretch" }} />
+            <span style={{ fontSize: 10, color: "#8e8e93", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", alignSelf: "center", lineHeight: 1.3 }}>{s.label}</span>
+            <div style={{ width: 1, background: "#f2f2f7", margin: "0 4px", alignSelf: "stretch" }} />
           </div>
         ))}
       </div>
@@ -3369,7 +3104,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
                       ))}
                       {columnUnits.length === 0 && (
                         <div style={{ border: "1px dashed #f0ece6", borderRadius: 12, padding: "20px 12px", textAlign: "center" }}>
-                          <p style={{ fontSize: 11, color: "#c8c0b8" }}>No units</p>
+                          <p style={{ fontSize: 11, color: "#c7c7cc" }}>No units</p>
                         </div>
                       )}
                     </div>
@@ -3380,9 +3115,9 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
               {/* Ready column */}
               <div style={{ width: 240, flexShrink: 0, display: "flex", flexDirection: "column", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#059669", boxShadow: "0 0 8px #05966960" }} />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>Move-In Ready</span>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#059669", background: "#dcfce7", border: "1px solid #05966935", borderRadius: 6, padding: "1px 7px" }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#16a34a", boxShadow: "0 0 8px #05966960" }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", textTransform: "uppercase", letterSpacing: "0.06em", flex: 1 }}>Move-In Ready</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#16a34a", background: "#dcfce7", border: "1px solid #05966935", borderRadius: 6, padding: "1px 7px" }}>
                     {filtered.filter(u => u.is_ready).length}
                   </span>
                 </div>
@@ -3391,7 +3126,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
                     <DeskUnitCard
                       key={to.id}
                       to={to}
-                      stageDef={{ id: "ready", label: "Ready", color: "#059669", bg: "#dcfce7", accent: "#86efac", dot: "#059669" }}
+                      stageDef={{ id: "ready", label: "Ready", color: "#16a34a", bg: "#dcfce7", accent: "#86efac", dot: "#16a34a" }}
                       db={db}
                       isSelected={selectedUnit === to.id}
                       onClick={() => setSelectedUnit(selectedUnit === to.id ? null : to.id)}
@@ -3438,7 +3173,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
             initial={{ opacity: 0, y: 16, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: 16, x: "-50%" }}
-            style={{ position: "fixed", bottom: 24, left: "50%", zIndex: 200, background: "#e8e4de", border: "1px solid #e07d2a40", borderRadius: 12, padding: "10px 18px", fontSize: 13, fontWeight: 600, color: "#1a1614", boxShadow: "0 4px 24px rgba(0,0,0,0.5)", whiteSpace: "nowrap" }}
+            style={{ position: "fixed", bottom: 24, left: "50%", zIndex: 200, background: "#e5e5ea", border: "1px solid #e07d2a40", borderRadius: 12, padding: "10px 18px", fontSize: 13, fontWeight: 600, color: "#000000", boxShadow: "0 4px 24px rgba(0,0,0,0.5)", whiteSpace: "nowrap" }}
           >
             {notification}
           </motion.div>
@@ -3475,7 +3210,7 @@ function DeskUnitCard({ to, stageDef, db, isSelected, onClick, onSetStageStatus,
       onClick={onClick}
       style={{
         background: isSelected ? "#f4f1ed" : "#ffffff",
-        border: `1px solid ${isSelected ? "#e07d2a60" : "#e8e4de"}`,
+        border: `1px solid ${isSelected ? "#e07d2a60" : "#e5e5ea"}`,
         borderRadius: 12, padding: 12, cursor: "pointer",
         boxShadow: isSelected ? "0 0 0 1px #e07d2a40, 0 4px 20px rgba(124,106,247,0.12)" : "none",
         transition: "border-color 0.15s, background 0.15s",
@@ -3488,22 +3223,22 @@ function DeskUnitCard({ to, stageDef, db, isSelected, onClick, onSetStageStatus,
             <span style={{ fontSize: 11, fontWeight: 800, color: stageDef.color }}>{to.unit_number}</span>
           </div>
           <div>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "#1a1614", lineHeight: 1.2 }}>Unit {to.unit_number}</p>
-            <p style={{ fontSize: 10, color: "#a09890", lineHeight: 1.2 }}>{to.property_name?.split(" ").slice(0, 2).join(" ")}</p>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#000000", lineHeight: 1.2 }}>Unit {to.unit_number}</p>
+            <p style={{ fontSize: 10, color: "#8e8e93", lineHeight: 1.2 }}>{to.property_name?.split(" ").slice(0, 2).join(" ")}</p>
           </div>
         </div>
         {to.is_ready ? (
-          <span style={{ fontSize: 9, fontWeight: 700, color: "#059669", background: "#dcfce7", border: "1px solid #05966930", borderRadius: 6, padding: "2px 6px" }}> Ready</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: "#16a34a", background: "#dcfce7", border: "1px solid #05966930", borderRadius: 6, padding: "2px 6px" }}> Ready</span>
         ) : isOverdue ? (
           <span style={{ fontSize: 9, fontWeight: 700, color: "#dc2626" }}> {Math.abs(daysLeft)}d late</span>
         ) : (
-          <span style={{ fontSize: 9, color: "#a09890" }}>{daysLeft}d left</span>
+          <span style={{ fontSize: 9, color: "#8e8e93" }}>{daysLeft}d left</span>
         )}
       </div>
 
       {/* Overall progress bar */}
-      <div style={{ height: 3, borderRadius: 2, background: "#f0ece6", overflow: "hidden", marginBottom: 8 }}>
-        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: pct === 100 ? "#059669" : `linear-gradient(90deg, ${stageDef.dot}, ${stageDef.dot}88)`, transition: "width 0.4s" }} />
+      <div style={{ height: 3, borderRadius: 2, background: "#f2f2f7", overflow: "hidden", marginBottom: 8 }}>
+        <div style={{ height: "100%", width: `${pct}%`, borderRadius: 2, background: pct === 100 ? "#16a34a" : `linear-gradient(90deg, ${stageDef.dot}, ${stageDef.dot}88)`, transition: "width 0.4s" }} />
       </div>
 
       {/* Stage task count + assigned member */}
@@ -3538,7 +3273,7 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
           <div>
             <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>{to.property_name}</p>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a1614", lineHeight: 1.1 }}>Unit {to.unit_number}</h2>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#000000", lineHeight: 1.1 }}>Unit {to.unit_number}</h2>
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             {!confirmDelete ? (
@@ -3548,44 +3283,44 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
             ) : (
               <button onClick={() => onDelete(to.id)} style={{ padding: "5px 10px", background: "#dc2626", border: "none", borderRadius: 8, fontSize: 11, fontWeight: 700, color: "white", cursor: "pointer" }}>Delete</button>
             )}
-            <button onClick={onClose} style={{ width: 30, height: 30, background: "#f0ece6", border: "1px solid #d6d0c8", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <Icon name="x" size={13} style={{ color: "#6b6560" }} />
+            <button onClick={onClose} style={{ width: 30, height: 30, background: "#f2f2f7", border: "1px solid #d6d0c8", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <Icon name="x" size={13} style={{ color: "#3c3c43" }} />
             </button>
           </div>
         </div>
 
         {/* Meta */}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 7, background: to.lease_status === "leased" ? "#dcfce7" : "#f0b40012", color: to.lease_status === "leased" ? "#059669" : "#f5d05e", border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#f0b40030"}` }}>
+          <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 7, background: to.lease_status === "leased" ? "#dcfce7" : "#f0b40012", color: to.lease_status === "leased" ? "#16a34a" : "#f5d05e", border: `1px solid ${to.lease_status === "leased" ? "#86efac" : "#f0b40030"}` }}>
             {to.lease_status === "leased" ? " Leased" : " Unleased"}
           </span>
-          <span style={{ fontSize: 10, fontWeight: 600, color: daysLeft < 0 ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#a09890" }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: daysLeft < 0 ? "#dc2626" : daysLeft <= 3 ? "#ffad5c" : "#8e8e93" }}>
             {daysLeft < 0 ? ` ${Math.abs(daysLeft)}d overdue` : `${daysLeft}d to target`}
           </span>
-          {to.assigned_name && <span style={{ fontSize: 10, color: "#6b6560" }}> {to.assigned_name}</span>}
+          {to.assigned_name && <span style={{ fontSize: 10, color: "#3c3c43" }}> {to.assigned_name}</span>}
         </div>
 
         {/* Progress */}
         <div style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-            <span style={{ fontSize: 11, color: "#a09890", fontWeight: 600 }}>Overall Progress</span>
-            <span style={{ fontSize: 11, fontWeight: 800, color: pct === 100 ? "#059669" : "#e07d2a" }}>{pct}%</span>
+            <span style={{ fontSize: 11, color: "#8e8e93", fontWeight: 600 }}>Overall Progress</span>
+            <span style={{ fontSize: 11, fontWeight: 800, color: pct === 100 ? "#16a34a" : "#e07d2a" }}>{pct}%</span>
           </div>
-          <div style={{ height: 5, borderRadius: 3, background: "#f0ece6", overflow: "hidden" }}>
-            <motion.div animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} style={{ height: "100%", borderRadius: 3, background: pct === 100 ? "#059669" : "linear-gradient(90deg,#e07d2a,#c45e0a)" }} />
+          <div style={{ height: 5, borderRadius: 3, background: "#f2f2f7", overflow: "hidden" }}>
+            <motion.div animate={{ width: `${pct}%` }} transition={{ duration: 0.5 }} style={{ height: "100%", borderRadius: 3, background: pct === 100 ? "#16a34a" : "linear-gradient(90deg,#e07d2a,#c45e0a)" }} />
           </div>
         </div>
 
         {/* Mark ready button */}
         {to.is_ready ? (
-          <button onClick={() => onMarkReady(to.id, false)} style={{ width: "100%", padding: "9px", borderRadius: 10, background: "#dcfce7", border: "1px solid #05966935", color: "#059669", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          <button onClick={() => onMarkReady(to.id, false)} style={{ width: "100%", padding: "9px", borderRadius: 10, background: "#dcfce7", border: "1px solid #05966935", color: "#16a34a", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
              Move-In Ready — Click to Reopen
           </button>
         ) : (
           <button onClick={() => onMarkReady(to.id, true)} style={{
             width: "100%", padding: "9px", borderRadius: 10, border: "none",
-            background: allDone ? "linear-gradient(135deg,#059669,#10b981)" : "#f0ece6",
-            color: allDone ? "white" : "#a09890", fontSize: 12, fontWeight: 700, cursor: allDone ? "pointer" : "default",
+            background: allDone ? "linear-gradient(135deg,#059669,#10b981)" : "#f2f2f7",
+            color: allDone ? "white" : "#8e8e93", fontSize: 12, fontWeight: 700, cursor: allDone ? "pointer" : "default",
             boxShadow: allDone ? "0 3px 12px #05966940" : "none",
           }}>
             {allDone ? "Mark Move-In Ready " : `${(to.stages||[]).filter(s=>s.status==="done").length}/${MR_STAGES.length} stages done`}
@@ -3595,7 +3330,7 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
 
       {/* Stage list — scrollable */}
       <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
-        <p style={{ fontSize: 10, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Stages</p>
+        <p style={{ fontSize: 10, color: "#8e8e93", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Stages</p>
         {MR_STAGES.map(def => {
           const stageObj = (to.stages||[]).find(s => s.id === def.id) || { id: def.id, status: "idle", tasks: [] };
           const tasksDone = stageObj.tasks?.filter(t => t.completed).length || 0;
@@ -3606,17 +3341,17 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
 
           return (
             <div key={def.id} style={{ marginBottom: 6 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: isOpen ? "10px 10px 0 0" : 10, background: isDone ? "#f0fdf4" : isIP ? def.bg : "#f9f7f4", border: `1px solid ${isDone ? "#86efac" : isIP ? def.accent : "#f0ece6"}`, borderBottom: isOpen ? "none" : undefined }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: isOpen ? "10px 10px 0 0" : 10, background: isDone ? "#f0fdf4" : isIP ? def.bg : "#f2f2f7", border: `1px solid ${isDone ? "#86efac" : isIP ? def.accent : "#f2f2f7"}`, borderBottom: isOpen ? "none" : undefined }}>
                 {/* Status dot */}
-                <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isDone ? "#059669" : isIP ? def.dot : "#f0ece6", border: !isDone && !isIP ? "1.5px solid #d6d0c8" : "none" }}>
-                  {isDone ? <Icon name="check" size={10} style={{ color: "#f7f5f2" }} /> : isIP ? <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f7f5f2" }} /> : null}
+                <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isDone ? "#16a34a" : isIP ? def.dot : "#f2f2f7", border: !isDone && !isIP ? "1.5px solid #d6d0c8" : "none" }}>
+                  {isDone ? <Icon name="check" size={10} style={{ color: "#f8fafc" }} /> : isIP ? <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f8fafc" }} /> : null}
                 </div>
 
                 {/* Label */}
-                <span style={{ fontSize: 12, fontWeight: 700, color: isDone ? "#059669" : isIP ? def.color : "#a09890", flex: 1 }}>{def.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: isDone ? "#16a34a" : isIP ? def.color : "#8e8e93", flex: 1 }}>{def.label}</span>
 
                 {/* Task count */}
-                <span style={{ fontSize: 10, color: isDone ? "#059669" : isIP ? def.color : "#b8b0a8", fontWeight: 600 }}>{tasksDone}/{tasksTotal}</span>
+                <span style={{ fontSize: 10, color: isDone ? "#16a34a" : isIP ? def.color : "#b8b0a8", fontWeight: 600 }}>{tasksDone}/{tasksTotal}</span>
 
                 {/* Status toggles */}
                 <div style={{ display: "flex", gap: 3 }}>
@@ -3631,8 +3366,8 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
                       onClick={(e) => { e.stopPropagation(); onSetStageStatus(to.id, def.id, opt.val); }}
                       style={{
                         width: 22, height: 22, borderRadius: 6, border: "none", cursor: "pointer",
-                        background: stageObj.status === opt.val ? (opt.val === "done" ? "#059669" : opt.val === "in_progress" ? def.dot : "#d6d0c8") : "#f0ece6",
-                        color: stageObj.status === opt.val ? "#f7f5f2" : "#b8b0a8",
+                        background: stageObj.status === opt.val ? (opt.val === "done" ? "#16a34a" : opt.val === "in_progress" ? def.dot : "#c6c6c8") : "#f2f2f7",
+                        color: stageObj.status === opt.val ? "#f8fafc" : "#b8b0a8",
                         fontSize: 10, fontWeight: 700,
                         display: "flex", alignItems: "center", justifyContent: "center",
                       }}
@@ -3642,7 +3377,7 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
 
                 {/* Expand */}
                 <button onClick={() => setOpenStage(isOpen ? null : def.id)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                  <Icon name={isOpen ? "chevron_down" : "chevron_right"} size={13} style={{ color: "#a09890" }} />
+                  <Icon name={isOpen ? "chevron_down" : "chevron_right"} size={13} style={{ color: "#8e8e93" }} />
                 </button>
               </div>
 
@@ -3650,11 +3385,11 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
               <AnimatePresence>
                 {isOpen && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                    style={{ overflow: "hidden", background: "#f4f1ed", border: `1px solid ${isIP ? def.accent : "#f0ece6"}`, borderTop: "none", borderRadius: "0 0 10px 10px" }}
+                    style={{ overflow: "hidden", background: "#f4f1ed", border: `1px solid ${isIP ? def.accent : "#f2f2f7"}`, borderTop: "none", borderRadius: "0 0 10px 10px" }}
                   >
                     {/* Assign member */}
                     <div style={{ padding: "8px 12px", borderBottom: "1px solid #ede9e3" }}>
-                      <p style={{ fontSize: 10, color: "#a09890", fontWeight: 600, marginBottom: 5 }}>ASSIGN TO</p>
+                      <p style={{ fontSize: 10, color: "#8e8e93", fontWeight: 600, marginBottom: 5 }}>ASSIGN TO</p>
                       <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                         {db.team.map(m => (
                           <button
@@ -3662,9 +3397,9 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
                             onClick={() => onAssignStage(to.id, def.id, m.id)}
                             style={{
                               padding: "4px 10px", borderRadius: 100, fontSize: 10, fontWeight: 700, cursor: "pointer",
-                              background: stageObj.assigned_to === m.id ? "#e07d2a" : "#f0ece6",
-                              color: stageObj.assigned_to === m.id ? "white" : "#a09890",
-                              border: `1px solid ${stageObj.assigned_to === m.id ? "#e07d2a" : "#d6d0c8"}`,
+                              background: stageObj.assigned_to === m.id ? "#e07d2a" : "#f2f2f7",
+                              color: stageObj.assigned_to === m.id ? "white" : "#8e8e93",
+                              border: `1px solid ${stageObj.assigned_to === m.id ? "#e07d2a" : "#c6c6c8"}`,
                             }}
                           >
                             {m.avatar} {m.name.split(" ")[0]}
@@ -3680,13 +3415,13 @@ function DeskUnitDetail({ to, db, onClose, onSetStageStatus, onAssignStage, onTo
                           onClick={() => onToggleTask(to.id, def.id, tk.id)}
                           style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1, border: tk.completed ? "none" : "1.5px solid #b8b0a8", background: tk.completed ? def.dot : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
                         >
-                          {tk.completed && <Icon name="check" size={10} style={{ color: "#f7f5f2" }} />}
+                          {tk.completed && <Icon name="check" size={10} style={{ color: "#f8fafc" }} />}
                         </button>
-                        <span style={{ fontSize: 11, color: tk.completed ? "#a09890" : "#3d3530", textDecoration: tk.completed ? "line-through" : "none", lineHeight: 1.4 }}>
+                        <span style={{ fontSize: 11, color: tk.completed ? "#8e8e93" : "#000000", textDecoration: tk.completed ? "line-through" : "none", lineHeight: 1.4 }}>
                           {tk.icon} {tk.label}
                         </span>
                         {tk.completed_by && (
-                          <span style={{ fontSize: 9, color: "#a09890", marginLeft: "auto", whiteSpace: "nowrap" }}>{tk.completed_by}</span>
+                          <span style={{ fontSize: 9, color: "#8e8e93", marginLeft: "auto", whiteSpace: "nowrap" }}>{tk.completed_by}</span>
                         )}
                       </div>
                     ))}
@@ -3709,24 +3444,24 @@ function DeskActivityFeed({ log, db }) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
       <div style={{ padding: "14px 16px", borderBottom: "1px solid #f0ece6", flexShrink: 0 }}>
         <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 2 }}>Live Feed</p>
-        <h3 style={{ fontSize: 16, fontWeight: 800, color: "#1a1614" }}>Activity</h3>
-        <p style={{ fontSize: 11, color: "#a09890", marginTop: 2 }}>Updates from field team · auto-refreshes</p>
+        <h3 style={{ fontSize: 16, fontWeight: 800, color: "#000000" }}>Activity</h3>
+        <p style={{ fontSize: 11, color: "#8e8e93", marginTop: 2 }}>Updates from field team · auto-refreshes</p>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
         {log.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "40px 0", color: "#c8c0b8" }}>
+          <div style={{ textAlign: "center", padding: "40px 0", color: "#c7c7cc" }}>
             <div style={{ fontSize: 32, marginBottom: 10 }}></div>
             <p style={{ fontSize: 12, color: "#b8b0a8" }}>No activity yet</p>
-            <p style={{ fontSize: 11, color: "#d6d0c8", marginTop: 4 }}>Field updates will appear here in real time</p>
+            <p style={{ fontSize: 11, color: "#c6c6c8", marginTop: 4 }}>Field updates will appear here in real time</p>
           </div>
         ) : log.map((entry, i) => (
           <div key={entry.id || i} style={{ display: "flex", gap: 10, padding: "10px 0", borderBottom: i < log.length - 1 ? "1px solid #f0ece6" : "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: "#f0ece6", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <span style={{ fontSize: 13 }}>{icons[entry.type] || ""}</span>
             </div>
             <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 12, color: "#3d3530", lineHeight: 1.4 }}>{entry.text}</p>
+              <p style={{ fontSize: 12, color: "#000000", lineHeight: 1.4 }}>{entry.text}</p>
               {entry.ts && <p style={{ fontSize: 10, color: "#b8b0a8", marginTop: 3 }}>{timeAgo(entry.ts)}</p>}
             </div>
           </div>
@@ -3739,8 +3474,8 @@ function DeskActivityFeed({ log, db }) {
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {db.team.filter(m => m.is_active).map(m => (
             <div key={m.id} title={m.name} style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 9px", background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 100 }}>
-              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#059669", boxShadow: "0 0 5px #05966980" }} />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#6b6560" }}>{m.avatar}</span>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a", boxShadow: "0 0 5px #05966980" }} />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#3c3c43" }}>{m.avatar}</span>
             </div>
           ))}
         </div>
@@ -3773,19 +3508,19 @@ function DeskAnalytics({ units, db }) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1a1614", marginBottom: 20 }}>Portfolio Analytics</h2>
+      <h2 style={{ fontSize: 22, fontWeight: 800, color: "#000000", marginBottom: 20 }}>Portfolio Analytics</h2>
 
       {/* KPI row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
         {[
           { label: "Avg Days to Turn",   value: avgTurnDays,   suffix: "d",   color: "#ffad5c" },
-          { label: "Units Ready",         value: readyCount,    suffix: "",    color: "#059669" },
-          { label: "Overdue Turnovers",   value: overdueCount,  suffix: "",    color: overdueCount > 0 ? "#dc2626" : "#a09890" },
+          { label: "Units Ready",         value: readyCount,    suffix: "",    color: "#16a34a" },
+          { label: "Overdue Turnovers",   value: overdueCount,  suffix: "",    color: overdueCount > 0 ? "#dc2626" : "#8e8e93" },
           { label: "Total Active",        value: units.length,  suffix: "",    color: "#f0a05a" },
         ].map(k => (
           <div key={k.label} style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: "18px 20px" }}>
             <div style={{ fontSize: 32, fontWeight: 800, color: k.color, lineHeight: 1 }}>{k.value}{k.suffix}</div>
-            <div style={{ fontSize: 11, color: "#a09890", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 6 }}>{k.label}</div>
+            <div style={{ fontSize: 11, color: "#8e8e93", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 6 }}>{k.label}</div>
           </div>
         ))}
       </div>
@@ -3793,16 +3528,16 @@ function DeskAnalytics({ units, db }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         {/* Stage breakdown */}
         <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#1a1614", marginBottom: 16 }}>Stage Breakdown</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#000000", marginBottom: 16 }}>Stage Breakdown</h3>
           {stageBreakdown.map(s => (
             <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: "#6b6560", flex: 1 }}>{s.label}</span>
+              <span style={{ fontSize: 12, color: "#3c3c43", flex: 1 }}>{s.label}</span>
               <div style={{ display: "flex", gap: 12 }}>
-                <span title="In progress" style={{ fontSize: 12, fontWeight: 700, color: s.active > 0 ? s.color : "#c8c0b8" }}>{s.active} active</span>
-                <span title="Done" style={{ fontSize: 12, fontWeight: 700, color: s.done > 0 ? "#059669" : "#c8c0b8" }}>{s.done} done</span>
+                <span title="In progress" style={{ fontSize: 12, fontWeight: 700, color: s.active > 0 ? s.color : "#c7c7cc" }}>{s.active} active</span>
+                <span title="Done" style={{ fontSize: 12, fontWeight: 700, color: s.done > 0 ? "#16a34a" : "#c7c7cc" }}>{s.done} done</span>
               </div>
-              <div style={{ width: 80, height: 4, background: "#f0ece6", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ width: 80, height: 4, background: "#f2f2f7", borderRadius: 2, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: units.length > 0 ? `${(s.active / units.length) * 100}%` : "0%", background: s.dot, borderRadius: 2 }} />
               </div>
             </div>
@@ -3811,15 +3546,15 @@ function DeskAnalytics({ units, db }) {
 
         {/* Team workload */}
         <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#1a1614", marginBottom: 16 }}>Team Workload</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#000000", marginBottom: 16 }}>Team Workload</h3>
           {teamLoad.map(m => (
             <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 9, background: "#f0ece6", border: "1px solid #d6d0c8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 9, background: "#f2f2f7", border: "1px solid #d6d0c8", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <span style={{ fontSize: 10, fontWeight: 800, color: "#e07d2a" }}>{m.avatar}</span>
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: "#3d3530" }}>{m.name}</p>
-                <p style={{ fontSize: 10, color: "#a09890" }}>{m.units || "No active stages"}</p>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#000000" }}>{m.name}</p>
+                <p style={{ fontSize: 10, color: "#8e8e93" }}>{m.units || "No active stages"}</p>
               </div>
               <div style={{ textAlign: "right" }}>
                 <span style={{ fontSize: 16, fontWeight: 800, color: m.load > 2 ? "#dc2626" : m.load > 0 ? "#ffad5c" : "#b8b0a8" }}>{m.load}</span>
@@ -3831,7 +3566,7 @@ function DeskAnalytics({ units, db }) {
 
         {/* Property breakdown */}
         <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#1a1614", marginBottom: 16 }}>By Property</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#000000", marginBottom: 16 }}>By Property</h3>
           {db.properties.map(p => {
             const propUnits = units.filter(u => u.property_id === p.id);
             const propReady = propUnits.filter(u => u.is_ready).length;
@@ -3839,10 +3574,10 @@ function DeskAnalytics({ units, db }) {
             return (
               <div key={p.id} style={{ marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#3d3530" }}>{p.name}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: propPct === 100 ? "#059669" : "#e07d2a" }}>{propReady}/{propUnits.length} ready</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#000000" }}>{p.name}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: propPct === 100 ? "#16a34a" : "#e07d2a" }}>{propReady}/{propUnits.length} ready</span>
                 </div>
-                <div style={{ height: 5, borderRadius: 3, background: "#f0ece6", overflow: "hidden" }}>
+                <div style={{ height: 5, borderRadius: 3, background: "#f2f2f7", overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${propPct}%`, borderRadius: 3, background: "linear-gradient(90deg,#e07d2a,#c45e0a)", transition: "width 0.5s" }} />
                 </div>
               </div>
@@ -3852,14 +3587,14 @@ function DeskAnalytics({ units, db }) {
 
         {/* Days remaining heatmap */}
         <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 20 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#1a1614", marginBottom: 16 }}>Target Date Status</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 800, color: "#000000", marginBottom: 16 }}>Target Date Status</h3>
           {units.filter(u => !u.is_ready).sort((a, b) => new Date(a.target_ready_date) - new Date(b.target_ready_date)).slice(0, 8).map(u => {
             const d = Math.ceil((new Date(u.target_ready_date) - Date.now()) / 86400000);
-            const color = d < 0 ? "#dc2626" : d <= 3 ? "#ffad5c" : d <= 7 ? "#f5d05e" : "#059669";
+            const color = d < 0 ? "#dc2626" : d <= 3 ? "#ffad5c" : d <= 7 ? "#f5d05e" : "#16a34a";
             return (
               <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 4, height: 24, borderRadius: 2, background: color, flexShrink: 0 }} />
-                <span style={{ fontSize: 12, color: "#3d3530", flex: 1 }}>Unit {u.unit_number} · {u.property_name?.split(" ")[0]}</span>
+                <span style={{ fontSize: 12, color: "#000000", flex: 1 }}>Unit {u.unit_number} · {u.property_name?.split(" ")[0]}</span>
                 <span style={{ fontSize: 11, fontWeight: 700, color }}>{d < 0 ? `${Math.abs(d)}d overdue` : d === 0 ? "Today" : `${d}d left`}</span>
               </div>
             );
@@ -3885,38 +3620,38 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a1614" }}>New Turnover</h2>
-            <p style={{ fontSize: 12, color: "#a09890", marginTop: 2 }}>All 6 make-ready stages auto-created. Team sees it instantly on mobile.</p>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#000000" }}>New Turnover</h2>
+            <p style={{ fontSize: 12, color: "#8e8e93", marginTop: 2 }}>All 6 make-ready stages auto-created. Team sees it instantly on mobile.</p>
           </div>
-          <button onClick={onClose} style={{ width: 32, height: 32, background: "#f0ece6", border: "1px solid #d6d0c8", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-            <Icon name="x" size={14} style={{ color: "#6b6560" }} />
+          <button onClick={onClose} style={{ width: 32, height: 32, background: "#f2f2f7", border: "1px solid #d6d0c8", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <Icon name="x" size={14} style={{ color: "#3c3c43" }} />
           </button>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <div>
-            <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Unit</label>
+            <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Unit</label>
             <select className="input-dark" value={form.unit_id} onChange={e => setForm(f => ({ ...f, unit_id: e.target.value }))} style={{ width: "100%" }}>
               <option value="">Select unit...</option>
               {db.units.map(u => <option key={u.id} value={u.id}>#{u.unit_number} — {db.properties.find(p => p.id === u.property_id)?.name}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Target Move-In Date</label>
+            <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Target Move-In Date</label>
             <input className="input-dark" type="date" value={form.target_ready_date} onChange={e => setForm(f => ({ ...f, target_ready_date: e.target.value }))} style={{ width: "100%" }} />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Lead Technician</label>
+            <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 6 }}>Lead Technician</label>
             <select className="input-dark" value={form.assigned_to} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} style={{ width: "100%" }}>
               <option value="">Unassigned</option>
               {db.team.map(m => <option key={m.id} value={m.id}>{m.name} — {m.role}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#6b6560", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 8 }}>Lease Status</label>
+            <label style={{ fontSize: 11, color: "#3c3c43", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 8 }}>Lease Status</label>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {[["leased"," Leased"],["unleased"," Unleased"]].map(([v, l]) => (
-                <button key={v} onClick={() => setForm(f => ({ ...f, lease_status: v }))} style={{ padding: "10px", borderRadius: 10, border: form.lease_status === v ? "1px solid #e07d2a" : "1px solid #e8e4de", background: form.lease_status === v ? "#e07d2a20" : "#f9f7f4", cursor: "pointer", fontSize: 13, fontWeight: 600, color: form.lease_status === v ? "#f0a05a" : "#6b6560" }}>{l}</button>
+                <button key={v} onClick={() => setForm(f => ({ ...f, lease_status: v }))} style={{ padding: "10px", borderRadius: 10, border: form.lease_status === v ? "1px solid #e07d2a" : "1px solid #e8e4de", background: form.lease_status === v ? "#e07d2a20" : "#f2f2f7", cursor: "pointer", fontSize: 13, fontWeight: 600, color: form.lease_status === v ? "#f0a05a" : "#3c3c43" }}>{l}</button>
               ))}
             </div>
           </div>
@@ -3925,8 +3660,8 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
             disabled={!form.unit_id || !form.target_ready_date}
             style={{
               width: "100%", padding: "14px", borderRadius: 12, border: "none", cursor: !form.unit_id || !form.target_ready_date ? "default" : "pointer",
-              background: !form.unit_id || !form.target_ready_date ? "#f0ece6" : "linear-gradient(135deg,#e07d2a,#c45e0a)",
-              color: !form.unit_id || !form.target_ready_date ? "#a09890" : "white",
+              background: !form.unit_id || !form.target_ready_date ? "#f2f2f7" : "#000000",
+              color: !form.unit_id || !form.target_ready_date ? "#8e8e93" : "white",
               fontSize: 14, fontWeight: 700, boxShadow: !form.unit_id || !form.target_ready_date ? "none" : "0 4px 14px #e07d2a40",
             }}
           >
@@ -4096,55 +3831,55 @@ async function getAIBriefing(turnovers, role, memberName) {
   const activeTurnovers = turnovers.filter(t => !t.is_ready);
 
   const turnoverSummary = activeTurnovers.map(to => {
-    const days     = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
-    const pct      = overallPct(to);
-    const doneStages   = (to.stages || []).filter(s => s.status === "done").length;
-    const activeStages = (to.stages || []).filter(s => s.status === "in_progress").map(s => s.id);
-    const idleStages   = (to.stages || []).filter(s => s.status === "idle").map(s => s.id);
+    const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+    const pct  = overallPct(to);
     const stalledStages = (to.stages || []).filter(s => {
       if (s.status !== "in_progress") return false;
       const lastActivity = s.tasks
         .filter(t => t.completed_at)
         .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))[0];
       if (!lastActivity) return true;
-      const hoursSince = (Date.now() - new Date(lastActivity.completed_at)) / 3600000;
-      return hoursSince > 24;
+      return (Date.now() - new Date(lastActivity.completed_at)) / 3600000 > 24;
     }).map(s => s.id);
 
     return {
-      unit: `Unit ${to.unit_number} at ${to.property_name}`,
+      unit: `Unit ${to.unit_number}`,
+      property: to.property_name,
       daysToTarget: days,
-      overallProgress: `${pct}%`,
-      doneStages,
-      activeStages,
-      idleStages,
+      progress: pct,
       stalledStages,
       leaseStatus: to.lease_status,
       assignedTo: to.assigned_name,
+      isOverdue: days < 0,
     };
   });
 
-  const systemPrompt = `You are Relay, Mainlync's agentic AI. 
-You generate short, direct, human-sounding briefings for property management team members.
-Never use bullet points with dashes. Use numbered lists when listing multiple items.
-Keep responses under 120 words. Sound like a helpful coworker, not a robot.
-Be specific — use unit numbers and names. Flag urgent issues clearly.
-Always end with one clear action item for this person today.`;
+  const systemPrompt = `You are Relay, Mainlync's agentic AI for property management.
+Return ONLY valid JSON. No markdown. No explanation. No preamble.
+The JSON must have exactly this structure:
+{
+  "greeting": "one short sentence, 8 words max, time-of-day appropriate",
+  "units": [
+    {
+      "unit": "Unit 203",
+      "status": "on_track" | "at_risk" | "critical",
+      "action": "one short action sentence, 10 words max, starts with a verb"
+    }
+  ],
+  "priority": "one sentence — the single most important thing to do right now, 15 words max"
+}
+Be specific. Use unit numbers. Start every action with a verb. Never use the word 'ensure'.`;
 
-  const userPrompt = role === "supervisor"
-    ? `Good morning. Generate a morning briefing for ${memberName || "the supervisor"} who oversees all turnovers.
-Here is the current state of all active turnovers: ${JSON.stringify(turnoverSummary, null, 2)}
-Tell them: what is on track, what needs their attention today, and what one thing is most urgent right now.`
-    : `Generate a personalized update for ${memberName || "a team member"} (role: ${role}).
-Here is the current state of all active turnovers they are assigned to: ${JSON.stringify(turnoverSummary.filter(t => t.assignedTo === memberName), null, 2)}
-Tell them specifically: what stage they should be working on right now and why, and if anything is at risk.`;
+  const userPrompt = `Generate a morning briefing for ${memberName || "the supervisor"}.
+Active turnovers: ${JSON.stringify(turnoverSummary)}
+Return only the JSON object.`;
 
   const response = await fetch("/.netlify/functions/ai-briefing", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-opus-4-5",
-      max_tokens: 300,
+      max_tokens: 400,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
     }),
@@ -4152,7 +3887,27 @@ Tell them specifically: what stage they should be working on right now and why, 
 
   const data = await response.json();
   if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-  return data.content?.[0]?.text || "";
+
+  const raw = data.content?.[0]?.text || "{}";
+  try {
+    const clean = raw.replace(/```json|```/g, "").trim();
+    return JSON.parse(clean);
+  } catch {
+    // Fallback structured response if JSON parse fails
+    return {
+      greeting: "Good morning.",
+      units: activeTurnovers.slice(0, 5).map(to => {
+        const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+        const pct  = overallPct(to);
+        return {
+          unit: `Unit ${to.unit_number}`,
+          status: days < 0 ? "critical" : pct < 30 ? "at_risk" : "on_track",
+          action: days < 0 ? "Check status immediately" : `Continue — ${pct}% complete`,
+        };
+      }),
+      priority: "Review all active turnovers and confirm assignments are current.",
+    };
+  }
 }
 
 // Generate a stage completion next-step message
@@ -4234,24 +3989,32 @@ function analyzeRisk(turnovers) {
 // ─────────────────────────────────────────────
 
 function AIBriefingCard({ turnovers, role, memberName }) {
-  const [briefing, setBriefing]   = useState("");
+  const [briefing, setBriefing]   = useState(null);
   const [loading, setLoading]     = useState(false);
   const [generated, setGenerated] = useState(false);
   const [expanded, setExpanded]   = useState(false);
+  const [error, setError]         = useState(null);
 
   async function generateBriefing() {
     setLoading(true);
     setExpanded(true);
+    setError(null);
     try {
-      const text = await getAIBriefing(turnovers, role, memberName);
-      setBriefing(text);
+      const result = await getAIBriefing(turnovers, role, memberName);
+      setBriefing(result);
       setGenerated(true);
     } catch (e) {
-      setBriefing("Error: " + (e.message || "Unable to generate briefing. Check your Anthropic API key in Netlify environment variables."));
+      setError(e.message || "Unable to generate briefing right now.");
       setGenerated(true);
     }
     setLoading(false);
   }
+
+  const statusConfig = {
+    on_track: { color: "#16a34a", bg: "#f0fdf4", border: "#86efac", dot: "#16a34a", label: "On Track" },
+    at_risk:  { color: "#c2570a", bg: "#fff7ed", border: "#fed7aa", dot: "#e07d2a", label: "At Risk"  },
+    critical: { color: "#dc2626", bg: "#fef2f2", border: "#fecaca", dot: "#dc2626", label: "Critical" },
+  };
 
   return (
     <div style={{
@@ -4261,25 +4024,22 @@ function AIBriefingCard({ turnovers, role, memberName }) {
       overflow: "hidden",
       boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
     }}>
-      {/* Header */}
+      {/* Header tap target */}
       <button
         onClick={generated ? () => setExpanded(e => !e) : generateBriefing}
-        style={{
-          width: "100%", display: "flex", alignItems: "center", gap: 10,
-          padding: "14px 16px", background: "none", border: "none", cursor: "pointer",
-        }}
+        style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "14px 16px", background: "none", border: "none", cursor: "pointer" }}
       >
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px #e07d2a40" }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><path d="M20 2v4m0 0h-4m4 0l-5 5"/></svg>
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: "#000000", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "0 2px 8px #e07d2a40" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
         </div>
         <div style={{ flex: 1, textAlign: "left" }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>Relay</p>
-          <p style={{ fontSize: 11, color: "#a09890" }}>
-            {generated ? "Tap to expand your briefing" : "Tap for your Relay briefing"}
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#000000" }}>Relay</p>
+          <p style={{ fontSize: 11, color: "#8e8e93" }}>
+            {loading ? "Generating your briefing..." : generated ? (expanded ? "Tap to collapse" : "Tap to view briefing") : "Tap for your morning briefing"}
           </p>
         </div>
         {loading ? (
-          <div style={{ width: 20, height: 20, border: "2px solid #fed7aa", borderTopColor: "#e07d2a", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+          <div style={{ width: 18, height: 18, border: "2px solid #fed7aa", borderTopColor: "#e07d2a", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
         ) : (
           <Icon name={expanded ? "chevron_down" : "chevron_right"} size={16} style={{ color: "#e07d2a" }} />
         )}
@@ -4288,31 +4048,55 @@ function AIBriefingCard({ turnovers, role, memberName }) {
       {/* Briefing content */}
       <AnimatePresence>
         {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            style={{ overflow: "hidden" }}
-          >
-            <div style={{ padding: "0 16px 16px" }}>
-              <div style={{ height: 1, background: "#fed7aa", marginBottom: 14 }} />
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
+            <div style={{ padding: "0 14px 14px" }}>
+              <div style={{ height: 1, background: "#fed7aa", marginBottom: 12 }} />
+
               {loading ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {[100, 85, 70].map((w, i) => (
-                    <div key={i} className="skeleton" style={{ height: 14, borderRadius: 4, width: `${w}%` }} />
-                  ))}
+                  {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 44, borderRadius: 10 }} />)}
                 </div>
+              ) : error ? (
+                <p style={{ fontSize: 12, color: "#dc2626", lineHeight: 1.5 }}>{error}</p>
               ) : briefing ? (
-                <p style={{ fontSize: 13, color: "#3d3530", lineHeight: 1.7, fontWeight: 400 }}>{briefing}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+
+                  {/* Greeting */}
+                  {briefing.greeting && (
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#000000", marginBottom: 4 }}>{briefing.greeting}</p>
+                  )}
+
+                  {/* Unit cards — scannable rows */}
+                  {(briefing.units || []).map((u, i) => {
+                    const sc = statusConfig[u.status] || statusConfig.on_track;
+                    return (
+                      <div key={i} style={{ background: sc.bg, border: `1px solid ${sc.border}`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: "50%", background: sc.dot, flexShrink: 0, marginTop: 4 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
+                            <span style={{ fontSize: 12, fontWeight: 800, color: "#000000" }}>{u.unit}</span>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: sc.color, textTransform: "uppercase", letterSpacing: "0.06em" }}>{sc.label}</span>
+                          </div>
+                          <p style={{ fontSize: 12, color: "#000000", lineHeight: 1.4 }}>{u.action}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Priority action */}
+                  {briefing.priority && (
+                    <div style={{ background: "rgba(224,125,42,0.08)", border: "1px solid #fed7aa", borderRadius: 10, padding: "10px 12px", marginTop: 2, display: "flex", gap: 8, alignItems: "flex-start" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e07d2a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#c2570a", lineHeight: 1.4 }}>{briefing.priority}</p>
+                    </div>
+                  )}
+
+                  {/* Refresh */}
+                  <button onClick={generateBriefing} style={{ marginTop: 4, fontSize: 11, color: "#e07d2a", fontWeight: 600, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 4 }}>
+                    <Icon name="refresh" size={11} /> Refresh
+                  </button>
+                </div>
               ) : null}
-              {generated && !loading && (
-                <button
-                  onClick={generateBriefing}
-                  style={{ marginTop: 12, fontSize: 11, color: "#e07d2a", fontWeight: 600, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 4 }}
-                >
-                  <Icon name="refresh" size={12} /> Refresh briefing
-                </button>
-              )}
             </div>
           </motion.div>
         )}
@@ -4352,171 +4136,115 @@ function RiskBadge({ riskLevel, riskReason }) {
 function Dashboard() {
   const { db, navigate } = useApp();
   const rawTurnovers = (db.turnovers || []).map(migrateTurnover);
-  const turnoversWithRisk = analyzeRisk(rawTurnovers);
+  const withRisk = analyzeRisk(rawTurnovers);
+  const roleData = getRoleData();
+  const firstName = roleData?.name?.split(" ")[0] || "there";
 
-  const total   = turnoversWithRisk.length;
-  const ready   = rawTurnovers.filter(t => t.is_ready).length;
-  const active  = rawTurnovers.filter(t => !t.is_ready && t.stages.some(s => s.status === "in_progress")).length;
-  const overdue = turnoversWithRisk.filter(t => t.riskLevel === "critical").length;
-  const atRisk  = turnoversWithRisk.filter(t => t.riskLevel === "at_risk").length;
-  const queued  = rawTurnovers.filter(t => !t.is_ready && t.stages.every(s => s.status === "idle")).length;
+  const active   = withRisk.filter(t => !t.is_ready).length;
+  const critical = withRisk.filter(t => t.riskLevel === "critical").length;
+  const onTrack  = withRisk.filter(t => t.riskLevel === "on_track" && !t.is_ready).length;
+  const ready    = withRisk.filter(t => t.is_ready).length;
 
-  const stageActivity = MR_STAGES.map(s => ({
-    ...s,
-    count: rawTurnovers.filter(t => !t.is_ready && t.stages.find(st => st.id === s.id)?.status === "in_progress").length,
-  })).filter(s => s.count > 0);
+  const attention = withRisk.filter(t => !t.is_ready && t.riskLevel !== "on_track")
+    .sort((a,b) => (a.riskLevel === "critical" ? -1 : 1));
+  const good = withRisk.filter(t => !t.is_ready && t.riskLevel === "on_track");
 
-  const urgent = [...turnoversWithRisk]
-    .filter(t => !t.is_ready)
-    .sort((a, b) => new Date(a.target_ready_date) - new Date(b.target_ready_date))
-    .slice(0, 4);
+  const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
+
+  function UnitRow({ to }) {
+    const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
+    const pct  = overallPct(to);
+    const sc   = statusColor[to.riskLevel] || "#8e8e93";
+    return (
+      <button onClick={() => navigate("Turnovers")}
+        className="row" style={{ width: "100%", border: "none", cursor: "pointer", textAlign: "left" }}>
+        <div className="unit-avatar">{to.unit_number}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
+            <span style={{ fontSize: 14, fontWeight: 500, color: "#000" }}>{to.property_name}</span>
+            <span style={{ fontSize: 12, color: sc, fontWeight: 600, flexShrink: 0, marginLeft: 8 }}>
+              {days < 0 ? `${Math.abs(days)}d late` : days === 0 ? "Today" : `${days}d`}
+            </span>
+          </div>
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${pct}%`, background: sc }} />
+          </div>
+        </div>
+        <svg width="7" height="12" viewBox="0 0 7 12" fill="none" style={{ marginLeft: 8, flexShrink: 0 }}><path d="M1 1l5 5-5 5" stroke="#c7c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+    );
+  }
 
   return (
-    <div style={{ padding: "16px 16px 100px" }}>
+    <div style={{ background: "#f2f2f7", minHeight: "100vh", paddingBottom: 100 }}>
       {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 11, color: "#e07d2a", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 2 }}>Make Ready</p>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: "#1a1614", letterSpacing: "-0.02em" }}>Overview</h1>
+      <div style={{ padding: "16px 16px 8px" }}>
+        <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 2 }}>Make Ready</p>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: "#000", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+          Good morning,<br/>{firstName}.
+        </h1>
       </div>
 
-      {/* Relay briefing card */}
-      {total > 0 && (
-        <AIBriefingCard
-          turnovers={rawTurnovers}
-          role="supervisor"
-          memberName="Marcus Torres"
-        />
+      {/* Relay briefing */}
+      {active > 0 && (
+        <div style={{ padding: "0 16px 4px" }}>
+          <AIBriefingCard turnovers={rawTurnovers} role="supervisor" memberName={roleData?.name || "Supervisor"} />
+        </div>
       )}
 
-      {/* Stat strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 16 }}>
+      {/* Stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, padding: "8px 16px 4px" }}>
         {[
-          { label: "Active",  value: active,  color: "#e07d2a", bg: "#fff7ed", border: "#fed7aa" },
-          { label: "Queued",  value: queued,  color: "#6b6560", bg: "#f9f7f4", border: "#e8e4de" },
-          { label: "Ready",   value: ready,   color: "#059669", bg: "#f0fdf4", border: "#86efac" },
-          { label: "At Risk", value: overdue + atRisk, color: (overdue + atRisk) > 0 ? "#dc2626" : "#a09890", bg: (overdue + atRisk) > 0 ? "#fef2f2" : "#f9f7f4", border: (overdue + atRisk) > 0 ? "#fecaca" : "#e8e4de" },
+          { label: "Active",   value: active,   color: "#000" },
+          { label: "Critical", value: critical, color: critical > 0 ? "#dc2626" : "#8e8e93" },
+          { label: "On Track", value: onTrack,  color: onTrack > 0 ? "#16a34a" : "#8e8e93" },
+          { label: "Ready",    value: ready,    color: ready > 0 ? "#0284c7" : "#8e8e93" },
         ].map(s => (
-          <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
-            <div style={{ fontSize: 9, color: "#a09890", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 3 }}>{s.label}</div>
+          <div key={s.label} style={{ background: "#fff", borderRadius: 12, padding: "12px 6px", textAlign: "center" }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: s.color, lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: 10, color: "#8e8e93", fontWeight: 500, marginTop: 3, letterSpacing: "0.02em" }}>{s.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Units needing attention */}
-      {turnoversWithRisk.filter(t => t.riskLevel !== "on_track" && !t.is_ready).length > 0 && (
-        <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 16, padding: 16, marginBottom: 16 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#dc2626", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>
-            Needs Attention
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {turnoversWithRisk.filter(t => t.riskLevel !== "on_track" && !t.is_ready).map(to => (
-              <button
-                key={to.id}
-                onClick={() => navigate("Turnovers")}
-                style={{ display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
-              >
-                <div style={{ width: 34, height: 34, borderRadius: 10, background: to.riskLevel === "critical" ? "#fef2f2" : "#fff7ed", border: `1px solid ${to.riskLevel === "critical" ? "#fecaca" : "#fed7aa"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, color: to.riskLevel === "critical" ? "#dc2626" : "#e07d2a" }}>{to.unit_number}</span>
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: "#1a1614", marginBottom: 1 }}>{to.property_name}</p>
-                  <p style={{ fontSize: 10, color: to.riskLevel === "critical" ? "#dc2626" : "#c2570a", fontWeight: 600 }}>{to.riskReason}</p>
-                </div>
-                <Icon name="chevron_right" size={14} style={{ color: "#a09890", flexShrink: 0 }} />
-              </button>
-            ))}
+      {/* Needs attention */}
+      {attention.length > 0 && (
+        <>
+          <div className="section-header">Needs Attention</div>
+          <div className="card-group" style={{ margin: "0 16px" }}>
+            {attention.map(to => <UnitRow key={to.id} to={to} />)}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Active stages */}
-      {stageActivity.length > 0 && (
-        <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Work in Progress</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {stageActivity.map(s => (
-              <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#3d3530", flex: 1 }}>{s.label}</span>
-                <span style={{ fontSize: 12, fontWeight: 800, color: s.color, background: s.bg, border: `1px solid ${s.accent}`, borderRadius: 8, padding: "2px 9px" }}>
-                  {s.count} unit{s.count > 1 ? "s" : ""}
-                </span>
-              </div>
-            ))}
+      {/* On track */}
+      {good.length > 0 && (
+        <>
+          <div className="section-header">On Track</div>
+          <div className="card-group" style={{ margin: "0 16px" }}>
+            {good.map(to => <UnitRow key={to.id} to={to} />)}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Upcoming targets with risk indicators */}
-      {urgent.length > 0 && (
-        <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#a09890", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>All Active Units</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {urgent.map(to => {
-              const days = Math.ceil((new Date(to.target_ready_date) - Date.now()) / 86400000);
-              const pct  = overallPct(to);
-              const isOd = days < 0;
-              return (
-                <button
-                  key={to.id}
-                  onClick={() => navigate("Turnovers")}
-                  style={{ display: "flex", flexDirection: "column", background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 10, background: isOd ? "#fef2f2" : "#fff7ed", border: `1px solid ${isOd ? "#fecaca" : "#fed7aa"}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, color: isOd ? "#dc2626" : "#e07d2a" }}>{to.unit_number}</span>
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1614", marginBottom: 3 }}>{to.property_name}</div>
-                      <div style={{ height: 3, borderRadius: 2, background: "#f0ece6", overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${pct}%`, background: isOd ? "#dc2626" : to.riskLevel === "at_risk" ? "#e07d2a" : "#059669", borderRadius: 2, transition: "width 0.4s" }} />
-                      </div>
-                    </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: isOd ? "#dc2626" : days <= 3 ? "#e07d2a" : "#a09890", whiteSpace: "nowrap", flexShrink: 0 }}>
-                      {isOd ? `${Math.abs(days)}d late` : days === 0 ? "Today" : `${days}d`}
-                    </span>
-                  </div>
-                  {to.riskLevel !== "on_track" && (
-                    <RiskBadge riskLevel={to.riskLevel} riskReason={to.riskReason} />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Open board button */}
+      <div style={{ padding: "20px 16px 0" }}>
+        <button onClick={() => navigate("Turnovers")} className="btn-primary"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          Open Make Ready Board
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
 
-      {/* Jump to board */}
-      <button
-        onClick={() => navigate("Turnovers")}
-        style={{
-          width: "100%", padding: "14px", borderRadius: 14,
-          background: "linear-gradient(135deg, #e07d2a, #c45e0a)",
-          border: "none", cursor: "pointer", color: "white",
-          fontSize: 14, fontWeight: 700,
-          boxShadow: "0 4px 14px #e07d2a40",
-          display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-        }}
-      >
-        Open Make Ready Board
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-
-      {total === 0 && (
-        <div style={{ textAlign: "center", padding: "48px 24px", color: "#a09890" }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 12px", opacity: 0.4 }}><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 6 }}>No active turnovers</p>
-          <p style={{ fontSize: 12, color: "#a09890" }}>Go to the board to create your first make-ready unit</p>
+      {active === 0 && (
+        <div style={{ textAlign: "center", padding: "48px 24px" }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: "#3c3c43", marginBottom: 4 }}>No active turnovers</p>
+          <p style={{ fontSize: 13, color: "#8e8e93" }}>Go to the board to start your first make-ready unit</p>
         </div>
       )}
     </div>
   );
 }
-
-// ─────────────────────────────────────────────
-// APP ROOT — focused 3-tab navigation
-// ─────────────────────────────────────────────
 
 export default function App() {
   const [db, setDB]           = useState(null);
@@ -4600,11 +4328,11 @@ export default function App() {
   if (loading || !db) return (
     <>
       <style>{THEME.css}</style>
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#f7f5f2" }}>
-        <div style={{ width: 48, height: 48, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #e07d2a40" }}>
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#ffffff" }}>
+        <div style={{ width: 48, height: 48, background: "#000", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         </div>
-        <p style={{ fontSize: 13, color: "#a09890", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+        <p style={{ fontSize: 13, color: "#8e8e93", fontFamily: "'Inter',sans-serif" }}>
           {"Loading Mainlync..."}
         </p>
       </div>
@@ -4651,81 +4379,62 @@ export default function App() {
   };
 
   const NAV = [
-    { page: "Dashboard", label: "Overview",  icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
-    { page: "Turnovers", label: "Make Ready", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, accent: true },
-    { page: "Agent",     label: "Relay",      icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
-    { page: "Team",      label: "Team",       icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+    { page: "Dashboard", label: "Home",       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> },
+    { page: "Turnovers", label: "Board",       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>, accent: true },
+    { page: "Agent",     label: "Relay",       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg> },
+    { page: "Team",      label: "Team",        icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
   ];
 
   return (
     <AppCtx.Provider value={{ db, updateDB, navigate }}>
       <style>{THEME.css}</style>
-      <div style={{ minHeight: "100vh", background: "#f7f5f2", maxWidth: 480, margin: "0 auto", position: "relative" }}>
-        {/* Top accent line */}
-        <div style={{ position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)", width: 480, height: 2, background: "linear-gradient(90deg,transparent,#e07d2a,#c45e0a,transparent)", zIndex: 100 }} />
+      <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto", position: "relative" }}>
 
         {/* Sync indicator */}
         {syncStatus === "syncing" && (
-          <div style={{ position: "fixed", top: 8, right: 16, zIndex: 200, fontSize: 10, color: "#e07d2a", fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#e07d2a", animation: "pulse-a 1s ease-in-out infinite" }} />
-            Saving...
-          </div>
-        )}
-        {syncStatus === "synced" && (
-          <div style={{ position: "fixed", top: 8, right: 16, zIndex: 200, fontSize: 10, color: "#059669", fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            Saved
+          <div style={{ position: "fixed", top: 8, right: 16, zIndex: 200, fontSize: 10, color: "#475569", fontWeight: 600, fontFamily: "'Inter',sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+            <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#475569", animation: "pulse-a 1s ease-in-out infinite" }} />
+            Saving
           </div>
         )}
 
         {/* Page content */}
-        <div style={{ paddingTop: 2 }}>
+        <div>
           <AnimatePresence mode="wait">
             <motion.div
               key={page}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               {PAGES[page] || <Dashboard />}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {/* Bottom navigation */}
+        {/* Bottom navigation — iOS native */}
         <nav style={{
           position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
           width: "100%", maxWidth: 480, zIndex: 60,
-          background: "rgba(255,255,255,0.96)", backdropFilter: "blur(20px)",
-          borderTop: "1px solid #e8e4de",
+          background: "rgba(249,249,249,0.94)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          borderTop: "0.5px solid #c6c6c8",
         }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around", padding: "8px 8px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-around", padding: "8px 8px 20px" }}>
             {NAV.map(item => {
               const isActive = page === item.page;
-              if (item.accent) {
-                return (
-                  <button
-                    key={item.page}
-                    onClick={() => setPage(item.page)}
-                    style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 16px", position: "relative" }}
-                  >
-                    <div style={{ width: 46, height: 46, borderRadius: 15, marginTop: -20, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 16px #e07d2a50", color: "white" }}>
-                      {item.icon}
-                    </div>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: isActive ? "#e07d2a" : "#a09890" }}>{item.label}</span>
-                    {isActive && <motion.div layoutId="nav-dot" style={{ position: "absolute", top: 2, width: 4, height: 4, borderRadius: "50%", background: "#e07d2a" }} />}
-                  </button>
-                );
-              }
+              const activeColor = "#007aff";
+              const inactiveColor = "#8e8e93";
               return (
                 <button
                   key={item.page}
                   onClick={() => setPage(item.page)}
-                  style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 16px", color: isActive ? "#e07d2a" : "#a09890", position: "relative", transition: "color 0.2s" }}
+                  style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, background: "none", border: "none", cursor: "pointer", padding: "4px 12px", color: isActive ? activeColor : inactiveColor, transition: "color 0.15s" }}
                 >
-                  {item.icon}
-                  <span style={{ fontSize: 10, fontWeight: 700 }}>{item.label}</span>
-                  {isActive && <motion.div layoutId="nav-dot" style={{ position: "absolute", top: 2, width: 4, height: 4, borderRadius: "50%", background: "#e07d2a" }} />}
+                  {React.cloneElement(item.icon, { stroke: isActive ? activeColor : inactiveColor })}
+                  <span style={{ fontSize: 10, fontWeight: 500, letterSpacing: "0.01em", fontFamily: "'Inter', sans-serif" }}>{item.label}</span>
                 </button>
               );
             })}
