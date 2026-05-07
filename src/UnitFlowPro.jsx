@@ -1473,7 +1473,7 @@ async function loadThreadMessages(unitId) {
   if (isSupabaseConfigured()) {
     try {
       const r = await fetch(
-        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&order=created_at.asc`,
+        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_role=neq.read&order=created_at.asc`,
         { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
       );
       if (r.ok) return r.json();
@@ -1481,7 +1481,8 @@ async function loadThreadMessages(unitId) {
   }
   try {
     const r = await window.storage.get(threadKey(unitId), true);
-    return r ? JSON.parse(r.value) : [];
+    const msgs = r ? JSON.parse(r.value) : [];
+    return msgs.filter(m => m.author_role !== "read");
   } catch { return []; }
 }
 
@@ -1491,25 +1492,66 @@ function readKey(unitId) { return `reads_${unitId}`; }
 // Record that someone opened the thread
 async function recordThreadRead(unitId, readerName, readerRole) {
   try {
+    // Store in Supabase as a special thread message with type "read"
+    if (isSupabaseConfigured()) {
+      // Check if this person already has a read record for this unit
+      const check = await fetch(
+        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_name=eq.${encodeURIComponent(readerName)}&author_role=eq.read`,
+        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
+      );
+      const existing = check.ok ? await check.json() : [];
+
+      if (existing.length > 0) {
+        // Update existing read timestamp
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/unit_threads?id=eq.${existing[0].id}`,
+          {
+            method: "PATCH",
+            headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ created_at: new Date().toISOString() }),
+          }
+        );
+      } else {
+        // Insert new read record
+        await fetch(`${SUPABASE_URL}/rest/v1/unit_threads`, {
+          method: "POST",
+          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+          body: JSON.stringify({
+            id: genId("read"),
+            unit_id: unitId,
+            unit_number: "",
+            property_name: "",
+            author_name: readerName,
+            author_role: "read", // special marker — filtered out of messages
+            text: "",
+            created_at: new Date().toISOString(),
+          }),
+        });
+      }
+      return;
+    }
+    // Fallback to local storage
     const key = readKey(unitId);
     const existing = await window.storage.get(key, true).catch(() => null);
     const reads = existing ? JSON.parse(existing.value) : [];
-
-    // Update or add this reader
     const filtered = reads.filter(r => r.name !== readerName);
-    const updated  = [...filtered, {
-      name: readerName,
-      role: readerRole,
-      seen_at: new Date().toISOString(),
-    }];
-
-    await window.storage.set(key, JSON.stringify(updated), true);
+    await window.storage.set(key, JSON.stringify([...filtered, { name: readerName, role: readerRole, seen_at: new Date().toISOString() }]), true);
   } catch {}
 }
 
 // Load who has seen the thread
 async function loadThreadReads(unitId) {
   try {
+    if (isSupabaseConfigured()) {
+      const r = await fetch(
+        `${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_role=eq.read`,
+        { headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` } }
+      );
+      if (r.ok) {
+        const rows = await r.json();
+        return rows.map(row => ({ name: row.author_name, role: "team", seen_at: row.created_at }));
+      }
+    }
     const r = await window.storage.get(readKey(unitId), true);
     return r ? JSON.parse(r.value) : [];
   } catch { return []; }
@@ -2011,30 +2053,8 @@ function LeasingView({ userName, onSwitchRole }) {
 
 
 
-const ONESIGNAL_APP_ID = "71c5efb6-f528-4f84-8846-34f67a314ea4";
 
-async function initOneSignal() {
-  try {
-    if (!window.OneSignal) return;
-    await window.OneSignal.init({
-      appId: ONESIGNAL_APP_ID,
-      allowLocalhostAsSecureOrigin: true,
-      notifyButton: { enable: false },
-    });
-  } catch (e) {
-    console.warn("OneSignal init failed:", e.message);
-  }
-}
 
-async function requestPushPermission() {
-  try {
-    if (!window.OneSignal) return false;
-    await window.OneSignal.Slidedown.promptPush();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 // ─────────────────────────────────────────────
 // AGENT PAGE — the AI coordinator control center
@@ -2068,7 +2088,6 @@ function AgentPage() {
   const [loadingLog, setLoadingLog] = useState(true);
   const [running, setRunning]     = useState(false);
   const [lastRun, setLastRun]     = useState(null);
-  const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
   const [settings, setSettings]   = useState({
     morningBriefingEnabled: true,
@@ -2088,12 +2107,7 @@ function AgentPage() {
 
   useEffect(() => {
     loadAgentLog().then(data => { setLog(data || []); setLoadingLog(false); });
-    // Check if push is already enabled
-    if (window.OneSignal) {
-      window.OneSignal.isPushNotificationsEnabled?.().then(enabled => setPushEnabled(enabled)).catch(() => {});
-    }
-    // Initialize OneSignal
-    initOneSignal();
+
   }, []);
 
   async function runAgent(type = "monitor") {
@@ -2114,13 +2128,6 @@ function AgentPage() {
       setRunResult({ error: e.message });
     }
     setRunning(false);
-  }
-
-  async function enablePush() {
-    setPushLoading(true);
-    const success = await requestPushPermission();
-    setPushEnabled(success);
-    setPushLoading(false);
   }
 
   async function sendTestSMS() {
@@ -2252,35 +2259,6 @@ function AgentPage() {
           </motion.div>
         )}
       </div>
-
-      {/* Push notification setup */}
-      {!pushEnabled && (
-        <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderRadius: 16, padding: 16, marginBottom: 16, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-            <div style={{ width: 36, height: 36, background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e07d2a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1614" }}>Enable Push Notifications</p>
-              <p style={{ fontSize: 11, color: "#a09890" }}>Get alerts when units are at risk</p>
-            </div>
-          </div>
-          <button
-            onClick={enablePush}
-            disabled={pushLoading}
-            style={{ width: "100%", padding: "11px", borderRadius: 11, border: "none", cursor: "pointer", background: "linear-gradient(135deg,#e07d2a,#c45e0a)", color: "white", fontSize: 13, fontWeight: 700, boxShadow: "0 4px 12px #e07d2a40" }}
-          >
-            {pushLoading ? "Enabling..." : "Enable Notifications"}
-          </button>
-        </div>
-      )}
-
-      {pushEnabled && (
-        <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 12, padding: "10px 14px", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#059669", boxShadow: "0 0 8px #05966980" }} />
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#15803d" }}>Push notifications enabled</span>
-        </div>
-      )}
 
       {/* Settings panel */}
       <AnimatePresence>
@@ -4250,67 +4228,6 @@ function analyzeRisk(turnovers) {
   });
 }
 
-// ─────────────────────────────────────────────
-// NOTIFICATION SYSTEM — in-app notifications
-// ─────────────────────────────────────────────
-
-function useNotifications() {
-  const [notifications, setNotifications] = useState([]);
-
-  function addNotification(message, type = "info", unitNumber = null) {
-    const id = genId("notif");
-    setNotifications(prev => [{ id, message, type, unitNumber, ts: new Date().toISOString() }, ...prev.slice(0, 9)]);
-    // Auto dismiss after 8 seconds
-    setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 8000);
-  }
-
-  function dismissNotification(id) {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  }
-
-  return { notifications, addNotification, dismissNotification };
-}
-
-function NotificationToast({ notifications, onDismiss }) {
-  if (notifications.length === 0) return null;
-  return (
-    <div style={{ position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)", width: "calc(100% - 32px)", maxWidth: 448, zIndex: 500, display: "flex", flexDirection: "column", gap: 8 }}>
-      <AnimatePresence>
-        {notifications.slice(0, 3).map(n => (
-          <motion.div
-            key={n.id}
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            style={{
-              background: n.type === "critical" ? "#fef2f2" : n.type === "at_risk" ? "#fff7ed" : n.type === "success" ? "#f0fdf4" : "#ffffff",
-              border: `1px solid ${n.type === "critical" ? "#fecaca" : n.type === "at_risk" ? "#fed7aa" : n.type === "success" ? "#86efac" : "#e8e4de"}`,
-              borderRadius: 14, padding: "12px 14px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-              display: "flex", alignItems: "flex-start", gap: 10,
-            }}
-          >
-            <div style={{
-              width: 8, height: 8, borderRadius: "50%", flexShrink: 0, marginTop: 4,
-              background: n.type === "critical" ? "#dc2626" : n.type === "at_risk" ? "#e07d2a" : n.type === "success" ? "#059669" : "#6b6560",
-            }} />
-            <div style={{ flex: 1 }}>
-              {n.unitNumber && (
-                <p style={{ fontSize: 10, fontWeight: 700, color: n.type === "critical" ? "#dc2626" : n.type === "at_risk" ? "#e07d2a" : "#059669", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>
-                  Unit {n.unitNumber}
-                </p>
-              )}
-              <p style={{ fontSize: 12, color: "#1a1614", lineHeight: 1.5, fontWeight: 500 }}>{n.message}</p>
-            </div>
-            <button onClick={() => onDismiss(n.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#a09890", flexShrink: 0, padding: 2 }}>
-              <Icon name="x" size={14} />
-            </button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 // ─────────────────────────────────────────────
 // AI BRIEFING CARD
@@ -4639,8 +4556,6 @@ export default function App() {
     return unsub;
   }, [!!db]);
 
-  const { notifications, addNotification, dismissNotification } = useNotifications();
-
   // Relay stall checker — runs every 30 minutes
   const stallCheckRef = useRef({});
   useEffect(() => {
@@ -4651,7 +4566,6 @@ export default function App() {
       for (const { to, stageId, stallKey } of stalled) {
         stallCheckRef.current[stallKey] = Date.now();
         await relayStallAlert(to, stageId).catch(() => {});
-        addNotification(`${stageId} on Unit ${to.unit_number} stalled 24h+ — Relay posted to thread`, "at_risk", to.unit_number);
       }
     }
     const timer    = setTimeout(runStallCheck, 5000);
@@ -4659,29 +4573,7 @@ export default function App() {
     return () => { clearTimeout(timer); clearInterval(interval); };
   }, [db?.turnovers?.length]);
 
-  // Risk monitor — fires once per unit per session, checks every 10 minutes
-  const notifiedRef = useRef(new Set());
-  useEffect(() => {
-    if (!db) return;
-    function checkRisks() {
-      const turnovers = (db.turnovers || []).map(migrateTurnover);
-      const withRisk  = analyzeRisk(turnovers);
-      withRisk.forEach(to => {
-        const key = `${to.id}_${to.riskLevel}`;
-        if (notifiedRef.current.has(key)) return;
-        if (to.riskLevel === "critical") {
-          addNotification(to.riskReason, "critical", to.unit_number);
-          notifiedRef.current.add(key);
-        } else if (to.riskLevel === "at_risk") {
-          addNotification(to.riskReason, "at_risk", to.unit_number);
-          notifiedRef.current.add(key);
-        }
-      });
-    }
-    const timer    = setTimeout(checkRisks, 5000);
-    const interval = setInterval(checkRisks, 10 * 60 * 1000);
-    return () => { clearTimeout(timer); clearInterval(interval); };
-  }, [db?.turnovers?.length]);
+
 
   const updateDB = useCallback(async (newDB) => {
     setSyncStatus("syncing");
@@ -4769,8 +4661,6 @@ export default function App() {
     <AppCtx.Provider value={{ db, updateDB, navigate }}>
       <style>{THEME.css}</style>
       <div style={{ minHeight: "100vh", background: "#f7f5f2", maxWidth: 480, margin: "0 auto", position: "relative" }}>
-        <NotificationToast notifications={notifications} onDismiss={dismissNotification} />
-
         {/* Top accent line */}
         <div style={{ position: "fixed", top: 0, left: "50%", transform: "translateX(-50%)", width: 480, height: 2, background: "linear-gradient(90deg,transparent,#e07d2a,#c45e0a,transparent)", zIndex: 100 }} />
 
