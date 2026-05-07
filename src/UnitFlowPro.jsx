@@ -1563,30 +1563,40 @@ async function postAIStageUpdate(unitId, unitNumber, propertyName, stageId, newS
 // ─────────────────────────────────────────────
 
 function UnitThread({ to, authorName, authorRole, onClose }) {
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [text, setText]         = useState("");
-  const [sending, setSending]   = useState(false);
-  const [photo, setPhoto]       = useState(null); // base64
-  const fileRef                 = useRef(null);
-  const bottomRef               = useRef(null);
+  const [allMessages, setAllMessages] = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [activeTab, setActiveTab]     = useState("thread");
+  const [text, setText]               = useState("");
+  const [sending, setSending]         = useState(false);
+  const [photo, setPhoto]             = useState(null);
+  const fileRef                       = useRef(null);
+  const bottomRef                     = useRef(null);
+  const relayBottomRef                = useRef(null);
+  const [lastRelayView, setLastRelayView] = useState(Date.now());
+
+  const humanMessages = allMessages.filter(m => m.author_role !== "ai");
+  const relayMessages = allMessages.filter(m => m.author_role === "ai");
+  const unreadRelay   = relayMessages.filter(m => new Date(m.created_at) > new Date(lastRelayView - 1000)).length;
 
   useEffect(() => {
     loadThreadMessages(to.unit_id).then(msgs => {
-      setMessages(msgs || []);
+      setAllMessages(msgs || []);
       setLoading(false);
     });
-    // Poll for new messages every 15 seconds
     const interval = setInterval(async () => {
       const fresh = await loadThreadMessages(to.unit_id);
-      setMessages(fresh || []);
+      setAllMessages(fresh || []);
     }, 15000);
     return () => clearInterval(interval);
   }, [to.unit_id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (activeTab === "thread") bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (activeTab === "relay") {
+      relayBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      setLastRelayView(Date.now());
+    }
+  }, [allMessages, activeTab]);
 
   function handlePhoto(file) {
     if (!file) return;
@@ -1599,127 +1609,142 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
     if (!text.trim() && !photo) return;
     setSending(true);
     const msg = await postThreadMessage(to.unit_id, to.unit_number, to.property_name, authorName, authorRole, text.trim(), photo);
-    setMessages(prev => [...prev, msg]);
-    setText("");
-    setPhoto(null);
-    setSending(false);
+    setAllMessages(prev => [...prev, msg]);
+    setText(""); setPhoto(null); setSending(false);
   }
 
   const roleColors = {
     maintenance: { bg: "#fff7ed", border: "#fed7aa", color: "#c2570a", dot: "#e07d2a" },
     leasing:     { bg: "#eff6ff", border: "#bfdbfe", color: "#1d4ed8", dot: "#3b82f6" },
-    ai:          { bg: "#f0fdf4", border: "#86efac", color: "#15803d", dot: "#059669" },
   };
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", zIndex: 200, maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column" }}>
+
       {/* Header */}
-      <div style={{ background: "#ffffff", borderBottom: "1px solid #e8e4de", padding: "14px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-        <button onClick={onClose} style={{ width: 34, height: 34, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-          <Icon name="chevron_left" size={16} style={{ color: "#6b6560" }} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1614" }}>Unit {to.unit_number} — {to.property_name}</p>
-          <p style={{ fontSize: 11, color: "#a09890" }}>Team thread — maintenance & leasing</p>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f7f5f2", display: "flex", flexDirection: "column", gap: 10 }}>
-        {loading ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)}
-          </div>
-        ) : messages.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "48px 24px" }}>
-            <div style={{ width: 48, height: 48, background: "#f0ece6", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a09890" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </div>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No messages yet</p>
-            <p style={{ fontSize: 12, color: "#a09890" }}>Be the first to post an update about this unit</p>
-          </div>
-        ) : (
-          messages.map(msg => {
-            const rc = roleColors[msg.author_role] || roleColors.maintenance;
-            const isMe = msg.author_name === authorName;
-            return (
-              <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: rc.dot }} />
-                  <span style={{ fontSize: 10, fontWeight: 700, color: rc.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                    {msg.author_name} {msg.author_role === "ai" ? "" : `· ${msg.author_role}`}
-                  </span>
-                  <span style={{ fontSize: 10, color: "#a09890" }}>{timeAgo(msg.created_at)}</span>
-                </div>
-                <div style={{
-                  maxWidth: "85%", background: isMe ? "#fff7ed" : "#ffffff",
-                  border: `1px solid ${isMe ? "#fed7aa" : "#e8e4de"}`,
-                  borderRadius: isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-                  padding: "10px 14px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-                }}>
-                  {msg.photo_base64 && (
-                    <img src={msg.photo_base64} alt="unit photo" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />
-                  )}
-                  {msg.text && (
-                    <p style={{ fontSize: 13, color: "#1a1614", lineHeight: 1.5 }}>{msg.text}</p>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Photo preview */}
-      {photo && (
-        <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-          <img src={photo} alt="preview" style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover" }} />
-          <p style={{ fontSize: 12, color: "#6b6560", flex: 1 }}>Photo attached</p>
-          <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626" }}>
-            <Icon name="x" size={16} />
+      <div style={{ background: "#ffffff", borderBottom: "1px solid #e8e4de", padding: "14px 16px 0", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+          <button onClick={onClose} style={{ width: 34, height: 34, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <Icon name="chevron_left" size={16} style={{ color: "#6b6560" }} />
           </button>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1614" }}>Unit {to.unit_number} — {to.property_name}</p>
+            <p style={{ fontSize: 11, color: "#a09890" }}>Maintenance & Leasing</p>
+          </div>
         </div>
+        {/* Tabs */}
+        <div style={{ display: "flex" }}>
+          {[
+            { id: "thread", label: "Thread" },
+            { id: "relay",  label: "Relay", badge: unreadRelay > 0, count: unreadRelay },
+          ].map(tab => (
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ flex: 1, padding: "10px 0", background: "none", border: "none", borderBottom: `2px solid ${activeTab === tab.id ? "#e07d2a" : "transparent"}`, cursor: "pointer", fontSize: 13, fontWeight: 700, color: activeTab === tab.id ? "#e07d2a" : "#a09890", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              {tab.label}
+              {tab.badge && <span style={{ width: 16, height: 16, borderRadius: "50%", background: "#059669", color: "white", fontSize: 9, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center" }}>{tab.count}</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Thread tab — humans only */}
+      {activeTab === "thread" && (
+        <>
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f7f5f2", display: "flex", flexDirection: "column", gap: 10 }}>
+            {loading ? (
+              [1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)
+            ) : humanMessages.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "48px 24px" }}>
+                <div style={{ width: 48, height: 48, background: "#f0ece6", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a09890" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>No messages yet</p>
+                <p style={{ fontSize: 12, color: "#a09890" }}>Post an update, ask a question, or share a photo</p>
+              </div>
+            ) : humanMessages.map(msg => {
+              const rc = roleColors[msg.author_role] || roleColors.maintenance;
+              const isMe = msg.author_name === authorName;
+              return (
+                <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: rc.dot }} />
+                    <span style={{ fontSize: 10, fontWeight: 700, color: rc.color, textTransform: "uppercase", letterSpacing: "0.05em" }}>{msg.author_name} · {msg.author_role}</span>
+                    <span style={{ fontSize: 10, color: "#a09890" }}>{timeAgo(msg.created_at)}</span>
+                  </div>
+                  <div style={{ maxWidth: "85%", background: isMe ? "#fff7ed" : "#ffffff", border: `1px solid ${isMe ? "#fed7aa" : "#e8e4de"}`, borderRadius: isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px", padding: "10px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+                    {msg.photo_base64 && <img src={msg.photo_base64} alt="unit photo" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />}
+                    {msg.text && <p style={{ fontSize: 13, color: "#1a1614", lineHeight: 1.5 }}>{msg.text}</p>}
+                  </div>
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+
+          {photo && (
+            <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+              <img src={photo} alt="preview" style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover" }} />
+              <p style={{ fontSize: 12, color: "#6b6560", flex: 1 }}>Photo attached</p>
+              <button onClick={() => setPhoto(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#dc2626" }}><Icon name="x" size={16} /></button>
+            </div>
+          )}
+
+          <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "12px 16px", display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
+            <button onClick={() => fileRef.current?.click()} style={{ width: 38, height: 38, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhoto(e.target.files[0])} />
+            <textarea placeholder="Post an update, question, or photo..." value={text} onChange={e => setText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} rows={1} style={{ flex: 1, resize: "none", background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1a1614", fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none" }} />
+            <button onClick={sendMessage} disabled={sending || (!text.trim() && !photo)} style={{ width: 38, height: 38, borderRadius: 10, border: "none", background: (text.trim() || photo) ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6", display: "flex", alignItems: "center", justifyContent: "center", cursor: (text.trim() || photo) ? "pointer" : "default", flexShrink: 0 }}>
+              <Icon name="send" size={16} style={{ color: (text.trim() || photo) ? "white" : "#a09890" }} />
+            </button>
+          </div>
+        </>
       )}
 
-      {/* Input bar */}
-      <div style={{ background: "#ffffff", borderTop: "1px solid #e8e4de", padding: "12px 16px", display: "flex", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
-        <button
-          onClick={() => fileRef.current?.click()}
-          style={{ width: 38, height: 38, background: "#f9f7f4", border: "1px solid #e8e4de", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b6560" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => handlePhoto(e.target.files[0])} />
-        <textarea
-          placeholder="Post an update about this unit..."
-          value={text}
-          onChange={e => setText(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-          rows={1}
-          style={{
-            flex: 1, resize: "none", background: "#f9f7f4", border: "1px solid #e8e4de",
-            borderRadius: 12, padding: "10px 14px", fontSize: 13, color: "#1a1614",
-            fontFamily: "'Plus Jakarta Sans', sans-serif", outline: "none",
-          }}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={sending || (!text.trim() && !photo)}
-          style={{
-            width: 38, height: 38, borderRadius: 10, border: "none",
-            background: (text.trim() || photo) ? "linear-gradient(135deg,#e07d2a,#c45e0a)" : "#f0ece6",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: (text.trim() || photo) ? "pointer" : "default", flexShrink: 0,
-          }}
-        >
-          <Icon name="send" size={16} style={{ color: (text.trim() || photo) ? "white" : "#a09890" }} />
-        </button>
-      </div>
+      {/* Relay tab — AI feed, read only */}
+      {activeTab === "relay" && (
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#f7f5f2", display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ background: "linear-gradient(135deg,#f0fdf4,#dcfce7)", border: "1px solid #86efac", borderRadius: 14, padding: "12px 14px", marginBottom: 4 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 9, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              </div>
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 700, color: "#15803d" }}>Relay — Agentic AI</p>
+                <p style={{ fontSize: 10, color: "#6b6560" }}>Automatic updates. Read only. Won't interrupt your thread.</p>
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            [1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 12 }} />)
+          ) : relayMessages.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "48px 24px" }}>
+              <div style={{ width: 48, height: 48, background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              </div>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "#6b6560", marginBottom: 4 }}>Relay is watching</p>
+              <p style={{ fontSize: 12, color: "#a09890" }}>When stages complete or something needs attention Relay will post updates here automatically</p>
+            </div>
+          ) : relayMessages.map(msg => (
+            <div key={msg.id} style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#059669" }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#059669", textTransform: "uppercase", letterSpacing: "0.05em" }}>Relay</span>
+                <span style={{ fontSize: 10, color: "#a09890" }}>{timeAgo(msg.created_at)}</span>
+              </div>
+              <div style={{ background: "#ffffff", border: "1px solid #e8e4de", borderLeft: "3px solid #059669", borderRadius: "4px 14px 14px 14px", padding: "10px 14px", boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                <p style={{ fontSize: 13, color: "#1a1614", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.text}</p>
+              </div>
+            </div>
+          ))}
+          <div ref={relayBottomRef} />
+        </div>
+      )}
     </div>
   );
 }
+
 
 // ─────────────────────────────────────────────
 // LEASING VIEW — dedicated experience for leasing team
