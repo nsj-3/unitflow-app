@@ -2727,7 +2727,7 @@ function SharedUnitView({ token }) {
               <Icon name="wrench" size={10} style={{ color: "white" }} />
             </div>
             <span style={{ fontSize: 11, color: "#a09890", fontWeight: 600 }}>Powered by </span>
-            <span style={{ fontSize: 11, fontWeight: 800, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Mainlync Pro</span>
+            <span style={{ fontSize: 11, fontWeight: 800, background: "linear-gradient(135deg,#e07d2a,#c45e0a)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Mainlync</span>
           </div>
           <p style={{ fontSize: 10, color: "#c8c0b8", marginTop: 8 }}>Make-ready coordination for property teams</p>
         </div>
@@ -3729,7 +3729,6 @@ const supabase = {
     const data = await res.json();
     // Handle both array response and {data: [...]} format
     const result = Array.isArray(data) ? data : (data?.data || []);
-    console.log(`Supabase ${table}:`, result.length, "rows");
     return result;
   },
 
@@ -3786,14 +3785,12 @@ const isSupabaseConfigured = () =>
 async function loadDB() {
   if (isSupabaseConfigured()) {
     try {
-      console.log("Loading from Supabase...");
       const [properties, units, team, turnovers] = await Promise.all([
         supabase.select("properties"),
         supabase.select("units"),
         supabase.select("team"),
         supabase.select("turnovers"),
       ]);
-      console.log("Supabase loaded:", { properties: properties?.length, units: units?.length, team: team?.length, turnovers: turnovers?.length });
       return { properties, units, team, turnovers, _version: DB_VERSION, _source: "supabase" };
     } catch (e) {
       console.warn("Supabase load failed, falling back to local:", e.message);
@@ -4423,7 +4420,7 @@ export default function App() {
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         </div>
         <p style={{ fontSize: 13, color: "#a09890", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-          {isSupabaseConfigured() ? "Connecting to database..." : "Loading..."}
+          {"Loading Mainlync..."}
         </p>
       </div>
     </>
