@@ -17,6 +17,7 @@
 
 import { useState, useEffect, useCallback, useRef, createContext, useContext, Fragment } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import OperatorOnboarding, { getOperatorSetup, saveOperatorSetup } from "./OperatorOnboarding";
 
 // ─────────────────────────────────────────────
 // CONSTANTS & HELPERS
@@ -402,6 +403,111 @@ async function loadAgentLog() {
     const r = await window.storage.get("unitflow_agent_log");
     return r ? JSON.parse(r.value) : [];
   } catch { return []; }
+}
+
+// ── Thread message loaders ──────────────────────
+async function loadThreadMessages(unitId) {
+  if (isSupabaseConfigured()) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_role=neq.read&order=created_at.asc&limit=200`, {
+        headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+      });
+      if (r.ok) return r.json();
+    } catch (e) { console.warn("loadThreadMessages failed:", e.message); }
+  }
+  try {
+    const r = await window.storage.get(`unitflow_thread_${unitId}`);
+    return r ? JSON.parse(r.value) : [];
+  } catch { return []; }
+}
+
+async function postThreadMessage(unitId, unitNumber, propertyName, authorName, authorRole, text, photoBase64) {
+  const msg = {
+    id: `msg_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    unit_id: unitId,
+    unit_number: unitNumber,
+    property_name: propertyName,
+    author_name: authorName,
+    author_role: authorRole,
+    text: text || "",
+    photo_base64: photoBase64 || null,
+    created_at: new Date().toISOString(),
+  };
+
+  if (isSupabaseConfigured()) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/unit_threads`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+          "Prefer": "return=representation",
+        },
+        body: JSON.stringify(msg),
+      });
+      if (r.ok) {
+        const result = await r.json();
+        return Array.isArray(result) ? result[0] : result;
+      }
+    } catch (e) { console.warn("postThreadMessage failed:", e.message); }
+  }
+
+  // Local fallback
+  try {
+    const existing = await window.storage.get(`unitflow_thread_${unitId}`);
+    const list = existing ? JSON.parse(existing.value) : [];
+    list.push(msg);
+    await window.storage.set(`unitflow_thread_${unitId}`, JSON.stringify(list));
+  } catch {}
+  return msg;
+}
+
+async function recordThreadRead(unitId, name, role) {
+  const readRecord = {
+    id: `read_${unitId}_${name}_${Date.now()}`,
+    unit_id: unitId,
+    author_name: name,
+    author_role: "read",
+    text: role,
+    created_at: new Date().toISOString(),
+  };
+
+  if (isSupabaseConfigured()) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/unit_threads`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+        },
+        body: JSON.stringify(readRecord),
+      });
+    } catch {}
+  }
+}
+
+async function loadThreadReads(unitId) {
+  if (isSupabaseConfigured()) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/unit_threads?unit_id=eq.${unitId}&author_role=eq.read&order=created_at.desc&limit=20`, {
+        headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+      });
+      if (r.ok) {
+        const data = await r.json();
+        // Group by author, keep most recent
+        const byAuthor = {};
+        data.forEach(rd => {
+          if (!byAuthor[rd.author_name] || new Date(rd.created_at) > new Date(byAuthor[rd.author_name].seen_at)) {
+            byAuthor[rd.author_name] = { name: rd.author_name, role: rd.text, seen_at: rd.created_at };
+          }
+        });
+        return Object.values(byAuthor);
+      }
+    } catch {}
+  }
+  return [];
 }
 
 // Relay generates and posts a stage completion message to the unit thread
@@ -1458,6 +1564,7 @@ function RoleSelectionScreen({ onSelect }) {
             <p style={{ fontSize: 15, color: "#8e8e93", marginBottom: 32, lineHeight: 1.5 }}>Which team are you on?</p>
             <div className="card-group">
               {[
+                { id: "operator",    label: "Operator / Admin", sub: "Owners, regional managers, asset managers" },
                 { id: "maintenance", label: "Maintenance", sub: "Supervisors, technicians, porters" },
                 { id: "leasing",     label: "Leasing",     sub: "Agents, property managers" },
               ].map(r => (
@@ -1465,7 +1572,9 @@ function RoleSelectionScreen({ onSelect }) {
                   className="row" style={{ width: "100%", border: "none", cursor: "pointer", textAlign: "left" }}>
                   <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f2f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      {r.id === "maintenance"
+                      {r.id === "operator"
+                        ? <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>
+                        : r.id === "maintenance"
                         ? <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                         : <><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>
                       }
@@ -4374,6 +4483,19 @@ export default function App() {
     return (
       <AppCtx.Provider value={{ db, updateDB, navigate }}>
         <RoleSelectionScreen onSelect={data => setRoleData(data)} />
+      </AppCtx.Provider>
+    );
+  }
+
+  // Operator onboarding — 8-step setup flow on first login
+  if (roleData?.role === "operator" && !getOperatorSetup() && !isDesktop) {
+    return (
+      <AppCtx.Provider value={{ db, updateDB, navigate }}>
+        <OperatorOnboarding onDone={cfg => {
+          saveOperatorSetup(cfg);
+          // Force re-render after setup completes
+          setRoleData({ ...roleData });
+        }} />
       </AppCtx.Provider>
     );
   }
