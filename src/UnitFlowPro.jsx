@@ -2902,6 +2902,7 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
   const [activeTab, setActiveTab]       = useState("board"); // board | analytics
   const [filterProperty, setFilterProperty] = useState("all");
   const [showNewTurnover, setShowNewTurnover] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [notification, setNotification] = useState(null);
 
   //  Sync loop 
@@ -3107,11 +3108,15 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
           ))}
         </nav>
 
-        {/* Bottom — New Turnover */}
-        <div style={{ padding: "12px 14px", borderTop: "0.5px solid #e5e5ea" }}>
+        {/* Bottom — New Turnover + Import Units */}
+        <div style={{ padding: "12px 14px", borderTop: "0.5px solid #e5e5ea", display: "flex", flexDirection: "column", gap: 6 }}>
           <button onClick={() => setShowNewTurnover(true)}
             style={{ width: "100%", padding: "9px 14px", background: "#000", border: "none", borderRadius: 8, color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontFamily: "'Inter', sans-serif" }}>
             <Icon name="plus" size={13} /> New Turnover
+          </button>
+          <button onClick={() => setShowImport(true)}
+            style={{ width: "100%", padding: "8px 14px", background: "#f2f2f7", border: "0.5px solid #e5e5ea", borderRadius: 8, color: "#3c3c43", fontSize: 12, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: "'Inter', sans-serif" }}>
+            <Icon name="upload" size={12} /> Import Units
           </button>
         </div>
       </div>
@@ -3324,6 +3329,20 @@ function DesktopHub({ db: initialDb, updateDB: persistDB }) {
       <AnimatePresence>
         {showNewTurnover && (
           <DeskNewTurnoverModal db={db} onCreate={createTurnover} onClose={() => setShowNewTurnover(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Unit Import modal */}
+      <AnimatePresence>
+        {showImport && (
+          <UnitImportModal
+            db={db}
+            onDone={async () => {
+              const freshDB = await loadDB();
+              setDb(freshDB);
+            }}
+            onClose={() => setShowImport(false)}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -3745,6 +3764,345 @@ function DeskAnalytics({ units, db }) {
 }
 
 //  New Turnover modal (desktop) 
+// ── Unit Import Modal — accessible post-onboarding ──────────
+function UnitImportModal({ db, onDone, onClose }) {
+  const [mode, setMode] = useState("choose"); // choose | upload | preview | manual
+  const [units, setUnits] = useState([]);
+  const [dragOver, setDragOver] = useState(false);
+  const [parseError, setParseError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [manualProp, setManualProp] = useState("");
+  const [manualUnit, setManualUnit] = useState("");
+  const [manualLease, setManualLease] = useState("unleased");
+  const fileRef = useRef(null);
+
+  function parseCSV(text) {
+    const rows = text.trim().split(/\r?\n/).filter(Boolean);
+    if (rows.length < 2) return [];
+    const headers = rows[0].split(",").map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_"));
+    const col = (row, ...names) => {
+      const cells = row.match(/(\"(?:[^\"]|\"\")*\"|[^,]*)/g) || [];
+      for (const name of names) {
+        const idx = headers.findIndex(h => h.includes(name));
+        if (idx >= 0) {
+          const v = (cells[idx] || "").replace(/^\"|\"$/g, "").trim();
+          if (v) return v;
+        }
+      }
+      return "";
+    };
+    return rows.slice(1).map((row, i) => ({
+      id: `imp_${Date.now()}_${i}`,
+      unit_number: col(row, "unit", "number", "apt", "apartment") || `${i + 1}`,
+      property_name: col(row, "property", "building", "community", "complex", "site"),
+      bedrooms: col(row, "bed", "bedroom", "br"),
+      bathrooms: col(row, "bath", "bathroom"),
+      sqft: col(row, "sqft", "sq_ft", "square"),
+      lease_status: col(row, "lease", "status", "vacant", "occupied").toLowerCase().includes("leas") ? "leased" : "unleased",
+      move_out_date: col(row, "move_out", "vacate", "end_date", "lease_end"),
+    })).filter(u => u.unit_number);
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (!["csv", "txt"].includes(ext)) {
+      setParseError("Please upload a .csv file.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+      const parsed = parseCSV(e.target.result);
+      if (!parsed.length) {
+        setParseError("Couldn't read any units. Make sure your first row has column headers (unit_number, property_name, lease_status).");
+        return;
+      }
+      setParseError("");
+      setUnits(parsed);
+      setMode("preview");
+    };
+    reader.readAsText(file);
+  }
+
+  function addManualUnit() {
+    if (!manualUnit.trim()) return;
+    setUnits(prev => [...prev, {
+      id: `man_${Date.now()}`,
+      unit_number: manualUnit.trim(),
+      property_name: manualProp.trim() || "My Property",
+      lease_status: manualLease,
+      bedrooms: "", bathrooms: "", sqft: "",
+    }]);
+    setManualUnit("");
+  }
+
+  async function saveUnits() {
+    setSaving(true);
+    try {
+      if (isSupabaseConfigured()) {
+        // Upsert new properties
+        const propNames = [...new Set(units.map(u => u.property_name).filter(Boolean))];
+        for (const name of propNames) {
+          if (!db.properties?.find(p => p.name === name)) {
+            await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Prefer": "return=minimal" },
+              body: JSON.stringify({ name, address: "" }),
+            });
+          }
+        }
+        // Reload properties to get fresh IDs
+        const propsRes = await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
+          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+        });
+        const freshProps = await propsRes.json();
+
+        // Insert units — skip duplicates by unit_number + property_id
+        const existingNums = new Set((db.units || []).map(u => `${u.property_id}_${u.unit_number}`));
+        for (const u of units) {
+          const prop = freshProps.find(p => p.name === u.property_name);
+          const key = `${prop?.id}_${u.unit_number}`;
+          if (existingNums.has(key)) continue;
+          await fetch(`${SUPABASE_URL}/rest/v1/units`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Prefer": "return=minimal" },
+            body: JSON.stringify({
+              property_id: prop?.id,
+              unit_number: u.unit_number,
+              bedrooms: u.bedrooms ? parseInt(u.bedrooms) : null,
+              bathrooms: u.bathrooms ? parseFloat(u.bathrooms) : null,
+              sqft: u.sqft ? parseInt(u.sqft) : null,
+              lease_status: u.lease_status || "unleased",
+            }),
+          });
+        }
+      }
+      setSaved(true);
+      setTimeout(() => { onDone(); onClose(); }, 1200);
+    } catch (e) {
+      setParseError("Save failed: " + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const grouped = units.reduce((acc, u) => {
+    const p = u.property_name || "Unknown";
+    acc[p] = (acc[p] || 0) + 1;
+    return acc;
+  }, {});
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <motion.div initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20 }}
+        onClick={e => e.stopPropagation()}
+        style={{ background: "#ffffff", borderRadius: 20, width: "100%", maxWidth: 680, maxHeight: "88vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
+
+        {/* Header */}
+        <div style={{ padding: "20px 24px 16px", borderBottom: "0.5px solid #e5e5ea", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+          <div>
+            <p style={{ fontSize: 18, fontWeight: 700, color: "#000", letterSpacing: "-0.02em" }}>Import Units</p>
+            <p style={{ fontSize: 12, color: "#8e8e93", marginTop: 2 }}>Upload a CSV or add units manually. No integration needed.</p>
+          </div>
+          <button onClick={onClose} style={{ background: "#f2f2f7", border: "none", borderRadius: 8, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 18, color: "#8e8e93" }}>×</button>
+        </div>
+
+        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px 24px" }}>
+
+          {/* SUCCESS */}
+          {saved && (
+            <div style={{ textAlign: "center", padding: "40px 24px" }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+              <p style={{ fontSize: 16, fontWeight: 600, color: "#000" }}>{units.length} units imported</p>
+              <p style={{ fontSize: 13, color: "#8e8e93", marginTop: 4 }}>Your board is updating now.</p>
+            </div>
+          )}
+
+          {/* CHOOSE */}
+          {!saved && mode === "choose" && (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+                {[
+                  { id: "upload", emoji: "📄", title: "Upload CSV", sub: "Export from Yardi, AppFolio, or any spreadsheet. Best for 20+ units.", badge: "RECOMMENDED" },
+                  { id: "manual", emoji: "✏️", title: "Enter manually", sub: "Add units one by one. Works for smaller portfolios under 20 units.", badge: "QUICK" },
+                ].map(opt => (
+                  <button key={opt.id} onClick={() => setMode(opt.id)}
+                    style={{ padding: "20px", borderRadius: 12, border: "0.5px solid #e5e5ea", background: "#f8f8fa", cursor: "pointer", textAlign: "left", fontFamily: "'Inter', sans-serif", transition: "border-color 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = "#000"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = "#e5e5ea"}>
+                    <div style={{ fontSize: 24, marginBottom: 8 }}>{opt.emoji}</div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#000", marginBottom: 4 }}>{opt.title}</p>
+                    <p style={{ fontSize: 12, color: "#8e8e93", lineHeight: 1.5 }}>{opt.sub}</p>
+                    <div style={{ marginTop: 10, display: "inline-block", padding: "2px 8px", borderRadius: 5, background: "#000", color: "white", fontSize: 10, fontWeight: 700 }}>{opt.badge}</div>
+                  </button>
+                ))}
+              </div>
+              <div style={{ padding: "12px 14px", background: "#f8f8fa", borderRadius: 10, fontSize: 12, color: "#3c3c43" }}>
+                💡 <strong>How to export from your PMS:</strong> Yardi → Reports → Unit Status Export · AppFolio → Units → Export · Any spreadsheet → File → Download as CSV
+              </div>
+            </>
+          )}
+
+          {/* UPLOAD */}
+          {!saved && mode === "upload" && (
+            <>
+              <div
+                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files[0]); }}
+                onClick={() => fileRef.current?.click()}
+                style={{ border: `2px dashed ${dragOver ? "#000" : "#c6c6c8"}`, borderRadius: 14, padding: "36px 24px", textAlign: "center", background: dragOver ? "#f2f2f7" : "#fafafa", cursor: "pointer", marginBottom: 16 }}>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>📂</div>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#000", marginBottom: 4 }}>{dragOver ? "Drop it here" : "Drop your CSV or click to browse"}</p>
+                <p style={{ fontSize: 12, color: "#8e8e93" }}>Accepts .csv from Yardi, AppFolio, RealPage, Excel, or Google Sheets</p>
+                <input ref={fileRef} type="file" accept=".csv,.txt" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
+              </div>
+
+              {/* Column guide */}
+              <div style={{ background: "#f8f8fa", borderRadius: 10, overflow: "hidden", marginBottom: 16 }}>
+                <div style={{ padding: "8px 14px", borderBottom: "0.5px solid #e5e5ea" }}>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.07em" }}>Expected columns — we auto-detect</p>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 0 }}>
+                  <div style={{ padding: "8px 14px", background: "#f2f2f7", display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 0, gridColumn: "1/-1" }}>
+                    {["unit_number *", "property_name", "lease_status", "bedrooms", "move_out_date"].map(h => (
+                      <span key={h} style={{ fontSize: 11, fontWeight: 600, color: "#3c3c43" }}>{h}</span>
+                    ))}
+                  </div>
+                  <div style={{ padding: "8px 14px", gridColumn: "1/-1", display: "grid", gridTemplateColumns: "repeat(5,1fr)" }}>
+                    {["203", "Maple Ridge", "unleased", "2", "2026-06-01"].map((v, i) => (
+                      <span key={i} style={{ fontSize: 12, color: "#8e8e93" }}>{v}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p style={{ fontSize: 11, color: "#8e8e93", marginBottom: 16 }}>* Only unit_number is required. Everything else is optional.</p>
+
+              {parseError && <div style={{ padding: "10px 14px", background: "#fef2f2", border: "0.5px solid #fecaca", borderRadius: 8, fontSize: 13, color: "#dc2626", marginBottom: 12 }}>⚠️ {parseError}</div>}
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => setMode("choose")} style={{ padding: "9px 16px", background: "#f2f2f7", border: "none", borderRadius: 8, fontSize: 13, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Back</button>
+                <button onClick={() => setMode("manual")} style={{ padding: "9px 16px", background: "none", border: "0.5px solid #e5e5ea", borderRadius: 8, fontSize: 13, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Switch to manual</button>
+              </div>
+            </>
+          )}
+
+          {/* PREVIEW */}
+          {!saved && mode === "preview" && (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#000", marginBottom: 4 }}>
+                  Found <strong>{units.length} units</strong> across <strong>{Object.keys(grouped).length} {Object.keys(grouped).length === 1 ? "property" : "properties"}</strong>
+                </p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {Object.entries(grouped).map(([name, count]) => (
+                    <span key={name} style={{ fontSize: 11, padding: "2px 9px", background: "#f2f2f7", borderRadius: 100, color: "#3c3c43" }}>{name} · {count} units</span>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ border: "0.5px solid #e5e5ea", borderRadius: 10, overflow: "hidden", maxHeight: 320, overflowY: "auto", marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "70px 1fr 80px 110px 30px", gap: 0, padding: "8px 14px", background: "#f8f8fa", borderBottom: "0.5px solid #e5e5ea", position: "sticky", top: 0 }}>
+                  {["Unit", "Property", "Beds", "Lease", ""].map(h => (
+                    <span key={h} style={{ fontSize: 10, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
+                  ))}
+                </div>
+                {units.map((u, i) => (
+                  <div key={u.id} style={{ display: "grid", gridTemplateColumns: "70px 1fr 80px 110px 30px", gap: 0, padding: "10px 14px", alignItems: "center", borderBottom: i < units.length - 1 ? "0.5px solid #e5e5ea" : "none" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: "#000" }}>{u.unit_number}</span>
+                    <span style={{ fontSize: 12, color: "#3c3c43", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{u.property_name || "—"}</span>
+                    <span style={{ fontSize: 12, color: "#8e8e93" }}>{u.bedrooms || "—"}</span>
+                    <span style={{ fontSize: 11, fontWeight: 500, color: u.lease_status === "leased" ? "#16a34a" : "#e07d2a" }}>{u.lease_status === "leased" ? "Leased" : "Unleased"}</span>
+                    <button onClick={() => setUnits(prev => prev.filter(x => x.id !== u.id))} style={{ background: "none", border: "none", cursor: "pointer", color: "#c7c7cc", fontSize: 16, padding: 0, lineHeight: 1 }}>×</button>
+                  </div>
+                ))}
+              </div>
+
+              {parseError && <div style={{ padding: "10px 14px", background: "#fef2f2", borderRadius: 8, fontSize: 13, color: "#dc2626", marginBottom: 12 }}>⚠️ {parseError}</div>}
+
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <button onClick={() => { setMode("upload"); setUnits([]); }} style={{ padding: "9px 16px", background: "#f2f2f7", border: "none", borderRadius: 8, fontSize: 13, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Re-upload</button>
+                <button onClick={() => setMode("manual")} style={{ padding: "9px 16px", background: "none", border: "0.5px solid #e5e5ea", borderRadius: 8, fontSize: 13, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Add more manually</button>
+                <div style={{ flex: 1 }} />
+                <button onClick={saveUnits} disabled={saving || !units.length}
+                  style={{ padding: "10px 20px", background: saving ? "#e5e5ea" : "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: saving ? "#8e8e93" : "white", cursor: saving ? "default" : "pointer", fontFamily: "'Inter',sans-serif" }}>
+                  {saving ? "Saving…" : `Import ${units.length} units →`}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* MANUAL */}
+          {!saved && mode === "manual" && (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 120px 100px auto", gap: 8, alignItems: "flex-end", marginBottom: 10 }}>
+                {[
+                  { label: "Property name", val: manualProp, set: setManualProp, placeholder: "e.g. Maple Ridge", type: "input" },
+                  { label: "Unit #", val: manualUnit, set: setManualUnit, placeholder: "e.g. 203", type: "input", onKey: e => e.key === "Enter" && addManualUnit() },
+                ].map(f => (
+                  <div key={f.label}>
+                    <p style={{ fontSize: 10, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>{f.label}</p>
+                    <input value={f.val} onChange={e => f.set(e.target.value)} onKeyDown={f.onKey} placeholder={f.placeholder}
+                      style={{ width: "100%", padding: "9px 12px", border: "0.5px solid #c6c6c8", borderRadius: 8, fontSize: 13, fontFamily: "'Inter',sans-serif", outline: "none", color: "#000" }} />
+                  </div>
+                ))}
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>Lease</p>
+                  <select value={manualLease} onChange={e => setManualLease(e.target.value)}
+                    style={{ width: "100%", padding: "9px 12px", border: "0.5px solid #c6c6c8", borderRadius: 8, fontSize: 13, fontFamily: "'Inter',sans-serif", outline: "none", color: "#000", background: "#fff" }}>
+                    <option value="unleased">Unleased</option>
+                    <option value="leased">Leased</option>
+                  </select>
+                </div>
+                <button onClick={addManualUnit}
+                  style={{ padding: "9px 16px", background: "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: "white", cursor: "pointer", fontFamily: "'Inter',sans-serif", whiteSpace: "nowrap" }}>
+                  + Add
+                </button>
+              </div>
+
+              {units.length > 0 ? (
+                <div style={{ border: "0.5px solid #e5e5ea", borderRadius: 10, overflow: "hidden", maxHeight: 240, overflowY: "auto", marginBottom: 14 }}>
+                  {units.map((u, i) => (
+                    <div key={u.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderBottom: i < units.length - 1 ? "0.5px solid #e5e5ea" : "none" }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "#000", width: 50 }}>{u.unit_number}</span>
+                      <span style={{ fontSize: 12, color: "#3c3c43", flex: 1 }}>{u.property_name}</span>
+                      <span style={{ fontSize: 11, color: u.lease_status === "leased" ? "#16a34a" : "#e07d2a", fontWeight: 500 }}>{u.lease_status}</span>
+                      <button onClick={() => setUnits(prev => prev.filter(x => x.id !== u.id))} style={{ background: "none", border: "none", cursor: "pointer", color: "#c7c7cc", fontSize: 16, padding: 0 }}>×</button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: "24px", textAlign: "center", color: "#8e8e93", fontSize: 13, border: "0.5px dashed #e5e5ea", borderRadius: 10, marginBottom: 14 }}>
+                  No units added yet. Fill in the form above and hit Add.
+                </div>
+              )}
+
+              {parseError && <div style={{ padding: "10px 14px", background: "#fef2f2", borderRadius: 8, fontSize: 13, color: "#dc2626", marginBottom: 12 }}>⚠️ {parseError}</div>}
+
+              <div style={{ display: "flex", gap: 8, justifyContent: "space-between" }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => setMode("choose")} style={{ padding: "9px 16px", background: "#f2f2f7", border: "none", borderRadius: 8, fontSize: 13, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Back</button>
+                  <button onClick={() => setMode("upload")} style={{ padding: "9px 16px", background: "none", border: "0.5px solid #e5e5ea", borderRadius: 8, fontSize: 13, color: "#3c3c43", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Switch to CSV</button>
+                </div>
+                {units.length > 0 && (
+                  <button onClick={saveUnits} disabled={saving}
+                    style={{ padding: "10px 20px", background: saving ? "#e5e5ea" : "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, color: saving ? "#8e8e93" : "white", cursor: saving ? "default" : "pointer", fontFamily: "'Inter',sans-serif" }}>
+                    {saving ? "Saving…" : `Import ${units.length} units →`}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+
 function DeskNewTurnoverModal({ db, onCreate, onClose }) {
   const [form, setForm] = useState({ unit_id: "", target_ready_date: "", lease_status: "unleased", assigned_to: "" });
 
@@ -4491,9 +4849,53 @@ export default function App() {
   if (roleData?.role === "operator" && !getOperatorSetup() && !isDesktop) {
     return (
       <AppCtx.Provider value={{ db, updateDB, navigate }}>
-        <OperatorOnboarding onDone={cfg => {
+        <OperatorOnboarding onDone={async cfg => {
           saveOperatorSetup(cfg);
-          // Force re-render after setup completes
+
+          // Push imported units into the live DB
+          if (cfg.imported_units?.length && isSupabaseConfigured()) {
+            try {
+              // First upsert any new properties
+              const propNames = [...new Set(cfg.imported_units.map(u => u.property_name).filter(Boolean))];
+              for (const name of propNames) {
+                if (!db.properties?.find(p => p.name === name)) {
+                  await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Prefer": "return=minimal" },
+                    body: JSON.stringify({ name, address: "" }),
+                  });
+                }
+              }
+              // Reload props to get IDs
+              const propsRes = await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
+                headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
+              });
+              const freshProps = await propsRes.json();
+
+              // Insert units
+              for (const u of cfg.imported_units) {
+                const prop = freshProps.find(p => p.name === u.property_name);
+                await fetch(`${SUPABASE_URL}/rest/v1/units`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Prefer": "return=minimal" },
+                  body: JSON.stringify({
+                    property_id: prop?.id,
+                    unit_number: u.unit_number,
+                    bedrooms: u.bedrooms ? parseInt(u.bedrooms) : null,
+                    bathrooms: u.bathrooms ? parseFloat(u.bathrooms) : null,
+                    sqft: u.sqft ? parseInt(u.sqft) : null,
+                    lease_status: u.lease_status || "unleased",
+                  }),
+                });
+              }
+            } catch (e) {
+              console.warn("Unit import to Supabase failed:", e.message);
+            }
+          }
+
+          // Reload DB to pick up new units
+          const freshDB = await loadDB();
+          updateDB(freshDB);
           setRoleData({ ...roleData });
         }} />
       </AppCtx.Provider>
