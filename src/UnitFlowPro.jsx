@@ -4676,10 +4676,15 @@ function Dashboard() {
     <div style={{ background: "#f2f2f7", minHeight: "100vh", paddingBottom: 100 }}>
       {/* Header */}
       <div style={{ padding: "16px 16px 8px" }}>
-        <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 2 }}>Make Ready</p>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: "#000", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-          Good morning,<br/>{firstName}.
-        </h1>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 2 }}>Make Ready</p>
+            <h1 style={{ fontSize: 28, fontWeight: 700, color: "#000", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+              Good morning,<br/>{firstName}.
+            </h1>
+          </div>
+          <button onClick={() => { clearRoleData(); window.location.reload(); }} style={{ marginTop: 4, background: "none", border: "none", borderRadius: 10, padding: "8px 12px", fontSize: 14, fontWeight: 500, color: "#007aff", cursor: "pointer", fontFamily: "'Inter',sans-serif" }}>Switch role</button>
+        </div>
       </div>
 
       {/* Relay briefing */}
