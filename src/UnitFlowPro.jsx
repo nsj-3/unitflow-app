@@ -1744,7 +1744,7 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
                     {msg.photo_base64 && <img src={msg.photo_base64} alt="unit" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />}
                     {msg.text && <p style={{ fontSize: 14, color: isMe ? "#fff" : "#000", lineHeight: 1.4 }}>{msg.text}</p>}
                   </div>
-                  {canResolve && <button onClick={() => resolveThreadMessage(to.unit_id, msg.id, authorName)} style={{ marginTop: 4, fontSize: 12, color: "#16a34a", background: "none", border: "1px solid #16a34a", borderRadius: 8, padding: "3px 10px", cursor: "pointer" }}>Mark Resolved</button>}
+                  {canResolve && <button onClick={() => { setAllMessages(prev => prev.map(m => m.id === msg.id ? { ...m, resolved: true } : m)); resolveThreadMessage(to.unit_id, msg.id, authorName); }} style={{ marginTop: 4, fontSize: 12, color: "#16a34a", background: "none", border: "1px solid #16a34a", borderRadius: 8, padding: "3px 10px", cursor: "pointer" }}>Mark Resolved</button>}
                 </div>
               );
             })}
