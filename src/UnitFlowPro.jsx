@@ -1799,6 +1799,7 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
 
 
 function LeasingView({ userName, onSwitchRole }) {
+  const userRole = getRoleData()?.role || "leasing";
   const { db } = useApp();
   const [selectedThread, setSelectedThread] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -1897,7 +1898,7 @@ function LeasingView({ userName, onSwitchRole }) {
 
       <AnimatePresence>
         {selectedThread && (
-          <UnitThread to={selectedThread} authorName={userName} authorRole="leasing" onClose={() => setSelectedThread(null)} />
+          <UnitThread to={selectedThread} authorName={userName} authorRole={userRole} onClose={() => setSelectedThread(null)} />
         )}
       </AnimatePresence>
     </div>
