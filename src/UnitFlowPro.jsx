@@ -1615,6 +1615,24 @@ function RoleSelectionScreen({ onSelect }) {
   );
 }
 
+async function resolveThreadMessage(unitId, msgId, resolverName) {
+  try {
+    if (isSupabaseConfigured()) {
+      await fetch(`${SUPABASE_URL}/rest/v1/unit_threads?id=eq.${msgId}`, {
+        method: "PATCH",
+        headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+        body: JSON.stringify({ resolved: true, resolved_by: resolverName, resolved_at: new Date().toISOString() })
+      });
+    }
+    const stored = await window.storage.get(`unitflow_thread_${unitId}`);
+    if (stored) {
+      const msgs = JSON.parse(stored.value);
+      const updated = msgs.map(m => m.id === msgId ? { ...m, resolved: true, resolved_by: resolverName } : m);
+      await window.storage.set(`unitflow_thread_${unitId}`, JSON.stringify(updated));
+    }
+  } catch(e) { console.warn('resolveThreadMessage failed', e); }
+}
+
 function UnitThread({ to, authorName, authorRole, onClose }) {
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading]         = useState(true);
@@ -1714,6 +1732,8 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
             ) : humanMessages.map(msg => {
               const isMe = msg.author_name === authorName;
               const rc = roleColor[msg.author_role] || "#8e8e93";
+              const isLeasingMsg = msg.author_role === "leasing";
+              const canResolve = authorRole === "maintenance" && isLeasingMsg && msg.resolved !== true;
               return (
                 <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
                   <div style={{ fontSize: 11, color: "#8e8e93", marginBottom: 3, display: "flex", alignItems: "center", gap: 5 }}>
@@ -1724,6 +1744,7 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
                     {msg.photo_base64 && <img src={msg.photo_base64} alt="unit" style={{ width: "100%", borderRadius: 8, marginBottom: msg.text ? 8 : 0, maxHeight: 200, objectFit: "cover" }} />}
                     {msg.text && <p style={{ fontSize: 14, color: isMe ? "#fff" : "#000", lineHeight: 1.4 }}>{msg.text}</p>}
                   </div>
+                  {canResolve && <button onClick={() => resolveThreadMessage(to.id, msg.id, authorName)} style={{ marginTop: 4, fontSize: 12, color: "#16a34a", background: "none", border: "1px solid #16a34a", borderRadius: 8, padding: "3px 10px", cursor: "pointer" }}>Mark Resolved</button>}
                 </div>
               );
             })}
