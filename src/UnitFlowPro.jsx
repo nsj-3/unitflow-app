@@ -1537,6 +1537,93 @@ function clearRoleData() {
 // ROLE SELECTION SCREEN
 // ─────────────────────────────────────────────
 
+
+function LoginScreen({ onLogin }) {
+  const [mode, setMode] = React.useState("login");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [role, setRole] = React.useState("maintenance");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const [message, setMessage] = React.useState("");
+
+  const handleLogin = async () => {
+    if (!email || !password) { setError("Enter your email and password."); return; }
+    setLoading(true); setError("");
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) { setError(authError.message); setLoading(false); return; }
+      const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+      if (profile) {
+        setRoleData(profile.role, profile.name);
+        onLogin({ role: profile.role, name: profile.name, userId: data.user.id });
+      } else {
+        setError("No profile found. Please sign up first.");
+      }
+    } catch(e) { setError("Login failed. Try again."); }
+    setLoading(false);
+  };
+
+  const handleSignup = async () => {
+    if (!email || !password || !name.trim()) { setError("Fill in all fields."); return; }
+    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    setLoading(true); setError("");
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({ email, password });
+      if (authError) { setError(authError.message); setLoading(false); return; }
+      if (data.user) {
+        await supabase.from("profiles").insert({ id: data.user.id, name: name.trim(), role });
+        setRoleData(role, name.trim());
+        if (data.session) {
+          onLogin({ role, name: name.trim(), userId: data.user.id });
+        } else {
+          setMessage("Check your email to confirm your account, then log in.");
+          setMode("login");
+        }
+      }
+    } catch(e) { setError("Signup failed. Try again."); }
+    setLoading(false);
+  };
+
+  const inp = { width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e5ea", fontSize: 16, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box", marginBottom: 12 };
+  const btn = { width: "100%", padding: "14px", borderRadius: 12, border: "none", background: "#e07d2a", color: "#fff", fontSize: 16, fontWeight: 600, fontFamily: "Inter, sans-serif", cursor: "pointer", marginBottom: 12 };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+      <div style={{ width: "100%", maxWidth: 400 }}>
+        <div style={{ marginBottom: 32, textAlign: "center" }}>
+          <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 4, letterSpacing: "0.05em", textTransform: "uppercase" }}>Make Ready</p>
+          <h1 style={{ fontSize: 32, fontWeight: 700, color: "#0d0a07", letterSpacing: "-0.02em", margin: 0 }}>Mainlync</h1>
+        </div>
+        {message && <div style={{ background: "#d1fae5", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#065f46" }}>{message}</div>}
+        {error && <div style={{ background: "#fee2e2", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#991b1b" }}>{error}</div>}
+        {mode === "signup" && (
+          <input style={inp} placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} />
+        )}
+        <input style={inp} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+        <input style={inp} placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        {mode === "signup" && (
+          <div style={{ marginBottom: 12 }}>
+            <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 8 }}>Your role</p>
+            <div style={{ display: "flex", gap: 8 }}>
+              {["maintenance","leasing","operator"].map(r => (
+                <button key={r} onClick={() => setRole(r)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: role === r ? "2px solid #e07d2a" : "1px solid #e5e5ea", background: role === r ? "#e07d2a15" : "#fff", color: role === r ? "#e07d2a" : "#8e8e93", fontSize: 12, fontWeight: 600, cursor: "pointer", textTransform: "capitalize", fontFamily: "Inter, sans-serif" }}>{r}</button>
+              ))}
+            </div>
+          </div>
+        )}
+        <button style={btn} onClick={mode === "login" ? handleLogin : handleSignup} disabled={loading}>
+          {loading ? "..." : mode === "login" ? "Log In" : "Create Account"}
+        </button>
+        <p style={{ textAlign: "center", fontSize: 14, color: "#8e8e93", cursor: "pointer" }} onClick={() => { setError(""); setMode(mode === "login" ? "signup" : "login"); }}>
+          {mode === "login" ? "No account? Sign up" : "Have an account? Log in"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function RoleSelectionScreen({ onSelect }) {
   const [step, setStep] = useState("role");
   const [selectedRole, setSelectedRole] = useState(null);
@@ -1617,18 +1704,24 @@ function RoleSelectionScreen({ onSelect }) {
 
 async function resolveThreadMessage(unitId, msgId, resolverName) {
   try {
+    // Update local storage
+    const key = `unitflow_thread_${unitId}`;
+    let msgs = [];
+    try {
+      const stored = await window.storage.get(key);
+      if (stored && stored.value) msgs = JSON.parse(stored.value);
+    } catch {}
+    const updated = msgs.map(m => m.id === msgId ? { ...m, resolved: true, resolved_by: resolverName } : m);
+    await window.storage.set(key, JSON.stringify(updated));
+    // Also update Supabase if configured
     if (isSupabaseConfigured()) {
-      await fetch(`${SUPABASE_URL}/rest/v1/unit_threads?id=eq.${msgId}`, {
-        method: "PATCH",
-        headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
-        body: JSON.stringify({ resolved: true, resolved_by: resolverName, resolved_at: new Date().toISOString() })
-      });
-    }
-    const stored = await window.storage.get(`unitflow_thread_${unitId}`);
-    if (stored) {
-      const msgs = JSON.parse(stored.value);
-      const updated = msgs.map(m => m.id === msgId ? { ...m, resolved: true, resolved_by: resolverName } : m);
-      await window.storage.set(`unitflow_thread_${unitId}`, JSON.stringify(updated));
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/unit_threads?id=eq.${msgId}`, {
+          method: "PATCH",
+          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Content-Type": "application/json", "Prefer": "return=minimal" },
+          body: JSON.stringify({ resolved: true, resolved_by: resolverName, resolved_at: new Date().toISOString() })
+        });
+      } catch {}
     }
   } catch(e) { console.warn('resolveThreadMessage failed', e); }
 }
@@ -1657,7 +1750,12 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
     loadThreadReads(to.unit_id).then(r => setReads(r || []));
     const interval = setInterval(async () => {
       const fresh = await loadThreadMessages(to.unit_id);
-      setAllMessages(fresh || []);
+      if (fresh) {
+        setAllMessages(prev => {
+          const resolvedIds = new Set(prev.filter(m => m.resolved).map(m => m.id));
+          return fresh.map(m => resolvedIds.has(m.id) ? { ...m, resolved: true } : m);
+        });
+      }
       const fr = await loadThreadReads(to.unit_id);
       setReads(fr || []);
     }, 15000);
@@ -4205,73 +4303,8 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
 
 const SUPABASE_URL  = "https://sxelqgfzandzapqgfvsa.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4ZWxxZ2Z6YW5kemFwcWdmdnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTY0OTMsImV4cCI6MjA5Mjk3MjQ5M30.CaQwWW6io1PplAhQ6NKdQaCwqSChmkpE3pt9NFHYpKQ";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Light wrapper — no SDK needed, just fetch
-const supabase = {
-  _h() {
-    return {
-      "Content-Type":  "application/json",
-      "apikey":        SUPABASE_ANON,
-      "Authorization": `Bearer ${SUPABASE_ANON}`,
-      "Prefer":        "return=representation",
-    };
-  },
-
-  async select(table, filter = "") {
-    const q = filter ? `?${filter}` : "";
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${q}`, { headers: this._h() });
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`Supabase select ${table} failed:`, err);
-      throw new Error(err);
-    }
-    const data = await res.json();
-    // Handle both array response and {data: [...]} format
-    const result = Array.isArray(data) ? data : (data?.data || []);
-    return result;
-  },
-
-  async upsert(table, row) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-      method: "POST",
-      headers: { ...this._h(), "Prefer": "resolution=merge-duplicates,return=representation" },
-      body: JSON.stringify(row),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  },
-
-  async update(table, id, patch) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-      method: "PATCH",
-      headers: this._h(),
-      body: JSON.stringify(patch),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  },
-
-  async delete(table, id) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-      method: "DELETE",
-      headers: this._h(),
-    });
-    if (!res.ok) throw new Error(await res.text());
-  },
-
-  // Real-time subscription via Supabase Realtime
-  subscribe(table, callback) {
-    // Polling fallback until Realtime WebSocket is configured
-    // Replace with supabase-js realtime for true push
-    const interval = setInterval(async () => {
-      try {
-        const data = await this.select(table);
-        callback(data);
-      } catch {}
-    }, 15000);
-    return () => clearInterval(interval);
-  },
-};
 
 // ─────────────────────────────────────────────
 // DATA LAYER — uses Supabase if configured,
@@ -4776,6 +4809,7 @@ export default function App() {
   const [page, setPage]       = useState("Dashboard");
   const [syncStatus, setSyncStatus] = useState("idle");
   const [roleData, setRoleData]     = useState(() => getRoleData());
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Hash routing for shared links
   const [shareToken, setShareToken] = useState(() => {
@@ -4790,6 +4824,50 @@ export default function App() {
     };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+
+  // Check for existing Supabase session on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        // Fetch profile to get role + name
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?user_id=eq.${session.user.id}&limit=1`, {
+          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${session.access_token || SUPABASE_ANON}` }
+        }).then(r => r.json()).then(rows => {
+          if (rows?.[0]) {
+            const { role, name } = rows[0];
+            setRoleData({ role, name });
+            try { localStorage.setItem("mainlync_role", JSON.stringify({ role, name, setAt: new Date().toISOString() })); } catch {}
+          }
+          setAuthLoading(false);
+        }).catch(() => setAuthLoading(false));
+      } else {
+        setAuthLoading(false);
+      }
+    }).catch(() => setAuthLoading(false));
+  }, []);
+
+
+  // Check for existing Supabase session on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        // Fetch profile to get role + name
+        fetch(`${SUPABASE_URL}/rest/v1/profiles?user_id=eq.${session.user.id}&limit=1`, {
+          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${session.access_token || SUPABASE_ANON}` }
+        }).then(r => r.json()).then(rows => {
+          if (rows?.[0]) {
+            const { role, name } = rows[0];
+            setRoleData({ role, name });
+            try { localStorage.setItem("mainlync_role", JSON.stringify({ role, name, setAt: new Date().toISOString() })); } catch {}
+          }
+          setAuthLoading(false);
+        }).catch(() => setAuthLoading(false));
+      } else {
+        setAuthLoading(false);
+      }
+    }).catch(() => setAuthLoading(false));
   }, []);
 
   // Load data
@@ -4863,11 +4941,19 @@ export default function App() {
     </>
   );
 
-  // Role selection — show once if no role set
+  // Auth gate — show login if no session and not desktop
   if (!roleData && !isDesktop) {
+    if (authLoading) return (
+      <>
+        <style>{THEME.css}</style>
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff" }}>
+          <p style={{ fontSize: 13, color: "#8e8e93", fontFamily: "'Inter',sans-serif" }}>Loading...</p>
+        </div>
+      </>
+    );
     return (
       <AppCtx.Provider value={{ db, updateDB, navigate }}>
-        <RoleSelectionScreen onSelect={data => setRoleData(data)} />
+        <LoginScreen onLogin={({ role, name }) => setRoleData({ role, name })} />
       </AppCtx.Provider>
     );
   }
