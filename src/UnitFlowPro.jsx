@@ -1540,14 +1540,14 @@ function clearRoleData() {
 
 
 function LoginScreen({ onLogin }) {
-  const [mode, setMode] = React.useState("login");
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [name, setName] = React.useState("");
-  const [role, setRole] = React.useState("maintenance");
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
-  const [message, setMessage] = React.useState("");
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("maintenance");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
     if (!email || !password) { setError("Enter your email and password."); return; }
