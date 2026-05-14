@@ -1574,7 +1574,11 @@ function LoginScreen({ onLogin }) {
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
       if (authError) { setError(authError.message); setLoading(false); return; }
       if (data.user) {
-        await supabase.from("profiles").insert({ id: data.user.id, name: name.trim(), role });
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${data.session?.access_token || SUPABASE_ANON}`, "Prefer": "return=minimal" },
+          body: JSON.stringify({ user_id: data.user.id, name: name.trim(), role })
+        });
         setRoleData(role, name.trim());
         if (data.session) {
           onLogin({ role, name: name.trim(), userId: data.user.id });
