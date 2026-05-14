@@ -1,0 +1,21 @@
+{
+  "appId": "com.mainlync.app",
+  "appName": "Mainlync",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "always",
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": true,
+    "keyboardResize": "body"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    },
+    "Keyboard": {
+      "resize": "body",
+      "style": "dark",
+      "resizeOnFullScreen": true
+    }
+  }
+}

@@ -107,7 +107,7 @@ export default function OperatorOnboarding({ onDone }) {
       <AnimatePresence mode="wait">
         <motion.div key={step} variants={slideVariants} initial="initial" animate="animate" exit="exit"
           transition={{ duration: 0.22 }}
-          style={{ flex: 1, display: "flex", flexDirection: "column", padding: "32px 24px 40px" }}>
+          style={{ flex: 1, display: "flex", flexDirection: "column", padding: "32px 24px 40px", overflowY: "auto" }}>
           {content}
         </motion.div>
       </AnimatePresence>
@@ -144,8 +144,9 @@ export default function OperatorOnboarding({ onDone }) {
           </div>
         ))}
       </div>
-      <div style={{ marginTop: "auto" }}>
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "16px 24px 48px", background: "#f2f2f7", display: "flex", flexDirection: "column", gap: 12 }}>
         <button onClick={next} className="btn-primary">Get started</button>
+        <button onClick={() => onDone(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 15, fontWeight: 500, fontFamily: "'Inter', sans-serif", padding: "10px 0" }}>← Back to role selection</button>
       </div>
     </>
   );
@@ -297,7 +298,7 @@ export default function OperatorOnboarding({ onDone }) {
     <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column", fontFamily: "'Inter', -apple-system, sans-serif" }}>
       <ProgressBar step={8} />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-        style={{ flex: 1, display: "flex", flexDirection: "column", padding: "32px 24px 40px" }}>
+        style={{ flex: 1, display: "flex", flexDirection: "column", padding: "32px 24px 40px", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 32, marginTop: 16 }}>
           <div style={{ width: 64, height: 64, background: "#000", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
