@@ -4318,12 +4318,14 @@ const isSupabaseConfigured = () =>
 async function loadDB() {
   if (isSupabaseConfigured()) {
     try {
-      const [properties, units, team, turnovers] = await Promise.all([
-        supabase.select("properties"),
-        supabase.select("units"),
-        supabase.select("team"),
-        supabase.select("turnovers"),
+      const headers = { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` };
+      const [pr, ur, tr, tor] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/properties`, { headers }).then(r => r.json()),
+        fetch(`${SUPABASE_URL}/rest/v1/units`, { headers }).then(r => r.json()),
+        fetch(`${SUPABASE_URL}/rest/v1/team`, { headers }).then(r => r.json()),
+        fetch(`${SUPABASE_URL}/rest/v1/turnovers`, { headers }).then(r => r.json()),
       ]);
+      const [properties, units, team, turnovers] = [pr, ur, tr, tor];
       return { properties, units, team, turnovers, _version: DB_VERSION, _source: "supabase" };
     } catch (e) {
       console.warn("Supabase load failed, falling back to local:", e.message);
@@ -4858,12 +4860,8 @@ export default function App() {
   // Supabase real-time polling when configured
   useEffect(() => {
     if (!isSupabaseConfigured() || !db) return;
-    const unsub = supabase.subscribe("turnovers", (fresh) => {
-      setDB(prev => prev ? { ...prev, turnovers: fresh } : prev);
-      setSyncStatus("synced");
-      setTimeout(() => setSyncStatus("idle"), 2000);
-    });
-    return unsub;
+    // Real-time polling disabled — using fetch-based polling instead
+    return () => {};
   }, [!!db]);
 
   // Relay stall checker — runs every 30 minutes
