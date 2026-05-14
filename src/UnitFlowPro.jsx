@@ -4849,27 +4849,6 @@ export default function App() {
   }, []);
 
 
-  // Check for existing Supabase session on mount
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        // Fetch profile to get role + name
-        fetch(`${SUPABASE_URL}/rest/v1/profiles?user_id=eq.${session.user.id}&limit=1`, {
-          headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${session.access_token || SUPABASE_ANON}` }
-        }).then(r => r.json()).then(rows => {
-          if (rows?.[0]) {
-            const { role, name } = rows[0];
-            setRoleData({ role, name });
-            try { localStorage.setItem("mainlync_role", JSON.stringify({ role, name, setAt: new Date().toISOString() })); } catch {}
-          }
-          setAuthLoading(false);
-        }).catch(() => setAuthLoading(false));
-      } else {
-        setAuthLoading(false);
-      }
-    }).catch(() => setAuthLoading(false));
-  }, []);
-
   // Load data
   useEffect(() => {
     loadDB().then(data => { setDB(data); setLoading(false); });
