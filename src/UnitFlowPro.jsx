@@ -1345,7 +1345,7 @@ function Turnovers() {
   }
 
   return (
-    <div style={{ paddingBottom: 100, background: "#f2f2f7", minHeight: "100vh", paddingTop: "env(safe-area-inset-top)" }}>
+    <div style={{ paddingBottom: 100, background: "#f2f2f7", minHeight: "100vh", paddingTop: "env(safe-area-inset-top, 50px)" }}>
       {/* Page header — ByeWind style */}
       <div style={{ padding: "16px 16px 12px", background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", position: "sticky", top: 0, zIndex: 40 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1956,7 +1956,7 @@ function LeasingView({ userName, onSwitchRole }) {
   const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", paddingBottom: 40, paddingTop: "env(safe-area-inset-top)" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", paddingBottom: 40, paddingTop: "env(safe-area-inset-top, 50px)" }}>
       <style>{THEME.css}</style>
 
       {/* Header */}
@@ -4742,7 +4742,7 @@ function Dashboard() {
   }
 
   return (
-    <div style={{ background: "#f2f2f7", minHeight: "100vh", paddingBottom: 100, paddingTop: "env(safe-area-inset-top)" }}>
+    <div style={{ background: "#f2f2f7", minHeight: "100vh", paddingBottom: 100, paddingTop: "env(safe-area-inset-top, 50px)" }}>
       {/* Header */}
       <div style={{ padding: "16px 16px 8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -5044,7 +5044,7 @@ export default function App() {
   return (
     <AppCtx.Provider value={{ db, updateDB, navigate }}>
       <style>{THEME.css}</style>
-      <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto", position: "relative", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
+      <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto", position: "relative", paddingTop: "env(safe-area-inset-top, 50px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
 
         {/* Sync indicator */}
         {syncStatus === "syncing" && (
