@@ -1948,6 +1948,80 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
 }
 
 
+
+function ProfileScreen({ onSignOut }) {
+  const roleData = getRoleData();
+  const [name, setName] = useState(roleData?.name || "");
+  const [newPassword, setNewPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+
+  const saveName = async () => {
+    if (!name.trim()) { setErr("Name can't be empty."); return; }
+    setSaving(true); setErr(""); setMsg("");
+    try {
+      const session = (await supabase.auth.getSession()).data?.session;
+      if (session?.user?.id) {
+        await fetch(`${SUPABASE_URL}/rest/v1/profiles?user_id=eq.${session.user.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${session.access_token || SUPABASE_ANON}`, "Prefer": "return=minimal" },
+          body: JSON.stringify({ name: name.trim() })
+        });
+      }
+      setRoleData(roleData?.role || "leasing", name.trim());
+      setMsg("Name updated!");
+    } catch { setErr("Failed to save."); }
+    setSaving(false);
+  };
+
+  const changePassword = async () => {
+    if (!newPassword || newPassword.length < 6) { setErr("Password must be at least 6 characters."); return; }
+    setSaving(true); setErr(""); setMsg("");
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) { setErr(error.message); } else { setMsg("Password updated!"); setNewPassword(""); }
+    } catch { setErr("Failed to update password."); }
+    setSaving(false);
+  };
+
+  const inp = { width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e5ea", fontSize: 16, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box", marginBottom: 12, background: "#fff" };
+  const btn = { width: "100%", padding: "14px", borderRadius: 12, border: "none", background: "#e07d2a", color: "#fff", fontSize: 16, fontWeight: 600, fontFamily: "Inter, sans-serif", cursor: "pointer", marginBottom: 12 };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "Inter, sans-serif", paddingTop: 59, paddingBottom: 100 }}>
+      <div style={{ background: "#fff", borderBottom: "0.5px solid #e5e5ea", padding: "16px 16px 20px", display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#e07d2a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <span style={{ fontSize: 22, fontWeight: 700, color: "#fff" }}>{(name || "?")[0].toUpperCase()}</span>
+        </div>
+        <div>
+          <p style={{ fontWeight: 700, fontSize: 17, margin: 0, color: "#000" }}>{name || "No name set"}</p>
+          <p style={{ fontSize: 13, color: "#8e8e93", margin: "2px 0 0", textTransform: "capitalize" }}>{roleData?.role || "User"}</p>
+        </div>
+      </div>
+
+      <div style={{ padding: "24px 16px 0" }}>
+        <p style={{ fontSize: 12, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Display Name</p>
+        <div style={{ background: "#fff", borderRadius: 16, padding: "16px", marginBottom: 24 }}>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" style={inp} />
+          <button onClick={saveName} disabled={saving} style={btn}>{saving ? "Saving..." : "Save Name"}</button>
+        </div>
+
+        <p style={{ fontSize: 12, fontWeight: 600, color: "#8e8e93", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>Change Password</p>
+        <div style={{ background: "#fff", borderRadius: 16, padding: "16px", marginBottom: 24 }}>
+          <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 6 chars)" style={inp} />
+          <button onClick={changePassword} disabled={saving} style={btn}>{saving ? "Updating..." : "Update Password"}</button>
+        </div>
+
+        {msg && <p style={{ color: "#16a34a", fontSize: 14, textAlign: "center", marginBottom: 16, fontWeight: 500 }}>{msg}</p>}
+        {err && <p style={{ color: "#dc2626", fontSize: 14, textAlign: "center", marginBottom: 16 }}>{err}</p>}
+
+        <button onClick={onSignOut} style={{ ...btn, background: "#fff", color: "#dc2626", border: "1px solid #fecaca" }}>Sign Out</button>
+      </div>
+    </div>
+  );
+}
+
 function LeasingView({ userName, onSwitchRole }) {
   const userRole = getRoleData()?.role || "leasing";
   const { db } = useApp();
@@ -5059,6 +5133,7 @@ export default function App() {
   // Maintenance experience — 4 tabs
   const PAGES = {
     Dashboard: <Dashboard />,
+    Profile: <ProfileScreen onSignOut={async () => { await signOutUser(); setRoleData(null); }} />,
     Turnovers: <Turnovers />,
     Agent:     <AgentPage />,
     Team:      <Team />,
