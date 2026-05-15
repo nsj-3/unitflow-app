@@ -124,6 +124,17 @@ const THEME = {
       -webkit-font-smoothing: antialiased;
     }
     ::-webkit-scrollbar { display: none; }
+    /* ── Fixed status bar shield — always on top ── */
+    #status-bar-shield {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 59px;
+      background: #f2f2f7;
+      z-index: 9999;
+      pointer-events: none;
+    }
     /* ── Status bar spacer ── */
     .safe-top { padding-top: constant(safe-area-inset-top); padding-top: 59px; }
     ion-app { --ion-safe-area-top: 59px; }
@@ -5045,6 +5056,7 @@ export default function App() {
     <AppCtx.Provider value={{ db, updateDB, navigate }}>
       <style>{THEME.css}</style>
       <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto", position: "relative", paddingTop: "59px", paddingBottom: "34px" }}>
+          <div id="status-bar-shield" />
 
         {/* Sync indicator */}
         {syncStatus === "syncing" && (
