@@ -1342,7 +1342,7 @@ function Turnovers() {
   }
 
   return (
-    <div style={{ paddingBottom: 100, background: "#f2f2f7", minHeight: "100vh" }}>
+    <div style={{ paddingBottom: 100, background: "#f2f2f7", minHeight: "100vh", paddingTop: "env(safe-area-inset-top)" }}>
       {/* Page header — ByeWind style */}
       <div style={{ padding: "16px 16px 12px", background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", position: "sticky", top: 0, zIndex: 40 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1953,7 +1953,7 @@ function LeasingView({ userName, onSwitchRole }) {
   const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", paddingBottom: 40 }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", paddingBottom: 40, paddingTop: "env(safe-area-inset-top)" }}>
       <style>{THEME.css}</style>
 
       {/* Header */}
@@ -4739,7 +4739,7 @@ function Dashboard() {
   }
 
   return (
-    <div style={{ background: "#f2f2f7", minHeight: "100vh", paddingBottom: 100 }}>
+    <div style={{ background: "#f2f2f7", minHeight: "100vh", paddingBottom: 100, paddingTop: "env(safe-area-inset-top)" }}>
       {/* Header */}
       <div style={{ padding: "16px 16px 8px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
