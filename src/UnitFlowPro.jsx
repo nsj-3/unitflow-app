@@ -1819,7 +1819,7 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", zIndex: 200, maxWidth: 480, margin: "0 auto", display: "flex", flexDirection: "column" }}>
 
       {/* Header */}
-      <div style={{ background: "rgba(249,249,249,0.97)", borderBottom: "0.5px solid #c6c6c8", flexShrink: 0 }}>
+      <div style={{ background: "rgba(249,249,249,0.97)", borderBottom: "0.5px solid #c6c6c8", flexShrink: 0, paddingTop: "59px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px 8px" }}>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 15, fontFamily: "'Inter', sans-serif", fontWeight: 500, display: "flex", alignItems: "center", gap: 3, padding: 0 }}>
             <svg width="9" height="14" viewBox="0 0 9 14" fill="none"><path d="M8 1L2 7l6 6" stroke="#007aff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
