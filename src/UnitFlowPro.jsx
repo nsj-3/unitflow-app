@@ -1576,7 +1576,7 @@ function LoginScreen({ onLogin }) {
     setLoading(true); setError("");
     try {
       const { data, error: authError } = await supabase.auth.signUp({ email, password });
-      if (authError) { setError(authError.message); setLoading(false); return; }
+      if (authError) { setError(authError.message || authError.msg || JSON.stringify(authError)); setLoading(false); return; }
       if (data.user) {
         await fetch(`${SUPABASE_URL}/rest/v1/profiles`, {
           method: "POST",
@@ -1591,7 +1591,7 @@ function LoginScreen({ onLogin }) {
           setMode("login");
         }
       }
-    } catch(e) { setError("Signup failed. Try again."); }
+    } catch(e) { setError(e?.message || "Signup failed. Try again."); }
     setLoading(false);
   };
 
