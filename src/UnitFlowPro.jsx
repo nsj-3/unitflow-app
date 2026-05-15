@@ -1554,8 +1554,12 @@ function LoginScreen({ onLogin }) {
     setLoading(true); setError("");
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-      if (authError) { setError(authError.message); setLoading(false); return; }
-      const { data: profile } = await supabase.from("profiles").select("*").eq("id", data.user.id).single();
+      if (authError) { setError(authError.message || JSON.stringify(authError)); setLoading(false); return; }
+      const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?user_id=eq.${data.user.id}&limit=1`, {
+        headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${data.session?.access_token || SUPABASE_ANON}` }
+      });
+      const profileRows = await profileRes.json();
+      const profile = { data: profileRows?.[0] };
       if (profile) {
         setRoleData(profile.role, profile.name);
         onLogin({ role: profile.role, name: profile.name, userId: data.user.id });
