@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+  <rect width="2732" height="2732" fill="#0d0a07"/>
+  <circle cx="1366" cy="1300" r="320" fill="none" stroke="#e07d2a" stroke-width="56"/>
+  <path d="M 1366 980 A 320 320 0 0 1 1686 1300" fill="none" stroke="#e07d2a" stroke-width="56" stroke-linecap="round"/>
+  <path d="M 1686 1258 L 1686 1342 L 1756 1300 Z" fill="#e07d2a"/>
+  <path d="M 1366 1620 A 320 320 0 0 1 1046 1300" fill="none" stroke="#e07d2a" stroke-width="56" stroke-linecap="round"/>
+  <path d="M 1046 1342 L 1046 1258 L 976 1300 Z" fill="#e07d2a"/>
+  <text x="1366" y="1730" font-family="Georgia, serif" font-size="96" font-weight="400" fill="#8e8e93" text-anchor="middle" letter-spacing="18">MAINLYNC</text>
+</svg>

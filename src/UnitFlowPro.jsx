@@ -1599,7 +1599,7 @@ function LoginScreen({ onLogin }) {
   const btn = { width: "100%", padding: "14px", borderRadius: 12, border: "none", background: "#e07d2a", color: "#fff", fontSize: 16, fontWeight: 600, fontFamily: "Inter, sans-serif", cursor: "pointer", marginBottom: 12 };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: "max(24px, env(safe-area-inset-top))" }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ marginBottom: 32, textAlign: "center" }}>
           <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 4, letterSpacing: "0.05em", textTransform: "uppercase" }}>Make Ready</p>
@@ -5041,7 +5041,7 @@ export default function App() {
   return (
     <AppCtx.Provider value={{ db, updateDB, navigate }}>
       <style>{THEME.css}</style>
-      <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto", position: "relative" }}>
+      <div style={{ minHeight: "100vh", background: "#f2f2f7", maxWidth: 480, margin: "0 auto", position: "relative", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
 
         {/* Sync indicator */}
         {syncStatus === "syncing" && (

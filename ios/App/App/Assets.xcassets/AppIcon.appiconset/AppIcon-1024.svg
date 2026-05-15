@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="230" fill="#0d0a07"/>
+  <circle cx="512" cy="512" r="280" fill="none" stroke="#e07d2a" stroke-width="48"/>
+  <path d="M 512 232 A 280 280 0 0 1 792 512" fill="none" stroke="#e07d2a" stroke-width="48" stroke-linecap="round"/>
+  <path d="M 792 472 L 792 552 L 852 512 Z" fill="#e07d2a"/>
+  <path d="M 512 792 A 280 280 0 0 1 232 512" fill="none" stroke="#e07d2a" stroke-width="48" stroke-linecap="round"/>
+  <path d="M 232 552 L 232 472 L 172 512 Z" fill="#e07d2a"/>
+  <text x="512" y="548" font-family="Georgia, serif" font-size="120" font-weight="700" fill="#f0a05a" text-anchor="middle" dominant-baseline="middle">M</text>
+</svg>
