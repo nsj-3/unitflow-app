@@ -124,6 +124,18 @@ const THEME = {
       -webkit-font-smoothing: antialiased;
     }
     ::-webkit-scrollbar { display: none; }
+    /* ── Permanent status bar cover ── */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: env(safe-area-inset-top);
+      background: #f2f2f7;
+      z-index: 99999;
+      pointer-events: none;
+    }
     input, textarea, select { font-family: 'Inter', -apple-system, sans-serif; }
 
     /* ── Cards & Groups ── */
