@@ -1560,9 +1560,9 @@ function LoginScreen({ onLogin }) {
       });
       const profileRows = await profileRes.json();
       const profile = { data: profileRows?.[0] };
-      if (profile) {
-        setRoleData(profile.role, profile.name);
-        onLogin({ role: profile.role, name: profile.name, userId: data.user.id });
+      if (profile?.data) {
+        setRoleData(profile.data.role, profile.data.name);
+        onLogin({ role: profile.data.role, name: profile.data.name, userId: data.user.id });
       } else {
         setError("No profile found. Please sign up first.");
       }
