@@ -1548,6 +1548,13 @@ function clearRoleData() {
   try { localStorage.removeItem("mainlync_role"); } catch {}
 }
 
+async function signOutUser() {
+  try {
+    await supabase.auth.signOut();
+  } catch(e) { console.warn('signOut error', e); }
+  clearRoleData();
+}
+
 // ─────────────────────────────────────────────
 // ROLE SELECTION SCREEN
 // ─────────────────────────────────────────────
@@ -1750,6 +1757,7 @@ async function resolveThreadMessage(unitId, msgId, resolverName) {
 }
 
 function UnitThread({ to, authorName, authorRole, onClose }) {
+  // Close on back swipe / hardware back
   const [allMessages, setAllMessages] = useState([]);
   const [loading, setLoading]         = useState(true);
   const [activeTab, setActiveTab]     = useState("thread");
@@ -4326,7 +4334,18 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
 
 const SUPABASE_URL  = "https://sxelqgfzandzapqgfvsa.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4ZWxxZ2Z6YW5kemFwcWdmdnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTY0OTMsImV4cCI6MjA5Mjk3MjQ5M30.CaQwWW6io1PplAhQ6NKdQaCwqSChmkpE3pt9NFHYpKQ";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (key) => { try { return localStorage.getItem(key); } catch { return null; } },
+      setItem: (key, val) => { try { localStorage.setItem(key, val); } catch {} },
+      removeItem: (key) => { try { localStorage.removeItem(key); } catch {} },
+    }
+  }
+});
 
 
 // ─────────────────────────────────────────────
