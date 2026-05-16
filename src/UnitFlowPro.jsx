@@ -566,9 +566,9 @@ async function relayStallAlert(to, stalledStageId) {
 
   if (isUrgent) {
     try {
-      const response = await fetch("/.netlify/functions/ai-briefing", {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
           max_tokens: 80,
@@ -605,9 +605,9 @@ async function relayOwnerReport(to) {
   const readyDate   = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   try {
-    const response = await fetch("/.netlify/functions/ai-briefing", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 200,
@@ -1548,6 +1548,15 @@ function clearRoleData() {
   try { localStorage.removeItem("mainlync_role"); } catch {}
 }
 
+
+// Save profile photo to localStorage
+function saveProfilePhoto(base64) {
+  try { localStorage.setItem("mainlync_profile_photo", base64); } catch {}
+}
+function getProfilePhoto() {
+  try { return localStorage.getItem("mainlync_profile_photo") || null; } catch { return null; }
+}
+
 async function signOutUser() {
   try {
     await supabase.auth.signOut();
@@ -1950,6 +1959,20 @@ function UnitThread({ to, authorName, authorRole, onClose }) {
 
 
 function ProfileScreen({ onSignOut }) {
+  const [photo, setPhoto] = useState(getProfilePhoto());
+  const photoRef = useRef(null);
+
+  function handlePhotoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const b64 = ev.target.result;
+      setPhoto(b64);
+      saveProfilePhoto(b64);
+    };
+    reader.readAsDataURL(file);
+  }
   const roleData = getRoleData();
   const [name, setName] = useState(roleData?.name || "");
   const [newPassword, setNewPassword] = useState("");
@@ -2164,7 +2187,7 @@ function AgentPage() {
       const url = type === "morning"
         ? "/.netlify/functions/agent-observe?type=morning"
         : "/.netlify/functions/agent-observe";
-      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify({}) });
       const data = await r.json();
       setRunResult(data);
       setLastRun(new Date());
@@ -4406,6 +4429,7 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
 // your project credentials from supabase.com/dashboard
 // ─────────────────────────────────────────────
 
+const ANTHROPIC_KEY = "sk-ant-api03-z75gQoOm386aFgsnugJjCXmv_Wer7IMT4rmKqDYLzENWgxlLz4cn-Kkuyri5qrd-Kf1evEAeUagkgMzYZbW25Q-PO3m5wA"; // Replace with your key
 const SUPABASE_URL  = "https://sxelqgfzandzapqgfvsa.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4ZWxxZ2Z6YW5kemFwcWdmdnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTY0OTMsImV4cCI6MjA5Mjk3MjQ5M30.CaQwWW6io1PplAhQ6NKdQaCwqSChmkpE3pt9NFHYpKQ";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
@@ -4544,7 +4568,7 @@ Be specific. Use unit numbers. Start every action with a verb. Never use the wor
 Active turnovers: ${JSON.stringify(turnoverSummary)}
 Return only the JSON object.`;
 
-  const response = await fetch("/.netlify/functions/ai-briefing", {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -4585,9 +4609,9 @@ async function getStageCompleteMessage(turnover, completedStageId, nextStageName
   const days = Math.ceil((new Date(turnover.target_ready_date) - Date.now()) / 86400000);
   const pct  = overallPct(turnover);
 
-  const response = await fetch("/.netlify/functions/ai-briefing", {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 100,
