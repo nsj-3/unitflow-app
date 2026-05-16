@@ -570,7 +570,7 @@ async function relayStallAlert(to, stalledStageId) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-opus-4-5",
+          model: "claude-sonnet-4-20250514",
           max_tokens: 80,
           messages: [{
             role: "user",
@@ -609,7 +609,7 @@ async function relayOwnerReport(to) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-opus-4-5",
+        model: "claude-sonnet-4-20250514",
         max_tokens: 200,
         messages: [{
           role: "user",
@@ -4548,7 +4548,7 @@ Return only the JSON object.`;
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-opus-4-5",
+      model: "claude-sonnet-4-20250514",
       max_tokens: 400,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
