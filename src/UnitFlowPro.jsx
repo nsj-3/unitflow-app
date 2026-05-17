@@ -568,7 +568,7 @@ async function relayStallAlert(to, stalledStageId) {
     try {
       const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
           max_tokens: 80,
@@ -607,7 +607,7 @@ async function relayOwnerReport(to) {
   try {
     const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "claude-sonnet-4-5",
         max_tokens: 200,
@@ -2187,7 +2187,7 @@ function AgentPage() {
       const url = type === "morning"
         ? "/.netlify/functions/agent-observe?type=morning"
         : "/.netlify/functions/agent-observe";
-      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }, body: JSON.stringify({}) });
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
       const data = await r.json();
       setRunResult(data);
       setLastRun(new Date());
@@ -4429,7 +4429,7 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
 // your project credentials from supabase.com/dashboard
 // ─────────────────────────────────────────────
 
-const ANTHROPIC_KEY = "sk-ant-api03-z75gQoOm386aFgsnugJjCXmv_Wer7IMT4rmKqDYLzENWgxlLz4cn-Kkuyri5qrd-Kf1evEAeUagkgMzYZbW25Q-PO3m5wA"; // Replace with your key
+const ANTHROPIC_KEY = "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"; // Replace with your key
 const SUPABASE_URL  = "https://sxelqgfzandzapqgfvsa.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4ZWxxZ2Z6YW5kemFwcWdmdnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTY0OTMsImV4cCI6MjA5Mjk3MjQ5M30.CaQwWW6io1PplAhQ6NKdQaCwqSChmkpE3pt9NFHYpKQ";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
@@ -4611,7 +4611,7 @@ async function getStageCompleteMessage(turnover, completedStageId, nextStageName
 
   const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-5",
       max_tokens: 100,
