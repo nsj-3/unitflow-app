@@ -1575,6 +1575,7 @@ async function signOutUser() {
 
 function LoginScreen({ onLogin }) {
   const [mode, setMode] = useState("login");
+  const [resetSent, setResetSent] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -1631,6 +1632,19 @@ function LoginScreen({ onLogin }) {
 
   const inp = { width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e5ea", fontSize: 16, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box", marginBottom: 12 };
   const btn = { width: "100%", padding: "14px", borderRadius: 12, border: "none", background: "#e07d2a", color: "#fff", fontSize: 16, fontWeight: 600, fontFamily: "Inter, sans-serif", cursor: "pointer", marginBottom: 12 };
+
+  const handleForgotPassword = async () => {
+    if (!email) { setError("Enter your email address first."); return; }
+    setLoading(true); setError("");
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://mainlync.app/reset-password"
+      });
+      if (resetError) { setError(resetError.message); } 
+      else { setResetSent(true); setMessage("Check your email for a password reset link."); setMode("login"); }
+    } catch(e) { setError("Failed to send reset email. Try again."); }
+    setLoading(false);
+  };
 
   const glassInp = {
     width: "100%", padding: "14px 16px",
@@ -1690,10 +1704,29 @@ function LoginScreen({ onLogin }) {
           </p>
         </div>
 
-        <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif", cursor: "pointer", margin: 0 }}
-          onClick={() => { setError(""); setMessage("Password reset coming soon — contact your admin."); }}>
-          Forgot password?
-        </p>
+        {mode === "login" && !resetSent && (
+          <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif", cursor: "pointer", margin: 0 }}
+            onClick={() => { setError(""); setMode("forgot"); }}>
+            Forgot password?
+          </p>
+        )}
+        {mode === "forgot" && (
+          <div style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 20, padding: 24, marginTop: 8 }}>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.7)", fontFamily: "Inter, sans-serif", marginBottom: 16, lineHeight: 1.5 }}>Enter your email and we'll send you a reset link.</p>
+            <input style={{ ...glassInp, marginBottom: 16 }} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+            <button
+              onClick={handleForgotPassword}
+              disabled={loading}
+              style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", background: loading ? "rgba(224,125,42,0.4)" : "linear-gradient(135deg, #e07d2a, #c45e0a)", color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: "Inter, sans-serif", cursor: loading ? "default" : "pointer", boxShadow: loading ? "none" : "0 4px 20px rgba(224,125,42,0.4)", marginBottom: 12 }}
+            >
+              {loading ? "Sending..." : "Send Reset Link"}
+            </button>
+            <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.4)", fontFamily: "Inter, sans-serif", cursor: "pointer", margin: 0 }}
+              onClick={() => { setError(""); setMode("login"); }}>
+              Back to login
+            </p>
+          </div>
+        )}
 
       </div>
     </div>
@@ -4479,7 +4512,6 @@ function DeskNewTurnoverModal({ db, onCreate, onClose }) {
 // your project credentials from supabase.com/dashboard
 // ─────────────────────────────────────────────
 
-const ANTHROPIC_KEY = "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"; // Replace with your key
 const SUPABASE_URL  = "https://sxelqgfzandzapqgfvsa.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4ZWxxZ2Z6YW5kemFwcWdmdnNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczOTY0OTMsImV4cCI6MjA5Mjk3MjQ5M30.CaQwWW6io1PplAhQ6NKdQaCwqSChmkpE3pt9NFHYpKQ";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
