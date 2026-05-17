@@ -570,7 +570,7 @@ async function relayStallAlert(to, stalledStageId) {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-sonnet-4-5",
           max_tokens: 80,
           messages: [{
             role: "user",
@@ -609,7 +609,7 @@ async function relayOwnerReport(to) {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-5",
         max_tokens: 200,
         messages: [{
           role: "user",
@@ -4572,7 +4572,7 @@ Return only the JSON object.`;
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5",
       max_tokens: 400,
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
@@ -4613,7 +4613,7 @@ async function getStageCompleteMessage(turnover, completedStageId, nextStageName
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5",
       max_tokens: 100,
       messages: [{
         role: "user",
