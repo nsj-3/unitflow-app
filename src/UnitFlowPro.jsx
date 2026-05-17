@@ -5032,12 +5032,12 @@ export default function App() {
             setRoleData({ role, name });
             try { localStorage.setItem("mainlync_role", JSON.stringify({ role, name, setAt: new Date().toISOString() })); } catch {}
           }
-          setTimeout(() => setAuthLoading(false), 1800);
-        }).catch(() => setTimeout(() => setAuthLoading(false), 1800));
+          setTimeout(() => setAuthLoading(false), 800);
+        }).catch(() => setTimeout(() => setAuthLoading(false), 800));
       } else {
-        setTimeout(() => setAuthLoading(false), 1800);
+        setTimeout(() => setAuthLoading(false), 800);
       }
-    }).catch(() => setTimeout(() => setAuthLoading(false), 1800));
+    }).catch(() => setTimeout(() => setAuthLoading(false), 800));
   }, []);
 
 
