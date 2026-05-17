@@ -2135,7 +2135,7 @@ function LeasingView({ userName, onSwitchRole }) {
       </div>
 
       {/* Unit list */}
-      <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 1 }}>
+      <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 1 }}>
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "48px 24px" }}>
             <p style={{ fontSize: 15, color: "#8e8e93" }}>No units match</p>
