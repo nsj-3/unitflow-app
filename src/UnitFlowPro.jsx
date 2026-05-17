@@ -2184,14 +2184,23 @@ function AgentPage() {
     setRunning(true);
     setRunResult(null);
     try {
-      const url = type === "morning"
-        ? "/.netlify/functions/agent-observe?type=morning"
-        : "/.netlify/functions/agent-observe";
-      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const turnovers = (db.turnovers || []).map(migrateTurnover);
+      const withRisk = analyzeRisk(turnovers);
+      const active = withRisk.filter(t => !t.is_ready);
+      const critical = active.filter(t => t.riskLevel === "critical");
+      const userContent = type === "morning"
+        ? `Morning briefing. Active turnovers: ${active.length}, critical: ${critical.length}. Units: ${active.slice(0,5).map(t => "Unit " + t.unit_number + " (" + t.riskLevel + ")").join(", ")}. Write a 2-3 sentence briefing.`
+        : `Monitor active turnovers. Active: ${active.length}, critical: ${critical.map(t => "Unit " + t.unit_number).join(", ") || "none"}. Summarize in 2-3 sentences, note urgent actions.`;
+      const r = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-5", max_tokens: 200, messages: [{ role: "user", content: userContent }] }),
+      });
       const data = await r.json();
-      setRunResult(data);
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      const text = data.content?.[0]?.text || "Scan complete.";
+      setRunResult({ message: text, monitored: active.length, critical: critical.length });
       setLastRun(new Date());
-      // Refresh log
       const freshLog = await loadAgentLog();
       setLog(freshLog || []);
     } catch (e) {
