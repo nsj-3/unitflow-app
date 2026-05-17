@@ -2109,7 +2109,7 @@ function LeasingView({ userName, onSwitchRole }) {
   const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
 
   return (
-    <div style={{ height: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ height: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column", position: "relative" }}>
       <style>{THEME.css}</style>
 
       {/* Header */}
@@ -2135,7 +2135,7 @@ function LeasingView({ userName, onSwitchRole }) {
       </div>
 
       {/* Unit list */}
-      <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 1 }}>
+      <div style={{ flex: 1, overflowY: "scroll", WebkitOverflowScrolling: "touch", padding: "12px 16px 100px", display: "flex", flexDirection: "column", gap: 1 }}>
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "48px 24px" }}>
             <p style={{ fontSize: 15, color: "#8e8e93" }}>No units match</p>
