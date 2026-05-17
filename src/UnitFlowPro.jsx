@@ -1640,8 +1640,8 @@ function LoginScreen({ onLogin }) {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: "https://mainlync.com"
       });
-      if (resetError) { setError(resetError.message); } 
-      else { setResetSent(true); setMessage("Check your email for a password reset link."); setMode("login"); }
+      if (resetError) { setError(resetError.message || "Failed to send reset email."); } 
+      else { setResetSent(true); setMessage("Reset link sent! Check your email."); setMode("login"); }
     } catch(e) { setError("Failed to send reset email. Try again."); }
     setLoading(false);
   };
@@ -1669,7 +1669,7 @@ function LoginScreen({ onLogin }) {
         </div>
 
         {/* Glass card */}
-        <div style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 20, padding: 24, marginBottom: 12 }}>
+        {mode !== "forgot" && <div style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 20, padding: 24, marginBottom: 12 }}>
 
           {message && <div style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#6ee7b7", fontFamily: "Inter, sans-serif" }}>{message}</div>}
           {error && <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#fca5a5", fontFamily: "Inter, sans-serif" }}>{error}</div>}
@@ -1702,11 +1702,11 @@ function LoginScreen({ onLogin }) {
           <p style={{ textAlign: "center", fontSize: 14, color: "rgba(255,255,255,0.4)", margin: "16px 0 0", fontFamily: "Inter, sans-serif", cursor: "pointer" }} onClick={() => { setError(""); setMode(mode === "login" ? "signup" : "login"); }}>
             {mode === "login" ? <>No account? <span style={{ color: "#e07d2a", fontWeight: 600 }}>Sign up</span></> : <>Have an account? <span style={{ color: "#e07d2a", fontWeight: 600 }}>Log in</span></>}
           </p>
-        </div>
+        </div>}
 
-        {mode === "login" && !resetSent && (
+        {mode === "login" && (
           <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif", cursor: "pointer", margin: 0 }}
-            onClick={() => { setError(""); setMode("forgot"); }}>
+            onClick={() => { setError(""); setMessage(""); setMode("forgot"); }}>
             Forgot password?
           </p>
         )}
