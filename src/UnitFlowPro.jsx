@@ -2109,11 +2109,11 @@ function LeasingView({ userName, onSwitchRole }) {
   const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
 
   return (
-    <div style={{ height: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column", position: "relative" }}>
+    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif" }}>
       <style>{THEME.css}</style>
 
       {/* Header */}
-      <div style={{ background: "rgba(249,249,249,0.97)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", flexShrink: 0, zIndex: 50, paddingTop: 75 }}>
+      <div style={{ background: "rgba(249,249,249,0.97)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", position: "sticky", top: 59, zIndex: 50, paddingTop: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "#000", letterSpacing: "-0.02em" }}>Unit Status</h1>
           <button onClick={onSwitchRole} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Switch role</button>
@@ -2135,7 +2135,7 @@ function LeasingView({ userName, onSwitchRole }) {
       </div>
 
       {/* Unit list */}
-      <div style={{ flex: 1, overflowY: "scroll", WebkitOverflowScrolling: "touch", padding: "12px 16px 100px", display: "flex", flexDirection: "column", gap: 1 }}>
+      <div style={{ padding: "12px 16px 120px", display: "flex", flexDirection: "column", gap: 1 }}>
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "48px 24px" }}>
             <p style={{ fontSize: 15, color: "#8e8e93" }}>No units match</p>
