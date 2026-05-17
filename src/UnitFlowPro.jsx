@@ -2080,7 +2080,7 @@ function LeasingView({ userName, onSwitchRole }) {
       <style>{THEME.css}</style>
 
       {/* Header */}
-      <div style={{ background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", position: "sticky", top: 0, zIndex: 50 }}>
+      <div style={{ background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", position: "sticky", top: "59px", zIndex: 50 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "#000", letterSpacing: "-0.02em" }}>Unit Status</h1>
           <button onClick={onSwitchRole} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Switch role</button>
