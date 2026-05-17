@@ -5097,13 +5097,23 @@ export default function App() {
   if (loading || !db) return (
     <>
       <style>{THEME.css}</style>
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14, background: "#ffffff" }}>
-        <div style={{ width: 48, height: 48, background: "#000", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 60 }}>
+          <div style={{ width: 80, height: 80, background: "linear-gradient(145deg, #e07d2a, #c45e0a)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(224,125,42,0.45)" }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: 11, color: "#e07d2a", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
+            <h1 style={{ fontSize: 38, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
+          </div>
         </div>
-        <p style={{ fontSize: 13, color: "#8e8e93", fontFamily: "'Inter',sans-serif" }}>
-          {"Loading Mainlync..."}
-        </p>
+        <div style={{ position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#e07d2a" : "rgba(255,255,255,0.2)" }} />
+            ))}
+          </div>
+        </div>
       </div>
     </>
   );
@@ -5111,13 +5121,28 @@ export default function App() {
   // Auth gate — show login if no session and not desktop
   if (!roleData && !isDesktop) {
     if (authLoading) return (
-      <>
-        <style>{THEME.css}</style>
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff" }}>
-          <p style={{ fontSize: 13, color: "#8e8e93", fontFamily: "'Inter',sans-serif" }}>Loading...</p>
+    <>
+      <style>{THEME.css}</style>
+      <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 60 }}>
+          <div style={{ width: 80, height: 80, background: "linear-gradient(145deg, #e07d2a, #c45e0a)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(224,125,42,0.45)" }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: 11, color: "#e07d2a", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
+            <h1 style={{ fontSize: 38, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
+          </div>
         </div>
-      </>
-    );
+        <div style={{ position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#e07d2a" : "rgba(255,255,255,0.2)" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
     return (
       <AppCtx.Provider value={{ db, updateDB, navigate }}>
         <LoginScreen onLogin={({ role, name }) => setRoleData({ role, name })} />
