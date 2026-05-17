@@ -5094,7 +5094,8 @@ export default function App() {
   // Share link view — no auth needed
   if (shareToken) return <SharedUnitView token={shareToken} />;
 
-  if (loading || !db) return (
+  // Show splash while checking auth session
+  if (authLoading || loading || !db) return (
     <>
       <style>{THEME.css}</style>
       <div style={{ position: "fixed", inset: 0, background: "linear-gradient(160deg, #e07d2a, #c45e0a)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
@@ -5107,7 +5108,7 @@ export default function App() {
             <h1 style={{ fontSize: 38, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
           </div>
         </div>
-        <div style={{ position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+        <div style={{ position: "absolute", bottom: 60 }}>
           <div style={{ display: "flex", gap: 6 }}>
             {[0,1,2].map(i => (
               <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#fff" : "rgba(255,255,255,0.35)" }} />
@@ -5117,89 +5118,10 @@ export default function App() {
       </div>
     </>
   );
+
 
   // Auth gate — show login if no session and not desktop
   if (!roleData && !isDesktop) {
-    if (authLoading) return (
-    <>
-      <style>{THEME.css}</style>
-      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(160deg, #e07d2a, #c45e0a)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 60 }}>
-          <div style={{ width: 80, height: 80, background: "rgba(255,255,255,0.2)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(0,0,0,0.15)" }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
-            <h1 style={{ fontSize: 38, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
-          </div>
-        </div>
-        <div style={{ position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          <div style={{ display: "flex", gap: 6 }}>
-            {[0,1,2].map(i => (
-              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#fff" : "rgba(255,255,255,0.35)" }} />
-            ))}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-  }
-
-  // Operator onboarding — 8-step setup flow on first login
-  if (roleData?.role === "operator" && !getOperatorSetup() && !isDesktop) {
-    return (
-      <AppCtx.Provider value={{ db, updateDB, navigate }}>
-        <OperatorOnboarding onDone={async cfg => {
-          saveOperatorSetup(cfg);
-
-          // Push imported units into the live DB
-          if (cfg.imported_units?.length && isSupabaseConfigured()) {
-            try {
-              // First upsert any new properties
-              const propNames = [...new Set(cfg.imported_units.map(u => u.property_name).filter(Boolean))];
-              for (const name of propNames) {
-                if (!db.properties?.find(p => p.name === name)) {
-                  await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Prefer": "return=minimal" },
-                    body: JSON.stringify({ name, address: "" }),
-                  });
-                }
-              }
-              // Reload props to get IDs
-              const propsRes = await fetch(`${SUPABASE_URL}/rest/v1/properties`, {
-                headers: { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}` }
-              });
-              const freshProps = await propsRes.json();
-
-              // Insert units
-              for (const u of cfg.imported_units) {
-                const prop = freshProps.find(p => p.name === u.property_name);
-                await fetch(`${SUPABASE_URL}/rest/v1/units`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON, "Authorization": `Bearer ${SUPABASE_ANON}`, "Prefer": "return=minimal" },
-                  body: JSON.stringify({
-                    property_id: prop?.id,
-                    unit_number: u.unit_number,
-                    bedrooms: u.bedrooms ? parseInt(u.bedrooms) : null,
-                    bathrooms: u.bathrooms ? parseFloat(u.bathrooms) : null,
-                    sqft: u.sqft ? parseInt(u.sqft) : null,
-                    lease_status: u.lease_status || "unleased",
-                  }),
-                });
-              }
-            } catch (e) {
-              console.warn("Unit import to Supabase failed:", e.message);
-            }
-          }
-
-          // Reload DB to pick up new units
-          const freshDB = await loadDB();
-          updateDB(freshDB);
-          setRoleData({ ...roleData });
-        }} />
-      </AppCtx.Provider>
-    );
   }
 
   // Desktop PM Hub — always maintenance experience
