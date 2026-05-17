@@ -566,7 +566,7 @@ async function relayStallAlert(to, stalledStageId) {
 
   if (isUrgent) {
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
         body: JSON.stringify({
@@ -605,7 +605,7 @@ async function relayOwnerReport(to) {
   const readyDate   = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
       body: JSON.stringify({
@@ -4568,7 +4568,7 @@ Be specific. Use unit numbers. Start every action with a verb. Never use the wor
 Active turnovers: ${JSON.stringify(turnoverSummary)}
 Return only the JSON object.`;
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -4609,7 +4609,7 @@ async function getStageCompleteMessage(turnover, completedStageId, nextStageName
   const days = Math.ceil((new Date(turnover.target_ready_date) - Date.now()) / 86400000);
   const pct  = overallPct(turnover);
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("https://sxelqgfzandzapqgfvsa.supabase.co/functions/v1/relay", {
     method: "POST",
     headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({

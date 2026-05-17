@@ -5,7 +5,7 @@
   "ios": {
     "contentInset": "never",
     "scrollEnabled": true,
-    "limitsNavigationsToAppBoundDomains": true,
+    "limitsNavigationsToAppBoundDomains": false,
     "keyboardResize": "body"
   },
   "plugins": {
