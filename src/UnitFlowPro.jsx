@@ -1642,7 +1642,7 @@ function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "linear-gradient(160deg, #e07d2a, #c45e0a)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: 59, overflowY: "auto" }}>
+    <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: 59, overflowY: "auto" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
 
         {/* Logo + wordmark */}
