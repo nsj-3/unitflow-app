@@ -5032,12 +5032,12 @@ export default function App() {
             setRoleData({ role, name });
             try { localStorage.setItem("mainlync_role", JSON.stringify({ role, name, setAt: new Date().toISOString() })); } catch {}
           }
-          setAuthLoading(false);
-        }).catch(() => setAuthLoading(false));
+          setTimeout(() => setAuthLoading(false), 1800);
+        }).catch(() => setTimeout(() => setAuthLoading(false), 1800));
       } else {
-        setAuthLoading(false);
+        setTimeout(() => setAuthLoading(false), 1800);
       }
-    }).catch(() => setAuthLoading(false));
+    }).catch(() => setTimeout(() => setAuthLoading(false), 1800));
   }, []);
 
 
@@ -5097,20 +5097,20 @@ export default function App() {
   if (loading || !db) return (
     <>
       <style>{THEME.css}</style>
-      <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
+      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(160deg, #e07d2a, #c45e0a)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 60 }}>
-          <div style={{ width: 80, height: 80, background: "linear-gradient(145deg, #e07d2a, #c45e0a)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(224,125,42,0.45)" }}>
+          <div style={{ width: 80, height: 80, background: "rgba(255,255,255,0.2)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(0,0,0,0.15)" }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: 11, color: "#e07d2a", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
             <h1 style={{ fontSize: 38, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
           </div>
         </div>
         <div style={{ position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
           <div style={{ display: "flex", gap: 6 }}>
             {[0,1,2].map(i => (
-              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#e07d2a" : "rgba(255,255,255,0.2)" }} />
+              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#fff" : "rgba(255,255,255,0.35)" }} />
             ))}
           </div>
         </div>
@@ -5123,31 +5123,26 @@ export default function App() {
     if (authLoading) return (
     <>
       <style>{THEME.css}</style>
-      <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
+      <div style={{ position: "fixed", inset: 0, background: "linear-gradient(160deg, #e07d2a, #c45e0a)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20, marginBottom: 60 }}>
-          <div style={{ width: 80, height: 80, background: "linear-gradient(145deg, #e07d2a, #c45e0a)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(224,125,42,0.45)" }}>
+          <div style={{ width: 80, height: 80, background: "rgba(255,255,255,0.2)", borderRadius: 24, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 40px rgba(0,0,0,0.15)" }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
           <div style={{ textAlign: "center" }}>
-            <p style={{ fontSize: 11, color: "#e07d2a", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 6px" }}>Make Ready</p>
             <h1 style={{ fontSize: 38, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
           </div>
         </div>
         <div style={{ position: "absolute", bottom: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
           <div style={{ display: "flex", gap: 6 }}>
             {[0,1,2].map(i => (
-              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#e07d2a" : "rgba(255,255,255,0.2)" }} />
+              <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i === 0 ? "#fff" : "rgba(255,255,255,0.35)" }} />
             ))}
           </div>
         </div>
       </div>
     </>
   );
-    return (
-      <AppCtx.Provider value={{ db, updateDB, navigate }}>
-        <LoginScreen onLogin={({ role, name }) => setRoleData({ role, name })} />
-      </AppCtx.Provider>
-    );
   }
 
   // Operator onboarding — 8-step setup flow on first login
