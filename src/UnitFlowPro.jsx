@@ -1642,7 +1642,7 @@ function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: "max(24px, 59px)" }}>
+    <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: 59, overflowY: "auto" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
 
         {/* Logo + wordmark */}
@@ -2109,11 +2109,11 @@ function LeasingView({ userName, onSwitchRole }) {
   const statusColor = { critical: "#dc2626", at_risk: "#e07d2a", on_track: "#16a34a" };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", paddingBottom: 40, paddingTop: "59px" }}>
+    <div style={{ height: "100vh", background: "#f2f2f7", fontFamily: "'Inter', sans-serif", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <style>{THEME.css}</style>
 
       {/* Header */}
-      <div style={{ background: "rgba(249,249,249,0.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", position: "sticky", top: "59px", zIndex: 50 }}>
+      <div style={{ background: "rgba(249,249,249,0.97)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderBottom: "0.5px solid #c6c6c8", padding: "16px 16px 12px", flexShrink: 0, zIndex: 50, paddingTop: 75 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: "#000", letterSpacing: "-0.02em" }}>Unit Status</h1>
           <button onClick={onSwitchRole} style={{ background: "none", border: "none", cursor: "pointer", color: "#007aff", fontSize: 14, fontFamily: "'Inter', sans-serif", fontWeight: 500 }}>Switch role</button>
