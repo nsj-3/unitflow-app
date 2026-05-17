@@ -921,6 +921,10 @@ function MakeReadyBoard({ turnovers, db, updateDB }) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 320 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.4 }}
+              onDragEnd={(e, info) => { if (info.offset.y > 80 || info.velocity.y > 400) setSelectedId(null); }}
               onClick={e => e.stopPropagation()}
               style={{
                 position: "absolute", bottom: 0, left: 0, right: 0,
