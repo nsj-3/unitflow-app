@@ -5122,6 +5122,11 @@ export default function App() {
 
   // Auth gate — show login if no session and not desktop
   if (!roleData && !isDesktop) {
+    return (
+      <AppCtx.Provider value={{ db, updateDB, navigate }}>
+        <LoginScreen onLogin={({ role, name }) => setRoleData({ role, name })} />
+      </AppCtx.Provider>
+    );
   }
 
   // Desktop PM Hub — always maintenance experience
