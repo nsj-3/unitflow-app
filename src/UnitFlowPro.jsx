@@ -1632,36 +1632,69 @@ function LoginScreen({ onLogin }) {
   const inp = { width: "100%", padding: "12px 14px", borderRadius: 12, border: "1px solid #e5e5ea", fontSize: 16, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box", marginBottom: 12 };
   const btn = { width: "100%", padding: "14px", borderRadius: 12, border: "none", background: "#e07d2a", color: "#fff", fontSize: 16, fontWeight: 600, fontFamily: "Inter, sans-serif", cursor: "pointer", marginBottom: 12 };
 
+  const glassInp = {
+    width: "100%", padding: "14px 16px",
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 12, color: "#fff", fontSize: 16,
+    fontFamily: "Inter, sans-serif", outline: "none",
+    boxSizing: "border-box", marginBottom: 12,
+  };
+
   return (
-    <div style={{ minHeight: "100vh", background: "#f2f2f7", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: "max(24px, 59px)" }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        <div style={{ marginBottom: 32, textAlign: "center" }}>
-          <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 4, letterSpacing: "0.05em", textTransform: "uppercase" }}>Make Ready</p>
-          <h1 style={{ fontSize: 32, fontWeight: 700, color: "#0d0a07", letterSpacing: "-0.02em", margin: 0 }}>Mainlync</h1>
-        </div>
-        {message && <div style={{ background: "#d1fae5", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#065f46" }}>{message}</div>}
-        {error && <div style={{ background: "#fee2e2", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#991b1b" }}>{error}</div>}
-        {mode === "signup" && (
-          <input style={inp} placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} />
-        )}
-        <input style={inp} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-        <input style={inp} placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-        {mode === "signup" && (
-          <div style={{ marginBottom: 12 }}>
-            <p style={{ fontSize: 13, color: "#8e8e93", marginBottom: 8 }}>Your role</p>
-            <div style={{ display: "flex", gap: 8 }}>
-              {["maintenance","leasing","operator"].map(r => (
-                <button key={r} onClick={() => setRole(r)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: role === r ? "2px solid #e07d2a" : "1px solid #e5e5ea", background: role === r ? "#e07d2a15" : "#fff", color: role === r ? "#e07d2a" : "#8e8e93", fontSize: 12, fontWeight: 600, cursor: "pointer", textTransform: "capitalize", fontFamily: "Inter, sans-serif" }}>{r}</button>
-              ))}
-            </div>
+    <div style={{ minHeight: "100vh", background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: "max(24px, 59px)" }}>
+      <div style={{ width: "100%", maxWidth: 380 }}>
+
+        {/* Logo + wordmark */}
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ width: 64, height: 64, background: "linear-gradient(145deg, #e07d2a, #c45e0a)", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(224,125,42,0.35)" }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
           </div>
-        )}
-        <button style={btn} onClick={mode === "login" ? handleLogin : handleSignup} disabled={loading}>
-          {loading ? "..." : mode === "login" ? "Log In" : "Create Account"}
-        </button>
-        <p style={{ textAlign: "center", fontSize: 14, color: "#8e8e93", cursor: "pointer" }} onClick={() => { setError(""); setMode(mode === "login" ? "signup" : "login"); }}>
-          {mode === "login" ? "No account? Sign up" : "Have an account? Log in"}
+          <p style={{ fontSize: 11, color: "#e07d2a", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 4px" }}>Make Ready</p>
+          <h1 style={{ fontSize: 34, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>Mainlync</h1>
+        </div>
+
+        {/* Glass card */}
+        <div style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px) saturate(180%)", WebkitBackdropFilter: "blur(20px) saturate(180%)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 20, padding: 24, marginBottom: 12 }}>
+
+          {message && <div style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#6ee7b7", fontFamily: "Inter, sans-serif" }}>{message}</div>}
+          {error && <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#fca5a5", fontFamily: "Inter, sans-serif" }}>{error}</div>}
+
+          {mode === "signup" && (
+            <input style={glassInp} placeholder="Your full name" value={name} onChange={e => setName(e.target.value)} />
+          )}
+          <input style={glassInp} placeholder="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+          <input style={{ ...glassInp, marginBottom: mode === "signup" ? 12 : 20 }} placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+
+          {mode === "signup" && (
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 8, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em", textTransform: "uppercase" }}>Your role</p>
+              <div style={{ display: "flex", gap: 8 }}>
+                {["maintenance","leasing","operator"].map(r => (
+                  <button key={r} onClick={() => setRole(r)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: role === r ? "1px solid rgba(224,125,42,0.8)" : "1px solid rgba(255,255,255,0.12)", background: role === r ? "rgba(224,125,42,0.2)" : "rgba(255,255,255,0.05)", color: role === r ? "#f0a05a" : "rgba(255,255,255,0.45)", fontSize: 11, fontWeight: 600, cursor: "pointer", textTransform: "capitalize", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>{r}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={mode === "login" ? handleLogin : handleSignup}
+            disabled={loading}
+            style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", background: loading ? "rgba(224,125,42,0.4)" : "linear-gradient(135deg, #e07d2a, #c45e0a)", color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: "Inter, sans-serif", cursor: loading ? "default" : "pointer", letterSpacing: "-0.01em", boxShadow: loading ? "none" : "0 4px 20px rgba(224,125,42,0.4)", transition: "all 0.15s" }}
+          >
+            {loading ? "..." : mode === "login" ? "Log In" : "Create Account"}
+          </button>
+
+          <p style={{ textAlign: "center", fontSize: 14, color: "rgba(255,255,255,0.4)", margin: "16px 0 0", fontFamily: "Inter, sans-serif", cursor: "pointer" }} onClick={() => { setError(""); setMode(mode === "login" ? "signup" : "login"); }}>
+            {mode === "login" ? <>No account? <span style={{ color: "#e07d2a", fontWeight: 600 }}>Sign up</span></> : <>Have an account? <span style={{ color: "#e07d2a", fontWeight: 600 }}>Log in</span></>}
+          </p>
+        </div>
+
+        <p style={{ textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.3)", fontFamily: "Inter, sans-serif", cursor: "pointer", margin: 0 }}
+          onClick={() => { setError(""); setMessage("Password reset coming soon — contact your admin."); }}>
+          Forgot password?
         </p>
+
       </div>
     </div>
   );
