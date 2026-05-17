@@ -2199,7 +2199,11 @@ function AgentPage() {
       const data = await r.json();
       if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
       const text = data.content?.[0]?.text || "Scan complete.";
-      setRunResult({ message: text, monitored: active.length, critical: critical.length });
+      setRunResult({
+        turnoversChecked: active.length,
+        actions: text ? [{ type: type === "morning" ? "morning_briefing" : "action_taken", message: text }] : [],
+        message: text,
+      });
       setLastRun(new Date());
       const freshLog = await loadAgentLog();
       setLog(freshLog || []);
@@ -2330,7 +2334,7 @@ function AgentPage() {
                 <p style={{ fontSize: 12, fontWeight: 700, color: "#15803d", marginBottom: 4 }}>
                   Checked {runResult.turnoversChecked} turnovers — {runResult.actions?.length || 0} action{runResult.actions?.length !== 1 ? "s" : ""} taken
                 </p>
-                {runResult.actions?.map((a, i) => (
+                {runResult.message && <p style={{ fontSize: 12, color: "#166534", marginTop: 6, lineHeight: 1.5 }}>{runResult.message}</p>}{runResult.actions?.filter(a => false).map((a, i) => (
                   <p key={i} style={{ fontSize: 11, color: "#3c3c43", marginTop: 3 }}>{a.type}: {a.message?.slice(0, 80)}...</p>
                 ))}
               </div>
