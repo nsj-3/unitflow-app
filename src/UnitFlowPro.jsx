@@ -5120,19 +5120,26 @@ export default function App() {
   // Handle incoming deep link URL and pass to Supabase
   useEffect(() => {
     CapApp.addListener("appUrlOpen", ({ url }) => {
-      if (url.includes("mainlync://")) {
-        // Extract the token from the URL and pass to Supabase
-        const urlObj = new URL(url.replace("mainlync://", "https://mainlync.com/"));
-        const access_token = urlObj.searchParams.get("access_token");
-        const refresh_token = urlObj.searchParams.get("refresh_token");
-        const type = urlObj.searchParams.get("type");
+      console.log("Deep link received:", url);
+      if (!url) return;
+      try {
+        // Supabase puts tokens in the hash fragment: mainlync://reset-password#access_token=...&type=recovery
+        const hashPart = url.includes("#") ? url.split("#")[1] : url.split("?")[1] || "";
+        const params = new URLSearchParams(hashPart);
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+        const type = params.get("type");
+        console.log("Token type:", type, "Has token:", !!access_token);
         if (access_token && type === "recovery") {
-          supabase.auth.setSession({ access_token, refresh_token }).then(() => {
-            setResetMode(true);
-            setAuthLoading(false);
+          supabase.auth.setSession({ access_token, refresh_token: refresh_token || "" }).then(({ error }) => {
+            console.log("setSession error:", error);
+            if (!error) {
+              setResetMode(true);
+              setAuthLoading(false);
+            }
           });
         }
-      }
+      } catch(e) { console.log("Deep link parse error:", e); }
     });
   }, []);
 
