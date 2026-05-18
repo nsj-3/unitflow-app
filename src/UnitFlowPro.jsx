@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { App as CapApp } from "@capacitor/app";
 /**
  * 
  *          UNITFLOW PRO — FULL REMAKE                   
@@ -5115,6 +5116,25 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+
+  // Handle incoming deep link URL and pass to Supabase
+  useEffect(() => {
+    CapApp.addListener("appUrlOpen", ({ url }) => {
+      if (url.includes("mainlync://")) {
+        // Extract the token from the URL and pass to Supabase
+        const urlObj = new URL(url.replace("mainlync://", "https://mainlync.com/"));
+        const access_token = urlObj.searchParams.get("access_token");
+        const refresh_token = urlObj.searchParams.get("refresh_token");
+        const type = urlObj.searchParams.get("type");
+        if (access_token && type === "recovery") {
+          supabase.auth.setSession({ access_token, refresh_token }).then(() => {
+            setResetMode(true);
+            setAuthLoading(false);
+          });
+        }
+      }
+    });
+  }, []);
 
   // Listen for password recovery event from deep link
   useEffect(() => {
