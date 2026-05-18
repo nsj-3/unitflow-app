@@ -6,7 +6,8 @@
     "contentInset": "never",
     "scrollEnabled": true,
     "limitsNavigationsToAppBoundDomains": false,
-    "keyboardResize": "body"
+    "keyboardResize": "body",
+    "scheme": "mainlync"
   },
   "plugins": {
     "SplashScreen": {

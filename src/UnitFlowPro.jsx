@@ -1638,7 +1638,7 @@ function LoginScreen({ onLogin }) {
     setLoading(true); setError("");
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "https://mainlync.com"
+        redirectTo: "mainlync://reset-password"
       });
       if (resetError) { setError(resetError.message || "Failed to send reset email."); } 
       else { setResetSent(true); setMessage("Reset link sent! Check your email."); setMode("login"); }
