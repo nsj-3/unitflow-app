@@ -5027,6 +5027,70 @@ function Dashboard() {
   );
 }
 
+
+function ResetPasswordScreen({ onDone }) {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const glassInp = {
+    width: "100%", padding: "14px 16px",
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 12, color: "#fff", fontSize: 16,
+    fontFamily: "Inter, sans-serif", outline: "none",
+    boxSizing: "border-box", marginBottom: 12,
+  };
+
+  const handleReset = async () => {
+    if (!password || password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (password !== confirm) { setError("Passwords don't match."); return; }
+    setLoading(true); setError("");
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+    if (updateError) { setError(updateError.message); setLoading(false); return; }
+    setSuccess(true);
+    setTimeout(() => onDone(), 2000);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "#0d0a07", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px", paddingTop: 59 }}>
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ width: 64, height: 64, background: "linear-gradient(145deg, #e07d2a, #c45e0a)", borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", boxShadow: "0 8px 32px rgba(224,125,42,0.35)" }}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <p style={{ fontSize: 11, color: "#e07d2a", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", fontWeight: 600, margin: "0 0 4px" }}>Make Ready</p>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#fff", letterSpacing: "-0.03em", margin: 0, fontFamily: "Inter, sans-serif" }}>New Password</h1>
+        </div>
+
+        <div style={{ background: "rgba(255,255,255,0.08)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 20, padding: 24 }}>
+          {success ? (
+            <div style={{ textAlign: "center", padding: "20px 0" }}>
+              <p style={{ fontSize: 16, color: "#6ee7b7", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Password updated!</p>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.4)", fontFamily: "Inter, sans-serif", marginTop: 8 }}>Taking you back to login...</p>
+            </div>
+          ) : (
+            <>
+              {error && <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, padding: "12px 14px", marginBottom: 16, fontSize: 14, color: "#fca5a5", fontFamily: "Inter, sans-serif" }}>{error}</div>}
+              <input style={glassInp} placeholder="New password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+              <input style={{ ...glassInp, marginBottom: 20 }} placeholder="Confirm password" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} />
+              <button
+                onClick={handleReset}
+                disabled={loading}
+                style={{ width: "100%", padding: 15, borderRadius: 14, border: "none", background: loading ? "rgba(224,125,42,0.4)" : "linear-gradient(135deg, #e07d2a, #c45e0a)", color: "#fff", fontSize: 16, fontWeight: 700, fontFamily: "Inter, sans-serif", cursor: loading ? "default" : "pointer", boxShadow: loading ? "none" : "0 4px 20px rgba(224,125,42,0.4)" }}
+              >
+                {loading ? "Updating..." : "Update Password"}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [db, setDB]           = useState(null);
   const [loading, setLoading] = useState(true);
@@ -5034,6 +5098,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState("idle");
   const [roleData, setRoleData]     = useState(() => getRoleData());
   const [authLoading, setAuthLoading] = useState(true);
+  const [resetMode, setResetMode] = useState(false);
 
   // Hash routing for shared links
   const [shareToken, setShareToken] = useState(() => {
@@ -5050,6 +5115,17 @@ export default function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+
+  // Listen for password recovery event from deep link
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setResetMode(true);
+        setAuthLoading(false);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Check for existing Supabase session on mount
   useEffect(() => {
@@ -5125,6 +5201,13 @@ export default function App() {
 
   // Share link view — no auth needed
   if (shareToken) return <SharedUnitView token={shareToken} />;
+
+  if (resetMode) return (
+    <ResetPasswordScreen onDone={() => {
+      setResetMode(false);
+      supabase.auth.signOut();
+    }} />
+  );
 
   // Show splash while checking auth session
   if (authLoading || loading || !db) return (
